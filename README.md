@@ -6,8 +6,8 @@ my emacs setting
 
 ln -s /tmp /tmp/host
 DIR=~/emacs.d
-
-docker run -d --name emacs-test \
+DISPLAY=:0
+docker run -d --name emacs \
        -v /tmp/.X11-unix:/tmp/.X11-unix \
        -v /tmp/.XIM-unix:/tmp/.XIM-unix \
        -v /home:/home \
