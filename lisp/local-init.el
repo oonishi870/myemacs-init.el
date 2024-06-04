@@ -694,3 +694,6 @@ ssh localhost ~/bin/npm $@
   (advice-add    'executable-interpret :around #'my/add-tramp)
 )
 
+(leaf magit
+  :ensure t
+  )
