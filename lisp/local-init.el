@@ -84,7 +84,14 @@
     "Keep selection after copying."
     (let ((deactivate-mark nil))
       (kill-ring-save (region-beginning) (region-end) args))
-  )  
+    )
+  (defun my/smart-split-window ()
+    "Split the window into two. Split horizontally if the window is wide enough, vertically otherwise."
+    (interactive)
+    (if (> (/ (window-width) 2) (window-height))
+      (split-window-right)
+      (split-window-below)))
+  (provide 'my/smart-split-window)
 )
 
 (leaf expand-region
@@ -356,9 +363,11 @@
       ;; ( "C-k C-l" . helm-M-x)
       ( "C-k C-l" . counsel-M-x)
       ( "C-k C-w" . kill-buffer)
-      ( "C-k C-k C-w" . delete-window)
-      ( "C-k C-k C-k" . comment-dwim)
-      ( "C-k C-j" . goto-line)
+      ( "C-k C-c" . comment-dwim)
+      ;; ( "C-k C-j" . goto-line)
+      ( "C-k C-j" . counsel-company)
+      ( "C-k C-d" . my/smart-split-window)
+      ( "C-k C-k C-d" . delete-window)
       ;;( "C-k C-o") . switch-to-prev-buffer)
       ;;( "C-k C-p") . switch-to-next-buffer)
       ;;( "C-k C-h") . swap-buffers)
@@ -370,14 +379,15 @@
               (s (if (region-active-p)
                   (buffer-substring-no-properties (region-beginning) (region-end)))))
             (set-mark nil)
-            (swiper s))))
+            (swiper (or s " ")))))
       ;; ( "C-k C-o" . helm-show-kill-ring)
       ( "C-k C-o" . counsel-yank-pop)
       ( "C-k C-t" . my/turn-buffer)
+      ( "C-k C-k C-t" . (lambda ()(interactive) (my/turn-buffer 1)))
       ( "C-k C-;" . helm-comint-input-ring)
 ;;      ( "C-k C-<left>" . split-window-left)
-      ( "C-k C-<right>" . split-window-right)
-      ( "C-k C-<down>" . split-window-below)
+      ;; ( "C-k C-<right>" . split-window-right)
+      ;; ( "C-k C-<down>" . split-window-below)
 ;;      ( "C-k C-<up>" . split-window-)
       ;;("TAB" . my/indent)
       ;;("TAB" . nil)
@@ -697,3 +707,4 @@ ssh localhost ~/bin/npm $@
 (leaf magit
   :ensure t
   )
+
