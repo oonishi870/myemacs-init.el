@@ -245,8 +245,11 @@
   ;; (require 'ivy)
   ;; (require 'counsel)
   (require 'recentf)
-  (ivy-posframe-mode 1)
-
+  (leaf ivy-posframe
+    :ensure t
+    :config
+    (ivy-posframe-mode 1)
+    )
 )
 
 
