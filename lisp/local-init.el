@@ -342,7 +342,10 @@
       ( "C-b" . isearch-forward)
       ( "C-r" . isearch-backward)
       ( "C-s" . save-buffer)
-      ( "C-t" . (lambda (&optional arg) (interactive "P") (if (null arg) (other-window  1) (other-window -1))))
+      ( "C-t" . other-window)
+      ( "C-S-t" . (lambda (&optional arg)
+                  (interactive "P")
+                  (other-window -1)))
       
       ( "C-<tab>" . other-window)
       ( "C-<iso-lefttab>" .(lambda ()(interactive) (other-window -1)))
@@ -374,6 +377,7 @@
       ;; ( "C-k C-o" . helm-show-kill-ring)
       ( "C-k C-o" . counsel-yank-pop)
       ( "C-k C-t" . my/turn-buffer)
+      ( "C-k C-k C-t" . (lambda ()(interactive)(my/turn-buffer 1)))
       ( "C-k C-;" . helm-comint-input-ring)
 ;;      ( "C-k C-<left>" . split-window-left)
       ( "C-k C-<right>" . split-window-right)
@@ -552,8 +556,23 @@
   )
 
   :config
+
+  ;; githubテーマ
+  (leaf github-theme.el
+    ;; ZenKurenaido
+    :ensure t
+    :config
+    (let (
+           (local-file (locate-user-emacs-file "lisp/github-theme.el"))
+           (url "https://raw.githubusercontent.com/philiparvidsson/GitHub-Theme-for-Emacs/master/github-theme.el"))
+      (unless (file-exists-p local-file)
+        (url-copy-file url local-file t))
+      (load local-file)
+      (load-theme 'github t)
+      ))
+
     ;;(load-theme 'deeper-blue t)
-    (load-theme 'wombat t)
+    ;;(load-theme 'wombat t)
     ;; 日本語フォントを設定。フォント名はfc-queryで調べる
     ;;(set-fontset-font t 'japanese-jisx0208 "あずきフォント")
     (set-fontset-font t 'japanese-jisx0208 "azuki_font")
@@ -562,7 +581,7 @@
     ;; (set-fontset-font t 'japanese-jisx0208 "MogihaPenFont")
     ;; (set-fontset-font t 'japanese-jisx0208 "APJapanesefontT")
     ;; (set-fontset-font t 'japanese-jisx0208 "RiiTegakiN-R")
-    (set-frame-font "NotoMono 11")
+    (set-frame-font "NotoMono 10")
     (setq face-font-rescale-alist '(
              (".*Zen Kurenaido.**" . 1.2) ;; Zenkurenaido
              (".*APJapanesefont.*" . 1.2) ;; あんずもじ
@@ -697,3 +716,4 @@ ssh localhost ~/bin/npm $@
 (leaf magit
   :ensure t
   )
+
