@@ -730,6 +730,51 @@ ssh localhost ~/bin/npm $@
 
 (leaf magit
   :ensure t
+  :config
+  (defun create-read-string-advice (regex fixed-input)
+    "Create an advice function that returns FIXED-INPUT if the prompt matches REGEX.
+この関数は、指定された正規表現 REGEX に minibuffer のプロンプトが一致した場合に、
+FIXED-INPUT を返すアドバイス関数を生成します。"
+    (lambda (orig-fun prompt &optional initial-input history default-value inherit-input-method)
+      "このラムダ関数は、元の関数と同じ引数を取り、プロンプトが正規表現に一致するかチェックします。"
+      (if (string-match-p regex prompt)
+        (progn
+          (message "Prompt: %s\nIgnoring user input and returning: %s" prompt fixed-input)
+          ;;"プロンプトが正規表現に一致した場合、ユーザー入力を無視し、固定値を返します。"
+          fixed-input)
+        (apply orig-fun prompt initial-input history default-value inherit-input-method)
+        )))
+
+  ;; ;; Use the creating function to make the actual advice function
+  ;; (setq my-read-string-advice (create-read-string-advice "^password" "my-fixed-input"))
+
+
+  (defun my/github-username()
+    (shell-command-to-string "awk '{print $1}' ~/private/github"))
+
+  (defun my/github-password()
+    (shell-command-to-string "awk '{print $2}' ~/private/github"))
+  ;; (my/github-username)
+  ;; (my/github-password)
+
+  (defun setup-magit-push-advice (orig-fun &optional args)
+    "Set up automatic responses for `magit-push-current-to-pushremote` based on prompts."
+    (interactive)
+    (print args)
+    ;; Create advice for password prompts
+    (let ((password-advice (create-read-string-advice "^Username for 'https://github.com':" (my/github-username)))
+           (confirm-advice (create-read-string-advice "^Password for 'https://oonishi870@github.com':" (my/github-password)))
+           result)
+      ;; Add advice to automatically fill in password
+      (advice-add 'read-string :around password-advice)
+      (advice-add 'read-string :around confirm-advice)
+      (setq result (apply orig-fun args))
+      (advice-remove 'read-string  password-advice)
+      (advice-remove 'read-string  confirm-advice)
+      result
+      ))
+  (advice-add 'magit-git-push :around 'setup-magit-push-advice)
+  ;; (advice-remove 'magit-git-push  'setup-magit-push-advice)
   )
 
 ;; なんかよくわからんので一旦OFF
