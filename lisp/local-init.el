@@ -391,6 +391,7 @@
       ( "C-k C-t" . my/turn-buffer)
       ( "C-k C-k C-t" . (lambda ()(interactive) (my/turn-buffer 1)))
       ( "C-k C-;" . helm-comint-input-ring)
+      ( "C-k C-k C-s" . describe-key)
 ;;      ( "C-k C-<left>" . split-window-left)
       ;; ( "C-k C-<right>" . split-window-right)
       ;; ( "C-k C-<down>" . split-window-below)
