@@ -53,6 +53,9 @@
   (tool-bar-mode -1)
   ;; 現在行のハイライトを無効
   (global-hl-line-mode -1)
+  
+  ;; ediffを左右分割にする
+  (setq ediff-split-window-function (quote split-window-horizontally))
 
   ;; lispのインデント設定
   (setq-default lisp-indent-offset 2)
@@ -256,6 +259,9 @@
     :ensure t
     :config
     (ivy-posframe-mode 1)
+    )
+  (leaf ivy-migemo
+    :ensure t
     )
 )
 
@@ -562,6 +568,21 @@
   )
 
   :config
+
+  ;; githubテーマ
+  (leaf github-theme.el
+    ;; ZenKurenaido
+    :ensure t
+    :config
+    (let (
+           (local-file (locate-user-emacs-file "lisp/github-theme.el"))
+           (url "https://raw.githubusercontent.com/philiparvidsson/GitHub-Theme-for-Emacs/master/github-theme.el"))
+      (unless (file-exists-p local-file)
+        (url-copy-file url local-file t))
+      (load local-file)
+      (load-theme 'github t)
+      ))
+
     ;;(load-theme 'deeper-blue t)
     (load-theme 'wombat t)
     ;; 日本語フォントを設定。フォント名はfc-queryで調べる
@@ -618,6 +639,7 @@
 ;;  (setq copilot-install-dir "/home/owner/copilot")
   (let (
     (nodepath (locate-user-emacs-file "bin/node"))
+    (shell-command (format "mkdir -p %s" (locate-user-emacs-file "bin/node")))
     (s "\
 #!/bin/sh
 ssh localhost ~/bin/node $@
@@ -646,8 +668,8 @@ ssh localhost ~/bin/npm $@
 )
   (require 'copilot)
   (bind-keys :map copilot-completion-map
-      ;;("TAB" . copilot-accept-completion-by-word)
-      ;;("C-g" . copilot-clear-overlay)
+      ("TAB" . copilot-accept-completion-by-word)
+      ("C-g" . copilot-clear-overlay)
       ("C-o" . copilot-accept-completion-by-line)
       ("C-n" . copilot-next-completion)
       ("C-p" . copilot-previous-completion)
@@ -692,13 +714,14 @@ ssh localhost ~/bin/npm $@
      )
   )
   (advice-add    'helm-find-files  :around #'my/strip-tramp)
+  (advice-add    'counsel-find-file  :around #'my/strip-tramp)
   (advice-add    'buffer-file-name :around #'my/strip-tramp)
   
   (defun my/add-tramp(f &rest args)
     (if (string-match "/home" default-directory)
       (let(
           (default-directory 
-            (concat "/scp:" (user-full-name)  "@localhost:" default-directory)))
+            (concat "/scp:" (user-login-name)  "@localhost:" default-directory)))
         (apply f args))
       (apply f args)))
   (advice-add    'executable-interpret :around #'my/add-tramp)
@@ -708,3 +731,109 @@ ssh localhost ~/bin/npm $@
   :ensure t
   )
 
+;; なんかよくわからんので一旦OFF
+;; (leaf orderless
+;;   :ensure t
+;;   :init
+;;   (setq completion-styles '(orderless basic)
+;;     completion-category-defaults nil
+;;     completion-category-overrides nil)
+
+;;   :config
+;;   ;; migemoでローマ字検索を有効にする
+;;   (leaf migemo
+;;     :ensure t
+;;     :config
+;;     (defun orderless-migemo (component)
+;;       (let ((pattern (downcase (migemo-get-pattern component))))
+;;         (condition-case nil
+;;           (progn (string-match-p pattern "") pattern)
+;;           (invalid-regexp nil))))
+;;     (add-to-list 'orderless-matching-styles 'orderless-migemo))
+
+;;   :after corfu
+;;   ;; corfuはorderless-flexで絞り込む
+;;   (with-eval-after-load 'corfu
+;;     (add-hook 'corfu-mode-hook
+;;       (lambda ()
+;;         (setq-local orderless-matching-styles '(orderless-flex))))))
+
+
+;; ivy corfu の並び準を記憶する
+(leaf prescient
+  :ensure t
+  :config
+  (require 'prescient)
+  (setq prescient-aggressive-file-save t)
+  (prescient-persist-mode +1)
+  (leaf ivy-prescient
+    :ensure t
+    :config
+    (ivy-prescient-mode 1)
+
+    (setq ivy-prescient-retain-classic-highlighting t)
+    (setq prescient-sort-full-matches-first t)
+
+    (shell-command (format "mkdir -p %s" (locate-user-emacs-file "cache")))
+    (setq prescient-save-file (locate-user-emacs-file "cache/prescient-save.el"))
+    )
+  
+  (leaf corfu-prescient
+    :ensure t
+    :after corfu
+    :config
+    (require 'corfu-prescient)
+    (with-eval-after-load 'orderless
+      (setq corfu-prescient-enable-filtering nil))
+    (corfu-prescient-mode +1))
+  )
+
+
+(leaf migemo
+  :ensure t
+  :config 
+  (require 'migemo)
+
+  ;; Migemoの設定
+  (setq migemo-command "cmigemo")
+  (setq migemo-options '("-q" "--emacs"))
+
+  ;; 辞書の場所（ここでは確認したパスに置き換えてください）
+  (setq migemo-dictionary "/usr/share/cmigemo/utf-8/migemo-dict")
+
+  (setq migemo-user-dictionary nil)
+  (setq migemo-regex-dictionary nil)
+  (setq migemo-coding-system 'utf-8-unix)
+  (migemo-init)
+  (leaf ivy-with-migemo
+    :ensure t
+    :config
+    (require 'ivy-with-migemo)
+    (setq ivy-with-migemo-enable-command ; migemo対応の対象となるコマンドを設定
+      '(swiper
+         swiper-isearch
+         counsel-recentf
+         counsel-rg))
+    (setq migemo-options '("--quiet" "--nonewline" "--emacs"))
+    (migemo-kill) ; migemoシャットダウン
+    (migemo-init) ; migemo再起動
+    (global-ivy-with-migemo-mode 1) ; 有効
+    )
+  ;; (leaf ivy-migemo
+  ;;   :ensure t
+  ;;   :config
+  ;;   (require 'ivy-migemo)
+    
+  ;;   ;; ivyのデフォルトのマッチング関数を設定
+  ;;   (setq ivy-re-builders-alist
+  ;;     '((t . ivy--regex-plus)
+  ;;        (swiper . ivy--regex-plus)
+  ;;        (counsel-find-file . ivy--regex-plus)
+  ;;        (t . ivy-migemo-re-builder)))
+
+  ;;   ;; migemoを使用するコマンドを追加（例：counsel-M-x, counsel-find-file）
+  ;;   ;;(add-to-list 'ivy-migemo-functions-alist '(counsel-M-x . ivy-migemo-get-pattern))
+  ;;   (add-to-list 'ivy-migemo-functions-alist '(swiper . ivy-migemo-get-pattern))
+
+  ;;   )
+  )
