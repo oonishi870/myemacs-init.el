@@ -573,7 +573,7 @@
   ;; githubテーマ
   (leaf github-theme.el
     ;; ZenKurenaido
-    :ensure t
+    ;;:ensure t
     :config
     (let (
            (local-file (locate-user-emacs-file "lisp/github-theme.el"))
@@ -582,11 +582,12 @@
         (url-copy-file url local-file t))
       (add-to-list 'load-path (locate-user-emacs-file "lisp"))
       (load "github-theme.el")
-      (load-theme 'github t)
+      ;;(load-theme 'github t)
       ))
 
     ;;(load-theme 'deeper-blue t)
-    (load-theme 'wombat t)
+    ;;(load-theme 'wombat t)
+    (load-theme 'github t)
     ;; 日本語フォントを設定。フォント名はfc-queryで調べる
     ;;(set-fontset-font t 'japanese-jisx0208 "あずきフォント")
     ;;(set-fontset-font t 'japanese-jisx0208 "azuki_font")
