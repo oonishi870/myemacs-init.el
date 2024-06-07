@@ -11,6 +11,7 @@ docker run -d --name emacs \
        -v /tmp/.X11-unix:/tmp/.X11-unix \
        -v /tmp/.XIM-unix:/tmp/.XIM-unix \
        -v /home:/home \
+       -v /mnt:/mnt \
        -v /tmp:/tmp/host \
        -e HOME=$HOME \
        -e DISPLAY=$DISPLAY \
