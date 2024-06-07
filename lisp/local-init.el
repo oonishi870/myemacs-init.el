@@ -747,7 +747,7 @@ FIXED-INPUT を返すアドバイス関数を生成します。"
         (apply orig-fun prompt initial-input history default-value inherit-input-method))
       ))
   ;; ;; Use the creating function to make the actual advice function
-  ;; (setq my-read-string-advice (create-read-string-advice4 "^password" "my-fixed-input"))
+  ;; (setq my-read-string-advice (create-read-string-advice "^password" "my-fixed-input"))
   ;; (advice-add 'read-string :around my-read-string-advice)
   ;; (read-string "password")
   ;; (funcall my-read-string-advice 'read-string "password")
