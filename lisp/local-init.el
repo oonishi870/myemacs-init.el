@@ -581,7 +581,7 @@
       (unless (file-exists-p local-file)
         (url-copy-file url local-file t))
       (add-to-list 'load-path (locate-user-emacs-file "lisp"))
-      (load "github-theme.el"")
+      (load "github-theme.el")
       (load-theme 'github t)
       ))
 
@@ -697,7 +697,7 @@ ssh localhost ~/bin/npm $@
     (let* (
         (tramp-mode t)
         (default-directory (format "/ssh:%s@localhost:~" (user-login-name))))
-      (shell (concat "*shell<" (number-to-string n) ">*"))
+        (shell (concat "*shell<" (number-to-string n) ">*"))
       )
   )
   (provide 'ssh-host)
@@ -732,7 +732,8 @@ ssh localhost ~/bin/npm $@
 (leaf magit
   :ensure t
   :config
-  (defun create-read-string-advice (regex fixed-input)
+  (setq lexical-binding t) ;; clojureを有効にする
+  (defun create-read-string-advice4 (regex fixed-input)
     "Create an advice function that returns FIXED-INPUT if the prompt matches REGEX.
 この関数は、指定された正規表現 REGEX に minibuffer のプロンプトが一致した場合に、
 FIXED-INPUT を返すアドバイス関数を生成します。"
@@ -743,13 +744,14 @@ FIXED-INPUT を返すアドバイス関数を生成します。"
           (message "Prompt: %s\nIgnoring user input and returning: %s" prompt fixed-input)
           ;;"プロンプトが正規表現に一致した場合、ユーザー入力を無視し、固定値を返します。"
           fixed-input)
-        (apply orig-fun prompt initial-input history default-value inherit-input-method)
-        )))
-
+        (apply orig-fun prompt initial-input history default-value inherit-input-method))
+      ))
   ;; ;; Use the creating function to make the actual advice function
-  ;; (setq my-read-string-advice (create-read-string-advice "^password" "my-fixed-input"))
-
-
+  ;; (setq my-read-string-advice (create-read-string-advice4 "^password" "my-fixed-input"))
+  ;; (advice-add 'read-string :around my-read-string-advice)
+  ;; (read-string "password")
+  ;; (funcall my-read-string-advice 'read-string "password")
+  ;; (advice-remove 'read-string  my-read-string-advice)
   (defun my/github-username()
     (shell-command-to-string "awk '{print $1}' ~/private/github"))
 
@@ -757,11 +759,10 @@ FIXED-INPUT を返すアドバイス関数を生成します。"
     (shell-command-to-string "awk '{print $2}' ~/private/github"))
   ;; (my/github-username)
   ;; (my/github-password)
-
   (defun setup-magit-push-advice (orig-fun &optional args)
     "Set up automatic responses for `magit-push-current-to-pushremote` based on prompts."
     (interactive)
-    (print args)
+    (print "yesyes")
     ;; Create advice for password prompts
     (let ((password-advice (create-read-string-advice "^Username for 'https://github.com':" (my/github-username)))
            (confirm-advice (create-read-string-advice "^Password for 'https://oonishi870@github.com':" (my/github-password)))
@@ -774,6 +775,8 @@ FIXED-INPUT を返すアドバイス関数を生成します。"
       (advice-remove 'read-string  confirm-advice)
       result
       ))
+  ;; (advice-add 'magit-push-current-to-pushremote :around 'setup-magit-push-advice)
+  ;; (advice-remove 'magit-push-current-to-pushremote  'setup-magit-push-advice)
   (advice-add 'magit-git-push :around 'setup-magit-push-advice)
   ;; (advice-remove 'magit-git-push  'setup-magit-push-advice)
   )
