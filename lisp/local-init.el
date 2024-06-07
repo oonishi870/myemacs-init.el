@@ -733,7 +733,7 @@ ssh localhost ~/bin/npm $@
   :ensure t
   :config
   (setq lexical-binding t) ;; clojureを有効にする
-  (defun create-read-string-advice4 (regex fixed-input)
+  (defun create-read-string-advice (regex fixed-input)
     "Create an advice function that returns FIXED-INPUT if the prompt matches REGEX.
 この関数は、指定された正規表現 REGEX に minibuffer のプロンプトが一致した場合に、
 FIXED-INPUT を返すアドバイス関数を生成します。"
