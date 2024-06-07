@@ -755,7 +755,7 @@ FIXED-INPUT を返すアドバイス関数を生成します。"
   (defun my/github-username()
     (shell-command-to-string "awk '{print $1}' ~/private/github"))
 
-  (defun my/github-password()
+  (defun my/github-password(&optional args)
     (shell-command-to-string "awk '{print $2}' ~/private/github"))
   ;; (my/github-username)
   ;; (my/github-password)
@@ -775,9 +775,22 @@ FIXED-INPUT を返すアドバイス関数を生成します。"
       (advice-remove 'read-string  confirm-advice)
       result
       ))
+  (setf magit-process-find-password-functions #'my/github-password)
+  (defun around-magit-process-username-prompt (orig-fun &rest args)
+    "Advice to temporarily replace 'read-string' with a custom lambda function in magit-process-username-prompt."
+    (cl-letf (((symbol-function 'read-string)
+                (lambda (prompt &optional initial-input history default-value inherit-input-method)
+                  (message "Custom lambda function triggered!")
+                  ;; ここに特定の文字列を返すロジックを記述します。
+                  (my/github-username))))
+      (apply orig-fun args)))
+
+  (advice-add 'magit-process-username-prompt :around #'around-magit-process-username-prompt)
+
   ;; (advice-add 'magit-push-current-to-pushremote :around 'setup-magit-push-advice)
   ;; (advice-remove 'magit-push-current-to-pushremote  'setup-magit-push-advice)
-  (advice-add 'magit-git-push :around 'setup-magit-push-advice)
+  ;;(advice-add 'magit-git-push :around 'setup-magit-push-advice)
+  ;;(advice-add 'magit-call-git :around 'setup-magit-push-advice)
   ;; (advice-remove 'magit-git-push  'setup-magit-push-advice)
   )
 
