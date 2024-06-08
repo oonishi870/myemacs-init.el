@@ -346,7 +346,20 @@
   ;; (bind-keys :map cua-global-keymap
   ;;   ( "C-c <timeout>" . kill-ring-save-keep-selection)
   ;;   ( "C-c" . kill-ring-save-keep-selection)
-  ;;  )
+    ;;  )
+  ;; Homeキーを普通のエディタっぽくする
+  (defun back-to-indentation-or-beginning ()
+    (interactive)
+    (if this-command-keys-shift-translated
+      (progn
+        (unless mark-active (push-mark nil t t))
+        (advice-add 'handle-shift-selection :after #'my/unset-mark-on-next-move)
+      ))
+    (if (= (point) (progn (back-to-indentation) (point)))
+        (beginning-of-line)))
+
+  (global-set-key [home] 'back-to-indentation-or-beginning)
+
   (bind-keys :map overriding-minor-mode-map
       ("C-b" . nil) ;; 2018/06/27 tmux用
       ( "C-z" . undo-tree-undo)
@@ -390,7 +403,9 @@
       ( "C-k C-o" . counsel-yank-pop)
       ( "C-k C-t" . my/turn-buffer)
       ( "C-k C-k C-t" . (lambda ()(interactive) (my/turn-buffer 1)))
-      ( "C-k C-;" . helm-comint-input-ring)
+      ;;( "C-k C-;" . helm-comint-input-ring)
+      ( "C-k C-;" . my/mdcoderun)
+      ( "C-k C-k C-;" . my/mdcoderun-again)
       ( "C-k C-k C-s" . describe-key)
 ;;      ( "C-k C-<left>" . split-window-left)
       ;; ( "C-k C-<right>" . split-window-right)
@@ -584,10 +599,22 @@
       (load "github-theme.el")
       ;;(load-theme 'github t)
       ))
+  
+  (leaf nordtheme
+    :el-get (
+       nordtheme/emacs
+       :type github               
+       :pkgname "nordtheme/emacs"
+       ;;:branch "main"
+       )
+    )
+  (require 'nord-theme)
+  
 
     ;;(load-theme 'deeper-blue t)
     ;;(load-theme 'wombat t)
     (load-theme 'github t)
+    (load-theme 'nord t)
     ;; 日本語フォントを設定。フォント名はfc-queryで調べる
     ;;(set-fontset-font t 'japanese-jisx0208 "あずきフォント")
     ;;(set-fontset-font t 'japanese-jisx0208 "azuki_font")
@@ -596,7 +623,7 @@
     ;; (set-fontset-font t 'japanese-jisx0208 "MogihaPenFont")
     (set-fontset-font t 'japanese-jisx0208 "APJapanesefontT")
     ;; (set-fontset-font t 'japanese-jisx0208 "RiiTegakiN-R")
-    (set-frame-font "NotoMono 10")
+    (set-frame-font "NotoMono 11")
     (setq face-font-rescale-alist '(
              (".*Zen Kurenaido.**" . 1.2) ;; Zenkurenaido
              (".*APJapanesefont.*" . 1.3) ;; あんずもじ
