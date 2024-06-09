@@ -1036,9 +1036,17 @@ ssh localhost ~/bin/npm $@
   (advice-add 'dimmer-dim-buffer :around
     (lambda (original-func BUF FRAC &rest args)
       (interactive "P")
-      (unless (string-match-p "\\*corfu\\*" (buffer-name (current-buffer)))
+      (message "BUF:%s" BUF)
+      (unless
+        (or
+            (string-match-p "\\*corfu\\*" (buffer-name (current-buffer)))
+            ;; ivyのポップアップが暗くなるのを防ぐ
+            (string-match-p "\\*ivy-.*" (buffer-name (current-buffer)))
+            (string-match-p "\\*ivy-.*" (buffer-name BUF))
+                )
         (funcall original-func BUF FRAC)
         )
       ;;(message "BUF:%s current:%s" BUF (current-buffer))
       )))
+
 
