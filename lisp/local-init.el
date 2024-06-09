@@ -747,7 +747,15 @@
        '(helm-selection ((t (:background "#434C5E" :foreground "#E5E9F0"))))
        '(helm-match ((t (:foreground "#81A1C1" :background "#2E3440" :weight bold))))
        '(helm-visible-mark ((t (:foreground "#2E3440" :background "#8FBCBB"))))
-       '(helm-ff-file ((t (:background "#2E3440" :foreground "#ECEFF4")))))))
+        '(helm-ff-file ((t (:background "#2E3440" :foreground "#ECEFF4")))))
+      (custom-set-faces
+        '(ivy-current-match ((t (:background "#4C566A" :foreground "#ECEFF4" :extend t))))
+        '(ivy-minibuffer-match-face-1 ((t (:background "#4C566A" :foreground "#D8DEE9" :weight bold))))
+        '(ivy-minibuffer-match-face-2 ((t (:background "#434C5E" :foreground "#D8DEE9" :weight bold))))
+        '(ivy-minibuffer-match-face-3 ((t (:background "#3B4252" :foreground "#D8DEE9" :weight bold))))
+        '(ivy-minibuffer-match-face-4 ((t (:background "#2E3440" :foreground "#D8DEE9" :weight bold))))
+ 
+      )))
 
   (advice-add 'load-theme :after #'my/helm-customize-for-nord-theme)
   (load-theme 'nord t)
