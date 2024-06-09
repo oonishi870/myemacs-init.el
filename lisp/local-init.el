@@ -65,6 +65,18 @@
   (setq python-indent-offset 4)
 
   ;; 自作インデント
+  (defun get-line-start-position (line-number)
+    "Return the position of the beginning of the line specified by LINE-NUMBER."
+    (save-excursion
+      (goto-line line-number)
+      (line-beginning-position)))
+  
+  (defun get-line-end-position (line-number)
+    "Return the position of the end of the line specified by LINE-NUMBER."
+    (save-excursion
+      (goto-line line-number)
+      (line-end-position)))
+
   (defun current-tab-width ()
   "Return the appropriate tab width for the current major mode."
     (cond
@@ -442,8 +454,8 @@
       ;; ( "C-k C-n" . helm-mini)
       ;; ( "C-k C-n" . counsel-switch-buffer)
       ( "C-k C-n" . my/counsel-mini)
-      ;;( "C-k C-f" . helm-find-files)
-      ( "C-k C-f" . counsel-find-file)
+      ( "C-k C-f" . helm-find-files)
+      ;;( "C-k C-f" . counsel-find-file)
       ;; ( "C-k C-l" . helm-M-x)
       ( "C-k C-l" . counsel-M-x)
       ( "C-k C-w" . kill-buffer)
@@ -480,9 +492,34 @@
 ;;      ( "C-k C-<up>" . split-window-)
       ;;("TAB" . my/indent)
       ;;("TAB" . nil)
-      ;;( "C-;" . copilot-accept-completion)
-  )
-  (overriding-minor-mode 1) ;; 自動で有効にする場合
+    ;;( "C-;" . copilot-accept-completion)
+    )
+    (overriding-minor-mode 1) ;; 自動で有効にする場合
+
+    (bind-keys :map isearch-mode-map
+	   ("C-b" . isearch-repeat-forward)
+	   ("C-f" . isearch-repeat-forward)
+	   ("C-r" . isearch-repeat-backward)
+	   ;;("C-b" . isearch-repeat-backward)
+	   ;; ("C-f" . isearch-forward)
+	   ;; ("C-b" . isearch-backward)
+	   ;;("<RET>" . isearch-repeat-forward)
+	   ;;("s-<RET>" . isearch-repeat-backward)
+	   ;;("<ESC>" . isearch-exit)
+	   ;;("<ESC>" . nil)
+	   ;;("<END>" . isearch-exit)
+	   ("<END>" . (lambda ()(
+				 (interactive)
+				 (isearch-exit)
+				 (end-of-line))))
+	   
+	   ("<HOME>" . (lambda ()(
+				 (interactive)
+				 (isearch-exit)
+				 (beginning-of-line))))
+	   ("C-v" . isearch-edit-string)
+	   ;;("<RET>" . isearch-exit)
+	   )
 ))
 
 (leaf corfu
@@ -681,7 +718,6 @@
     ;;(load-theme 'deeper-blue t)
     ;;(load-theme 'wombat t)
     (load-theme 'github t)
-    (load-theme 'nord t)
     ;; 日本語フォントを設定。フォント名はfc-queryで調べる
     ;;(set-fontset-font t 'japanese-jisx0208 "あずきフォント")
     ;;(set-fontset-font t 'japanese-jisx0208 "azuki_font")
@@ -699,7 +735,23 @@
              (".*MogihaPenFont.*" . 1.2)          ;;mogiha
              (".*RiiTegakiN.*" . 1.2)          ;;りい手書き
              ))
-    (set-face-underline 'hl-line nil)
+  (set-face-underline 'hl-line nil)
+
+  ;; nord-themeでhelm-find-fileが背景白になって見にくい
+  (defun my/helm-customize-for-nord-theme (&rest _)
+    "Customize Helm faces when loading Nord theme."
+    (when (custom-theme-enabled-p 'nord)
+      (custom-set-faces
+       '(helm-source-header
+         ((t (:background "#4C566A" :foreground "#ECEFF4" :weight bold :height 1.3 :family "Sans Serif"))))
+       '(helm-selection ((t (:background "#434C5E" :foreground "#E5E9F0"))))
+       '(helm-match ((t (:foreground "#81A1C1" :background "#2E3440" :weight bold))))
+       '(helm-visible-mark ((t (:foreground "#2E3440" :background "#8FBCBB"))))
+       '(helm-ff-file ((t (:background "#2E3440" :foreground "#ECEFF4")))))))
+
+  (advice-add 'load-theme :after #'my/helm-customize-for-nord-theme)
+  (load-theme 'nord t)
+  
 )
 
 (leaf mozc
