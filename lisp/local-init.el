@@ -904,8 +904,8 @@ ssh localhost ~/bin/npm $@
     :after corfu
     :config
     (require 'corfu-prescient)
-    (with-eval-after-load 'orderless
-      (setq corfu-prescient-enable-filtering nil))
+    ;; (with-eval-after-load 'orderless
+    ;;   (setq corfu-prescient-enable-filtering nil))
     (corfu-prescient-mode +1))
   )
 
@@ -958,3 +958,27 @@ ssh localhost ~/bin/npm $@
 
   ;;   )
   )
+
+(leaf jump-back
+  :config
+  (load "jump-back.el")
+  )
+
+
+(leaf dimmer
+  :ensure
+  :config
+  (dimmer-mode 1)
+  (setq dimmer-fraction 0.3)
+  (setq dimmer-exclusion-regexp "^\\*helm.*\\|\\*Minibuf-.*|\\*corfu\\*.*|\\*ivy.*")
+
+  ;; corfuの補完で非アクティブ化されるのを防ぐ
+  (advice-add 'dimmer-dim-buffer :around
+    (lambda (original-func BUF FRAC &rest args)
+      (interactive "P")
+      (unless (string-match-p "\\*corfu\\*" (buffer-name (current-buffer)))
+        (funcall original-func BUF FRAC)
+        )
+      ;;(message "BUF:%s current:%s" BUF (current-buffer))
+      )))
+
