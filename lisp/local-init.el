@@ -60,6 +60,53 @@
   ;; lispのインデント設定
   (setq-default lisp-indent-offset 2)
   (setq-default indent-tabs-mode nil)
+  ;; タブ幅を4に設定
+  (setq-default tab-width 4)
+  (setq python-indent-offset 4)
+
+  ;; 自作インデント
+  (defun current-tab-width ()
+  "Return the appropriate tab width for the current major mode."
+    (cond
+      ((derived-mode-p 'c-mode 'c++-mode 'java-mode 'javascript-mode) c-basic-offset)
+      ((derived-mode-p 'python-mode) python-indent-offset)
+      ((derived-mode-p 'ruby-mode) ruby-indent-level)
+      ((derived-mode-p 'js-mode) js-indent-level)
+      ((derived-mode-p 'emacs-lisp-mode) lisp-indent-offset)
+      (t tab-width)))  ; Default to tab-width if no specific setting is found
+
+  (defun my/indent-or-unindent (&optional unindent)
+    "Indent or unindent current line or region based on the presence of a prefix argument, or insert a tab/spaces if no region is selected."
+    (interactive "P")
+    (if (use-region-p)
+        (let* ((start-pos (region-beginning) )
+               (end-pos  (region-end))
+               (start-line (line-number-at-pos start-pos))
+               (end-line (line-number-at-pos end-pos))
+               (start-line-start-pos (get-line-start-position start-line))
+               (end-line-end-pos (get-line-end-position end-line))
+               (deactivate-mark nil))  ; This keeps the selection active after the command
+          ;; Indent or unindent the region
+          (goto-char start-line-start-pos)
+          (set-mark (point))
+          (goto-char end-line-end-pos)
+          (if unindent
+              (indent-rigidly start-line-start-pos end-line-end-pos (- (current-tab-width)))
+            (indent-rigidly start-line-start-pos end-line-end-pos (current-tab-width)))
+          ;; Recalculate the start and end positions based on the original line numbers and columns
+          (goto-char start-line-start-pos)
+          (set-mark (point))
+          (goto-char (get-line-end-position end-line))
+          )
+      ;; No region selected, insert tab or equivalent spaces
+      (if indent-tabs-mode
+          (insert "\t")  ; Insert a tab character
+        (insert (make-string (current-tab-width) ?\s)))))  ; Insert spaces
+
+  (global-set-key (kbd "TAB") 'my/indent-or-unindent)
+  (global-set-key (kbd "<backtab>") (lambda () (interactive) (my/indent-or-unindent t)))
+
+
 
   ;; 2020/02/17 修正
   (defun my/next--window(reverse)
@@ -121,6 +168,24 @@
 
   (advice-add 'er/expand-region :after #'my/expand-region-advice)
   ;;(advice-remove 'er/expand-region #'my/expand-region-advice)
+
+  ;; lisp開発用
+  ;; 直前に実行したlisp式を再実行する
+  (defvar last-evaluated-sexp nil
+  "Stores the last evaluated S-expression.")
+
+  (defun store-last-evaluated-sexp (arg)
+    "Store the last evaluated S-expression from the point."
+    (setq last-evaluated-sexp (sexp-at-point)))
+
+  (advice-add 'eval-last-sexp :before #'store-last-evaluated-sexp)
+
+  (defun my/repeat-last-evaluated-sexp ()
+    "Evaluate the last evaluated S-expression."
+    (interactive)
+    (if last-evaluated-sexp
+        (eval-expression last-evaluated-sexp)
+      (message "No S-expression has been evaluated yet.")))
 )
 
 (leaf undo-tree
@@ -382,16 +447,17 @@
       ;; ( "C-k C-l" . helm-M-x)
       ( "C-k C-l" . counsel-M-x)
       ( "C-k C-w" . kill-buffer)
+      ( "C-k C-k C-w" . revert-buffer)
       ( "C-k C-c" . comment-dwim)
       ;; ( "C-k C-j" . goto-line)
-      ( "C-k C-j" . counsel-company)
-      ( "C-k C-d" . my/smart-split-window)
-      ( "C-k C-k C-d" . delete-window)
+      ( "C-k C-d" . counsel-company)
+      ( "C-k C-i" . my/smart-split-window)
+      ( "C-k C-k C-i" . delete-window)
       ;;( "C-k C-o") . switch-to-prev-buffer)
       ;;( "C-k C-p") . switch-to-next-buffer)
       ;;( "C-k C-h") . swap-buffers)
       ;;( "C-k C-u") . helm-swoop)
-      ( "C-k C-u" .
+      ( "C-k C-j" .
         (lambda (&optional args)
           (interactive)
           (let(
@@ -406,7 +472,8 @@
       ;;( "C-k C-;" . helm-comint-input-ring)
       ( "C-k C-;" . my/mdcoderun)
       ( "C-k C-k C-;" . my/mdcoderun-again)
-      ( "C-k C-k C-s" . describe-key)
+      ( "C-k C-k C-@" . describe-key)
+      ( "C-k C-@" . my/repeat-last-evaluated-sexp)
 ;;      ( "C-k C-<left>" . split-window-left)
       ;; ( "C-k C-<right>" . split-window-right)
       ;; ( "C-k C-<down>" . split-window-below)
