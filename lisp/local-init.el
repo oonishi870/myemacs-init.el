@@ -154,6 +154,9 @@
       (split-window-right)
       (split-window-below)))
   (provide 'my/smart-split-window)
+
+  ;; ビープ音を鳴らさない
+  (setq ring-bell-function 'ignore)
 )
 
 (leaf expand-region
@@ -1026,8 +1029,9 @@ ssh localhost ~/bin/npm $@
 
 
 (leaf dimmer
-  :ensure
+  :ensure t
   :config
+  ;;(require 'dimmer)
   (dimmer-mode 1)
   (setq dimmer-fraction 0.3)
   (setq dimmer-exclusion-regexp "^\\*helm.*\\|\\*Minibuf-.*|\\*corfu\\*.*|\\*ivy.*")
