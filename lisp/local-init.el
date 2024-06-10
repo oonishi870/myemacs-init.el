@@ -407,6 +407,60 @@
     (add-hook 'unemacslike-search-mode-hook #'my/unemacslike-search-completion 1)
     ))
 
+
+;; C-tabでvscodeっぽい移動をする
+(leaf C-tab-like-vscode
+  :config
+  (defun update-buffer-history ()
+    "Update the buffer history for the current window."
+    (let* (
+            (hist (mapcar #'car (window-prev-buffers)))
+            (hist (append (list (current-buffer)) hist))
+           )
+      (set-window-parameter nil 'my-buffer-history hist)
+      (set-window-parameter nil 'my-buffer-history-index 0)))
+
+  (defun my/switch-to-last-buffer-in-window (&rest args)
+    "Switch to the last buffer displayed in the current window."
+    (interactive)
+    (let* ((history (window-parameter nil 'my-buffer-history))
+           (index (window-parameter nil 'my-buffer-history-index)))
+      (unless history
+        (update-buffer-history)
+        (setq history (window-parameter nil 'my-buffer-history))
+        (setq index (window-parameter nil 'my-buffer-history-index)))
+      (when (> (length history) (1+ index))
+        (setq index (1+ index)) 
+        (let((--skip t))
+          (switch-to-buffer (nth index history)))
+        (set-window-parameter nil 'my-buffer-history-index index)
+        )))
+
+  (defun my/switch-to-next-buffer-in-window (&rest args)
+    "Switch to the next buffer in the window's buffer history, if available."
+    (interactive)
+    (let* ((index (window-parameter nil 'my-buffer-history-index))
+           (history (window-parameter nil 'my-buffer-history)))
+      (when (and (> index 0) history)
+        (setq index (1- index))
+        (let((--skip t))
+          (switch-to-buffer (nth index history)))
+        (set-window-parameter nil 'my-buffer-history-index index))))
+
+  (setq --skip nil)
+  (defun reset-buffer-history ()
+    "Reset the buffer history when the window's buffer changes."
+    (unless --skip
+      (update-buffer-history)))
+    ;; (let ((current-buffer (window-buffer)))
+    ;;   (unless (eq current-buffer (window-parameter nil 'last-buffer))
+    ;;     (update-buffer-history)
+    ;;     (set-window-parameter nil 'last-buffer current-buffer))))
+
+  (add-hook 'window-buffer-change-hook 'reset-buffer-history)
+  ;;(remove-hook 'window-buffer-change-hook 'reset-buffer-history)
+  )
+
 (leaf overriding-minor-mode
   :config
   (let ()
@@ -450,8 +504,8 @@
       ( "C-s" . save-buffer)
       ( "C-t" . (lambda (&optional arg) (interactive "P") (if (null arg) (other-window  1) (other-window -1))))
       
-      ( "C-<tab>" . other-window)
-      ( "C-<iso-lefttab>" .(lambda ()(interactive) (other-window -1)))
+      ( "C-<tab>" . my/switch-to-last-buffer-in-window)
+      ( "C-<iso-lefttab>" . my/switch-to-next-buffer-in-window)
       ( "C-h" . er/expand-region)    
       ( "C-k" . nil)
       ;; ( "C-k C-n" . helm-mini)
@@ -723,11 +777,11 @@
     (load-theme 'github t)
     ;; 日本語フォントを設定。フォント名はfc-queryで調べる
     ;;(set-fontset-font t 'japanese-jisx0208 "あずきフォント")
-    ;;(set-fontset-font t 'japanese-jisx0208 "azuki_font")
+    (set-fontset-font t 'japanese-jisx0208 "azuki_font")
     ;; (set-fontset-font t 'japanese-jisx0208 "Klee One")
     ;; (set-fontset-font t 'japanese-jisx0208 "Zenkurenaido")
     ;; (set-fontset-font t 'japanese-jisx0208 "MogihaPenFont")
-    (set-fontset-font t 'japanese-jisx0208 "APJapanesefontT")
+    ;;(set-fontset-font t 'japanese-jisx0208 "APJapanesefontT")
     ;; (set-fontset-font t 'japanese-jisx0208 "RiiTegakiN-R")
     (set-frame-font "NotoMono 11")
     (setq face-font-rescale-alist '(
@@ -1047,6 +1101,8 @@ ssh localhost ~/bin/npm $@
             ;; ivyのポップアップが暗くなるのを防ぐ
             (string-match-p "\\*ivy-.*" (buffer-name (current-buffer)))
             (string-match-p "\\*ivy-.*" (buffer-name BUF))
+            (string-match-p "\\*helm.*" (buffer-name BUF))
+            (string-match-p "\\*helm.*" (buffer-name (current-buffer)))
                 )
         (funcall original-func BUF FRAC)
         )
