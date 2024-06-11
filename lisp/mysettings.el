@@ -544,7 +544,8 @@
       
       ( "C-<tab>" . my/switch-to-last-buffer-in-window)
       ( "C-<iso-lefttab>" . my/switch-to-next-buffer-in-window)
-      ( "C-h" . er/expand-region)    
+      ( "C-h" . er/expand-region)
+      ( "C-S-d" . er/contract-region)
       ( "C-k" . nil)
       ;; ( "C-k C-n" . helm-mini)
       ;; ( "C-k C-n" . counsel-switch-buffer)
@@ -1161,4 +1162,29 @@ ssh localhost ~/bin/npm $@
       ;;(message "BUF:%s current:%s" BUF (current-buffer))
       )))
 
+;; 
+(leaf pulsar
+  :ensure t
+  :config
+  (pulsar-global-mode +1)
+  (setq pulsar-pulse t)
+  (setq pulsar-delay 0.055)
+  (setq pulsar-iterations 10)
+  (setq pulsar-face 'pulsar-magenta)
+  (setq pulsar-highlight-face 'pulsar-magenta)
+  (advice-add 'other-window :after
+    (lambda (&rest args)
+      (interactive)
+       (pulsar-pulse-line)
+       ;;(pulsar-highlight-dwim)
+      )
+    )
+
+  (add-hook 'window-buffer-change-hook
+     (lambda (&rest args)
+       (interactive)
+       (pulsar-pulse-line)
+       ;;(pulsar-pulse-dwim)
+       ))
+  )
 
