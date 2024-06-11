@@ -411,6 +411,24 @@
 ;; C-tabでvscodeっぽい移動をする
 (leaf C-tab-like-vscode
   :config
+  (defun my-reset-buffer-history-timer (window)
+    "Reset the buffer history clearing timer for the specified WINDOW."
+    (let ((timer (window-parameter window 'my-buffer-history-timer)))
+      (when timer
+        (cancel-timer timer)))
+    (set-window-parameter window 'my-buffer-history-timer
+                          (run-with-timer 10 nil #'my-clear-buffer-history-for-window window)))
+
+  (defun my-clear-buffer-history-for-window (window)
+    "Clear the buffer history for the specified WINDOW."
+    (set-window-parameter window 'my-buffer-history nil)
+    (set-window-parameter window 'my-buffer-history-index 0)
+    ;; Clear and unlink the timer to prevent memory leaks
+    (let ((timer (window-parameter window 'my-buffer-history-timer)))
+      (when timer
+        (cancel-timer timer)))
+    (set-window-parameter window 'my-buffer-history-timer nil))
+
   (defun update-buffer-history ()
     "Update the buffer history for the current window."
     (let* (
@@ -434,7 +452,8 @@
         (let((--skip t))
           (switch-to-buffer (nth index history)))
         (set-window-parameter nil 'my-buffer-history-index index)
-        )))
+        ))
+    (my-reset-buffer-history-timer (selected-window)))
 
   (defun my/switch-to-next-buffer-in-window (&rest args)
     "Switch to the next buffer in the window's buffer history, if available."
@@ -445,7 +464,8 @@
         (setq index (1- index))
         (let((--skip t))
           (switch-to-buffer (nth index history)))
-        (set-window-parameter nil 'my-buffer-history-index index))))
+        (set-window-parameter nil 'my-buffer-history-index index)))
+    (my-reset-buffer-history-timer (selected-window)))
 
   (setq --skip nil)
   (defun reset-buffer-history ()
@@ -459,6 +479,7 @@
 
   (add-hook 'window-buffer-change-hook 'reset-buffer-history)
   ;;(remove-hook 'window-buffer-change-hook 'reset-buffer-history)
+
   )
 
 (leaf overriding-minor-mode
