@@ -565,14 +565,7 @@
       ;;( "C-k C-p") . switch-to-next-buffer)
       ;;( "C-k C-h") . swap-buffers)
       ;;( "C-k C-u") . helm-swoop)
-      ( "C-k C-j" .
-        (lambda (&optional args)
-          (interactive)
-          (let(
-              (s (if (region-active-p)
-                  (buffer-substring-no-properties (region-beginning) (region-end)))))
-            (set-mark nil)
-            (swiper (or s " ")))))
+      ( "C-k C-j" . swiper-thing-at-point)
       ;; ( "C-k C-o" . helm-show-kill-ring)
       ( "C-k C-o" . counsel-yank-pop)
       ( "C-k C-t" . my/turn-buffer)
