@@ -42,12 +42,12 @@
 (setq svr (ws-start
  '(((:POST . ".*") .
      (lambda (request)
-       (print "yes0")
+       ;;(print "yes0")
       (with-slots (process headers) request
         ;;(let ((buffer-name (cdr (assoc "buffer" (ws-parse-qs (cdr (assoc "Content-Length" headers)))))))
         (let ((buffer-name (cdr (assoc "buffer" headers))))
-        (print buffer-name)
-        (print "yes")
+        ;;(print buffer-name)
+        ;;(print "yes")
         (if buffer-name
            (my/serve-buffer-contents process buffer-name)
            (ws-send-404 process))))
