@@ -1,5 +1,6 @@
 (add-to-list 'load-path (locate-user-emacs-file "lisp"))
 (load "mysettings.el")
+(load "local-settings.el")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
