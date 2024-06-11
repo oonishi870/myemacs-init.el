@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Rendering</title>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/marked/2.0.1/marked.js'></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/monokai-sublime.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js" integrity="sha384-/y1Nn9+QQAipbNQWU65krzJralCnuOasHncUFXGkdwntGeSvQicrYkiUBwsgUqc1" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="markdown-content"></div>
+
+  <script>
+    function loadMarkdown() {
+      // ファイルのパス
+      const params = new URLSearchParams(window.location.search);
+      //var markdownFilePath = 'test.md';
+      var markdownFilePath = params.get('source'); ;
+
+      // ファイルを読み込む
+      fetch(markdownFilePath)
+        .then(response => response.text())
+        .then(markdownText => {
+          // marked.jsを使ってMarkdownをHTMLに変換
+          var html = marked(markdownText);
+          
+          // コードブロックのハイライト
+          var div = document.createElement('div');
+          div.innerHTML = html;
+          document.getElementById('markdown-content').innerHTML = div.innerHTML;
+
+          // ハイライト
+          document.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightBlock(block);
+          });
+
+          var mathElements = document.getElementsByClassName("language-math");
+          for (var i=0; i < mathElements.length; i++){
+            var texText = mathElements[i].firstChild
+            katex.render(texText.data, mathElements[i])
+          }
+        })
+        .catch(error => {
+          console.error('Error loading Markdown file:', error);
+        });
+    }
+
+    // ページの読み込み時にMarkdownを読み込む
+    window.addEventListener('load', loadMarkdown);
+
+    // 定期的にMarkdownを読み込み直す
+    setInterval(loadMarkdown, 1000); // 5秒ごとにポーリング
+
+    // Dockerfileのハイライトを追加
+    hljs.registerLanguage('dockerfile', function(hljs) {
+      return {
+        case_insensitive: true,
+        contains: [
+          {
+            className: 'keyword',
+            begin: /^(FROM|MAINTAINER|RUN|CMD|EXPOSE|ENV|ADD|COPY|ENTRYPOINT|VOLUME|USER|WORKDIR|ONBUILD)\b/,
+            end: / |$/,
+            excludeEnd: true,
+          },
+          hljs.HASH_COMMENT_MODE,
+          hljs.QUOTE_STRING_MODE,
+          hljs.NUMBER_MODE,
+        ]
+      };
+    });
+
+    // emacs-lispのハイライトを追加
+    hljs.registerLanguage('emacs-lisp', function(hljs) {
+      return {
+        case_insensitive: true,
+        contains: [
+          hljs.HASH_COMMENT_MODE,
+          {
+            className: 'string',
+            begin: /"/,
+            end: /"/
+          },
+          {
+            className: 'literal',
+            begin: /\b(t|nil)\b/
+          },
+          {
+            className: 'variable',
+            begin: /[\*&]\w+/
+          },
+          {
+            className: 'function',
+            begin: /\([^\)]+\)/,
+            relevance: 0
+          },
+          hljs.NUMBER_MODE
+        ]
+      };
+    });
+
+    // emacs-lisp / elispのハイライトを追加
+    hljs.registerLanguage('elisp', function(hljs) {
+      return hljs.getLanguage('emacs-lisp');
+    });
+
+    hljs.initHighlightingOnLoad();
+  </script>
+</body>
+</html>
