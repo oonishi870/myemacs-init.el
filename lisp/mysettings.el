@@ -1035,6 +1035,20 @@ ssh localhost ~/bin/npm $@
 
     (shell-command (format "mkdir -p %s" (locate-user-emacs-file "cache")))
     (setq prescient-save-file (locate-user-emacs-file "cache/prescient-save.el"))
+
+    ;; yank-popのみprescientを無効にする
+    (defun my/disable-ivy-prescient-for-counsel-yank-pop (fun &rest args)
+      "Temporarily disable `ivy-prescient' for `counsel-yank-pop'."
+      (let((result))
+        (ivy-prescient-mode -1)
+        (unwind-protect
+          (setq result (apply fun args))
+          (ivy-prescient-mode 1))
+        result
+        ))
+
+    (advice-add 'counsel-yank-pop :around #'my/disable-ivy-prescient-for-counsel-yank-pop)
+    (advice-remove 'counsel-yank-pop  #'my/disable-ivy-prescient-for-counsel-yank-pop)
     )
   
   (leaf corfu-prescient
