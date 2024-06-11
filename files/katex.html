@@ -15,45 +15,50 @@
   <div id="markdown-content"></div>
 
   <script>
-    function loadMarkdown() {
-      // ファイルのパス
-      const params = new URLSearchParams(window.location.search);
-      //var markdownFilePath = 'test.md';
-      var markdownFilePath = params.get('source'); ;
+    document.addEventListener("DOMContentLoaded", function() {
+        // POSTメソッドのリクエストを送信する関数
+        function sendPostRequest() {
+            // XMLHttpRequestオブジェクトの生成
+            var xhr = new XMLHttpRequest();
+            // レスポンスがロードされた際のイベントハンドラ
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                  // レスポンスを表示
+                  var html = marked(xhr.responseText);
+                  var div = document.createElement('div');
+                  div.innerHTML = html;
+                  document.getElementById('markdown-content').innerHTML = div.innerHTML;
 
-      // ファイルを読み込む
-      fetch(markdownFilePath)
-        .then(response => response.text())
-        .then(markdownText => {
-          // marked.jsを使ってMarkdownをHTMLに変換
-          var html = marked(markdownText);
-          
-          // コードブロックのハイライト
-          var div = document.createElement('div');
-          div.innerHTML = html;
-          document.getElementById('markdown-content').innerHTML = div.innerHTML;
+                  // ハイライト
+                  document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightBlock(block);
+                  });
 
-          // ハイライト
-          document.querySelectorAll('pre code').forEach((block) => {
-            hljs.highlightBlock(block);
-          });
+                  var mathElements = document.getElementsByClassName("language-math");
+                  for (var i=0; i < mathElements.length; i++){
+                    var texText = mathElements[i].firstChild
+                    katex.render(texText.data, mathElements[i])
+                  }
+                } else {
+                    // エラーメッセージを表示
+                    document.getElementById("response").textContent = 'Error: ' + xhr.status;
+                }
+            };
+            // リクエストの設定
+            xhr.open('POST', window.location.href, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            // リクエストの送信
+            xhr.send('data=someData');
+        }
 
-          var mathElements = document.getElementsByClassName("language-math");
-          for (var i=0; i < mathElements.length; i++){
-            var texText = mathElements[i].firstChild
-            katex.render(texText.data, mathElements[i])
-          }
-        })
-        .catch(error => {
-          console.error('Error loading Markdown file:', error);
-        });
-    }
-
+        // ページがロードされたらPOSTリクエストを自動的に送信
+        sendPostRequest();
+    });
     // ページの読み込み時にMarkdownを読み込む
-    window.addEventListener('load', loadMarkdown);
+    //window.addEventListener('load', loadMarkdown);
 
     // 定期的にMarkdownを読み込み直す
-    setInterval(loadMarkdown, 1000); // 5秒ごとにポーリング
+    //setInterval(loadMarkdown, 1000); // 5秒ごとにポーリング
 
     // Dockerfileのハイライトを追加
     hljs.registerLanguage('dockerfile', function(hljs) {

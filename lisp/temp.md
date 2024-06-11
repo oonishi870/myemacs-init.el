@@ -16,3 +16,52 @@
       )))
 ```
 
+
+
+```elisp
+(require 'web-server)
+
+(defvar my/html-file-path (locate-user-emacs-file "files/katex.html")
+  "Path to the HTML file to serve.")
+
+(defun my/serve-html-file (proc)
+  "Serve an HTML file for GET requests."
+  (with-temp-buffer
+    (insert-file-contents my/html-file-path)
+    (ws-response-header proc 200 '("Content-Type" . "text/html"))
+    (process-send-region proc (point-min) (point-max))))
+
+(defun my/serve-buffer-contents (proc buffer-name)
+  "Serve the contents of a buffer for POST requests."
+  (if-let ((buffer (get-buffer buffer-name)))
+      (with-current-buffer buffer
+        (ws-response-header proc 200 '("Content-Type" . "text/plain"))
+        (process-send-string proc (buffer-string)))
+    (ws-send-404 proc)))
+
+(setq svr (ws-start
+ '(((:POST . ".*") .
+     (lambda (request)
+       (print "yes0")
+      (with-slots (process headers) request
+        ;;(let ((buffer-name (cdr (assoc "buffer" (ws-parse-qs (cdr (assoc "Content-Length" headers)))))))
+        (let ((buffer-name (cdr (assoc "buffer" headers))))
+        (print buffer-name)
+        (print "yes")
+        (if buffer-name
+           (my/serve-buffer-contents process buffer-name)
+           (ws-send-404 process))))
+        ))
+   ((:GET . ".*") .
+    (lambda (request)
+      (with-slots (process) request
+        (my/serve-html-file process)
+        ))))
+ 9001))
+
+;;(setq svr (ws-start 'my/web-server-handler 9001))
+;;(ws-stop svr)
+
+;;(locate-user-emacs-file "files/katex.html")
+
+```
