@@ -6,7 +6,7 @@
 ## hello
 
 ```math
-f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-6} dx
+f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
 
 ```
 
@@ -85,8 +85,51 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-6} dx
           ))))
               9001))
   ;;(ws-stop svr)
+
+
+  (require 'xwidget)
+  (defun my/markdown-live-preview-refresh(&rest _args)
+    (interactive)
+    (let ((js "sendPostRequest();"))
+      (when my/markdown-live-preview-buffer
+        (with-current-buffer my/markdown-live-preview-buffer
+          (xwidget-webkit-execute-script (xwidget-webkit-current-session) js)
+          ))))
+  (provide 'my/markdown-live-preview-refresh)
+  
+
+  (defvar-local my/markdown-live-preview-buffer nil)
+  (defun my/markdown-live-preview ()
+    (interactive)
+    (let ((buf (current-buffer)))
+      (xwidget-webkit-new-session
+        (format "http://localhost:9001/?buffer=%s"
+          (replace-regexp-in-string " " "%20" (buffer-name))))
+      (let ((browser-buffer (current-buffer)))
+        (with-current-buffer buf
+          (setq-local my/markdown-live-preview-buffer browser-buffer)))
+    ))
+  (provide 'my/markdown-live-preview)
+
+
+  ;; poly-markdown対応
+  (advice-add 'my/markdown-live-preview :around
+    (lambda (f &rest args)
+      (with-current-buffer (pm-base-buffer)
+        ;; ローカル変数にフラグをセット
+        (apply f args))))
+  
+  (advice-add 'my/markdown-live-preview-refresh :around
+    (lambda (f &rest args)
+      (with-current-buffer (pm-base-buffer)
+        ;; ローカル変数にフラグをセット
+        (apply f args))))
+
+  ;; save-bufferでwebkitをリロード
+  (advice-add 'save-buffer :after #'my/markdown-live-preview-refresh)
   )
 
+(derived-mode-p 'markdown-mode 'poly-markdown-mode)
 (print
   (xwidget-webkit-browse-url
     (format "http://localhost:9001/?buffer=%s"
@@ -114,35 +157,10 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-6} dx
       (let ((js "sendPostRequest();"))
         (xwidget-webkit-execute-script (xwidget-webkit-current-session) js))))))
 
-(defvar-local my-enable-xwidget-js nil)
-
-(defun my/markdown-live-preview--reload(&rest _args)
-  (when my-enable-xwidget-js ;; バッファローカル変数がtrueの場合のみ
-    (let ((js "sendPostRequest();"))
-      (xwidget-webkit-execute-script (xwidget-webkit-current-session) js))))
-
-(defun my/markdown-live-preview ()
-  (interactive)
-  (setq-local my-enable-xwidget-js t)
-  (xwidget-webkit-browse-url
-    (format "http://localhost:9001/?buffer=%s"
-      (replace-regexp-in-string " " "%20" (buffer-name))))
-  ;; バッファローカル変数を設定
-  ;; アドバイスを追加
-  (advice-add 'save-buffer :after #'my/markdown-live-preview--reload))
-
-(advice-add 'my/markdown-live-preview :around
-  (lambda (f &rest args)
-    (with-current-buffer (pm-base-buffer)
-      (apply f args))))
-
-(advice-add 'my/markdown-live-preview--reload :around
-  (lambda (f &rest args)
-    (with-current-buffer (pm-base-buffer)
-      (apply f args))))
+(with-current-buffer (pm-base-buffer)
+  (print my/markdown-live-preview-buffer))
 
 ;;(advice-remove 'save-buffer nil)
-(provide 'my/markdown-live-preview)
 ;; (advice-remove 'save-buffer nil)
 ;;(setq svr (ws-start 'my/web-server-handler 9001))
 ;;(ws-stop svr)
