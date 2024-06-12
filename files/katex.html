@@ -6,57 +6,58 @@
   <title>Markdown Rendering</title>
   <!-- <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> -->
   <script src='https://cdnjs.cloudflare.com/ajax/libs/marked/2.0.1/marked.js'></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/monokai-sublime.min.css">
-  <!-- <link href="//note.nkmk.me/css/style.css" rel="stylesheet"> -->
+  <!-- GitHub-style for code blocks -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/github.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/highlight.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js" integrity="sha384-/y1Nn9+QQAipbNQWU65krzJralCnuOasHncUFXGkdwntGeSvQicrYkiUBwsgUqc1" crossorigin="anonymous"></script>
+  
+  <!-- GitHub Markdown CSS -->
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css"> -->
 </head>
 <body>
-  <div id="markdown-content"></div>
+  <div id="markdown-content" class="markdown-body"></div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // POSTメソッドのリクエストを送信する関数
-        function sendPostRequest() {
-            // XMLHttpRequestオブジェクトの生成
-            var xhr = new XMLHttpRequest();
-            // レスポンスがロードされた際のイベントハンドラ
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                  // レスポンスを表示
-                  var html = marked(xhr.responseText);
-                  var div = document.createElement('div');
-                  div.innerHTML = html;
-                  document.getElementById('markdown-content').innerHTML = div.innerHTML;
+    // POSTメソッドのリクエストを送信する関数
+    function sendPostRequest() {
+        // XMLHttpRequestオブジェクトの生成
+        var xhr = new XMLHttpRequest();
+        // レスポンスがロードされた際のイベントハンドラ
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              // レスポンスを表示
+              var html = marked(xhr.responseText);
+              var div = document.createElement('div');
+              div.innerHTML = html;
+              document.getElementById('markdown-content').innerHTML = div.innerHTML;
 
-                  // ハイライト
-                  document.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightBlock(block);
-                  });
+              // ハイライト
+              document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+              });
 
-                  var mathElements = document.getElementsByClassName("language-math");
-                  for (var i=0; i < mathElements.length; i++){
-                    var texText = mathElements[i].firstChild
-                    katex.render(texText.data, mathElements[i])
-                  }
-                } else {
-                    // エラーメッセージを表示
-                    document.getElementById("response").textContent = 'Error: ' + xhr.status;
-                }
-            };
-            // リクエストの設定
-            xhr.open('POST', window.location.href, true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            // リクエストの送信
-            xhr.send('data=someData');
-        }
+              var mathElements = document.getElementsByClassName("language-math");
+              for (var i=0; i < mathElements.length; i++){
+                var texText = mathElements[i].firstChild
+                katex.render(texText.data, mathElements[i])
+              }
+            } else {
+                // エラーメッセージを表示
+                document.getElementById("response").textContent = 'Error: ' + xhr.status;
+            }
+        };
+        // リクエストの設定
+        xhr.open('POST', window.location.href, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        // リクエストの送信
+        xhr.send('data=someData');
+    }
 
         // ページがロードされたらPOSTリクエストを自動的に送信
-        sendPostRequest();
-    });
+        //sendPostRequest();
     // ページの読み込み時にMarkdownを読み込む
-    //window.addEventListener('load', loadMarkdown);
+    window.addEventListener('load', sendPostRequest);
 
     // 定期的にMarkdownを読み込み直す
     //setInterval(loadMarkdown, 1000); // 5秒ごとにポーリング

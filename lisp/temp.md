@@ -1,3 +1,16 @@
+# test
+
+- test1
+- test2
+
+## hello
+
+```math
+f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-6} dx
+
+```
+
+
 
 ```elisp
 (defun my/edit-region-in-indirect-buffer (start end)
@@ -72,12 +85,69 @@
           ))))
               9001))
   ;;(ws-stop svr)
-)
+  )
 
+(print
+  (xwidget-webkit-browse-url
+    (format "http://localhost:9001/?buffer=%s"
+      (replace-regexp-in-string  " " "%20" (buffer-name (pm-base-buffer)))))
+  )
+(defun execute-js-in-webkit ()
+  (interactive)
+  ;;(let ((js "alert('Hello from Emacs!');"))
+  (let ((js "sendPostRequest();"))
+    (xwidget-webkit-execute-script (xwidget-webkit-current-session) js))
+  )
+(defun my-after-save-actions (&rest _args)
+  "Execute JavaScript in xwidget-webkit after saving the buffer."
+  (when (derived-mode-p 'xwidget-webkit-mode) ;; 現在のバッファがxwidget-webkitの場合のみ実行
+    (let ((js "sendPostRequest();"))
+      (xwidget-webkit-execute-script (xwidget-webkit-current-session) js))))
+
+(defun my/markdown-live-preview(&optional)
+  (interactive)
+  (xwidget-webkit-browse-url
+    (format "http://localhost:9001/?buffer=%s"
+      (replace-regexp-in-string  " " "%20" (buffer-name (pm-base-buffer)))))
+  (advice-add 'save-buffer :after (lambda (&rest _args)
+    (when (derived-mode-p 'xwidget-webkit-mode) ;; 現在のバッファがxwidget-webkitの場合のみ実行
+      (let ((js "sendPostRequest();"))
+        (xwidget-webkit-execute-script (xwidget-webkit-current-session) js))))))
+
+(defvar-local my-enable-xwidget-js nil)
+
+(defun my/markdown-live-preview--reload(&rest _args)
+  (when my-enable-xwidget-js ;; バッファローカル変数がtrueの場合のみ
+    (let ((js "sendPostRequest();"))
+      (xwidget-webkit-execute-script (xwidget-webkit-current-session) js))))
+
+(defun my/markdown-live-preview ()
+  (interactive)
+  (setq-local my-enable-xwidget-js t)
+  (xwidget-webkit-browse-url
+    (format "http://localhost:9001/?buffer=%s"
+      (replace-regexp-in-string " " "%20" (buffer-name))))
+  ;; バッファローカル変数を設定
+  ;; アドバイスを追加
+  (advice-add 'save-buffer :after #'my/markdown-live-preview--reload))
+
+(advice-add 'my/markdown-live-preview :around
+  (lambda (f &rest args)
+    (with-current-buffer (pm-base-buffer)
+      (apply f args))))
+
+(advice-add 'my/markdown-live-preview--reload :around
+  (lambda (f &rest args)
+    (with-current-buffer (pm-base-buffer)
+      (apply f args))))
+
+;;(advice-remove 'save-buffer nil)
+(provide 'my/markdown-live-preview)
+;; (advice-remove 'save-buffer nil)
 ;;(setq svr (ws-start 'my/web-server-handler 9001))
 ;;(ws-stop svr)
 ;; (buffer-list)
-;; (get-buffer " temp.md")
+;; (get-buffer ")
 ;; (buffer-name (current-buffer))
 ;; (buffer-name(pm-base-buffer ))
 ;;(locate-user-emacs-file "files/katex.html")
