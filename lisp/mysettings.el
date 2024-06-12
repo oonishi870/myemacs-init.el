@@ -1059,7 +1059,7 @@ ssh localhost ~/bin/npm $@
         ))
 
     (advice-add 'counsel-yank-pop :around #'my/disable-ivy-prescient-for-counsel-yank-pop)
-    (advice-remove 'counsel-yank-pop  #'my/disable-ivy-prescient-for-counsel-yank-pop)
+    ;;(advice-remove 'counsel-yank-pop  #'my/disable-ivy-prescient-for-counsel-yank-pop)
     )
   
   (leaf corfu-prescient
