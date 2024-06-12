@@ -1140,7 +1140,7 @@ ssh localhost ~/bin/npm $@
   (advice-add 'dimmer-dim-buffer :around
     (lambda (original-func BUF FRAC &rest args)
       (interactive "P")
-      (message "BUF:%s" BUF)
+      ;;(message "BUF:%s" BUF)
       (unless
         (or
             (string-match-p "\\*corfu\\*" (buffer-name (current-buffer)))
