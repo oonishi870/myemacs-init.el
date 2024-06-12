@@ -37,14 +37,17 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
 (leaf web-server
   :ensure t
   :config
-  (defvar my/html-file-path (locate-user-emacs-file "files/katex.html")
+  (defvar my/html-file-path (locate-user-emacs-file "files/katex.html"))
+  (defvar my/bashe-html-file-path (locate-user-emacs-file "files/base.html"))
+  (defvar my/markdown-html-file-path (locate-user-emacs-file "files/default.html")
     "Path to the HTML file to serve.")
 
   (defun my/serve-html-file (proc)
     "Serve an HTML file for GET requests."
     (with-temp-buffer
       ;; (print "yes4")
-      (insert-file-contents my/html-file-path)
+      ;;(insert-file-contents my/html-file-path)
+      (insert (my/server-html-string))
       (ws-response-header proc 200 '("Content-Type" . "text/html; charset=UTF-8"))
       ;;(ws-response-header proc 200 '("Content-Type" . "text/plain"))
       (process-send-string proc (buffer-string))
@@ -52,6 +55,25 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
       ;;(process-send-string proc "hello")
       ))
       ;;(process-send-region proc (point-min) (point-max))))
+  
+  (defun my/server-html-string()
+    (with-temp-buffer
+      (insert-file-contents my/bashe-html-file-path)
+        (goto-char (point-min))
+        (print "yes2")
+      ;; SSIタグを解析し、ファイル内容を挿入
+
+        (let* (
+            ;;(include-file (match-string 1))
+            (contents
+              (with-temp-buffer
+                (insert-file-contents my/markdown-html-file-path)
+                  (buffer-string))))
+          (if (re-search-forward "<!-- #include file -->" nil t)
+            (replace-match contents))
+          (buffer-string))
+      ;;(buffer-string)
+      ))
 
   (defun my/serve-buffer-contents (proc buffer-name)
     "Serve the contents of a buffer for POST requests."
