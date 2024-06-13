@@ -40,11 +40,17 @@
               document.getElementById("response").textContent = 'Error: ' + xhr.status;
           }
       };
-      // リクエストの設定
-      xhr.open('POST', window.location.href, true);
-      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-      // リクエストの送信
-      xhr.send('data=someData');
+    // URLからGETパラメータを取り出す
+    var url = new URL(window.location.href);
+    var parameters = url.searchParams;
+    var buffer = parameters.get("buffer");
+    // URLからGETパラメータを削除
+    url.search = '';
+    // リクエストの設定
+    xhr.open('POST', url.toString(), true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    // パラメータをPOSTとして送信
+    xhr.send('buffer='+buffer);
   }
 
       // ページがロードされたらPOSTリクエストを自動的に送信

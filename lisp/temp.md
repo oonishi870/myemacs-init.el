@@ -60,7 +60,7 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
     (with-temp-buffer
       (insert-file-contents my/bashe-html-file-path)
         (goto-char (point-min))
-        (print "yes2")
+        ;;(print "yes2")
       ;; SSIタグを解析し、ファイル内容を挿入
 
         (let* (
@@ -93,9 +93,12 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
         ;; (print "yes0")
         (with-slots (process headers) request
           ;;(let ((buffer-name (cdr (assoc "buffer" (ws-parse-qs (cdr (assoc "Content-Length" headers)))))))
+          ;; (print "yes2")
           (let ((buffer-name (cdr (assoc "buffer" headers))))
-            ;; (print buffer-name)
+          ;;(let ((buffer-name ""))
             ;; (print "yes")
+            ;; (print headers)
+            ;; (print buffer-name)
             (if buffer-name
               (my/serve-buffer-contents process buffer-name)
               (ws-send-404 process))))
@@ -195,6 +198,50 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
 ```
 
 ```math
-f\left(x\right) = \frac{e^{x}-1}{x}
+f\left(x\right) = \frac{e^{x}-1}{x^3 - 1}
 ```
 
+```py
+
+import win32com.client
+# Excelを開始
+excel = win32com.client.Dispatch("Excel.Application")
+excel.Visible = True  # Excelを可視状態で開く
+
+# ブックを開く
+# \\172.16.19.171\大分県畜産共通システム基盤構築\233480_「大分県畜産共通システム構築」第２次開発\50_データ移行\03_データ分析\01_データ分析\子牛登記情報(令和６年出生分).xlsx
+#book = excel.Workbooks.Open(r'C:\Users\oonishi\Downloads\県内家畜市場取引結果_玖珠子牛.xlsx')
+#book = excel.Workbooks(r'コピー子牛登記情報(令和５年出生分).xlsx')
+book = excel.Workbooks(r'子牛登記情報(令和６年出生分).xlsx')
+#book = excel.Workbooks(r'母牛登録情報(令和４年、５年登録分).xlsx')
+#book = excel.Workbooks(r'母牛異動情報(BOGYUIDO).xlsx')
+
+sheet = book.Worksheets(2)
+
+prev_c1 = prev_c2 = ""
+for i in range(2, 330):
+    # print(dir(sheet.Cells(5, i)))
+    c1 = sheet.Cells(1, i).Formula or prev_c1
+    if prev_c1 != c1:
+        prev_c2 = ''
+    prev_c1 = c1
+    c2 = sheet.Cells(2, i).Formula or prev_c2
+    prev_c2 = c2
+    c3 = sheet.Cells(3, i).Formula
+    
+    colname = f'{c1}.{c2}.{c3}'.rstrip('.').replace('\n', '')
+    
+    f = sheet.Cells(5, i).Formula
+    if not f: continue
+    begin,last = f.split(",")[1:]
+    last = last.rstrip(')')
+    print(begin,last, f'{(i-1):03d}_{colname}', sep='\t')
+    
+
+```
+
+日本語
+
+
+
+emacsのweb-serverでPOSTパラメータを取り出す方法を教えて
