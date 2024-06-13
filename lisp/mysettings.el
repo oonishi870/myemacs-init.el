@@ -1181,3 +1181,21 @@ ssh localhost ~/bin/npm $@
        ))
   )
 
+(leaf chatgpt-shell
+  :ensure t
+  :config
+  (setq chatgpt-shell-openai-key 
+    (shell-command-to-string "cat ~/private/openai"))
+
+  ;; shellを保存してクリアする
+  (defun my/chatgpt-shell-save-and-clear()
+    (interactive)
+    (let(
+      (shell-maker--file 
+        (expand-file-name 
+              (format-time-string "~/transcripts/%Y%m%d%H%M%S.txt")))
+        )
+      (chatgpt-shell-save-session-transcript)
+      (chatgpt-shell-clear-buffer))
+    )
+  )
