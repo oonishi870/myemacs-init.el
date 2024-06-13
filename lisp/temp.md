@@ -6,9 +6,22 @@
 ## hello
 
 ```math
-f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
+\displaystyle f(x) =  \int_0^{\infty} \frac{ \sum_{k=1}^n k}{\displaystyle \prod_{k=1}^n k} \, dx
+
 
 ```
+
+
+
+\[
+\displaystyle f\left(x\right) = \int_0^{\infty} \frac{ \sum_{k=1}^nk}{ \prod_{k=1}^{n}k} \, dx
+\]
+
+$$ 
+\displaystyle f(x) =  \int_0^{\infty} \frac{ \sum_{k=1}^n k}{\displaystyle \prod_{k=1}^n k} \, dx
+$$
+
+$$
 
 
 
@@ -17,7 +30,7 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
   "Edit the region specified by START and END in an indirect buffer.
    Only the region is visible in the indirect buffer, thanks to `narrow-to-region`."
   (interactive "r")
-  (let ((buffer-name (generate-new-buffer-name "*Indirect Region Edit*"))
+ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer-name (generate-new-buffer-name "*Indirect Region Edit*"))
         (origin-buffer (current-buffer)))
     ;; 1. 間接バッファを作成
     (with-current-buffer (make-indirect-buffer origin-buffer buffer-name t)
@@ -45,10 +58,11 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
   (defun my/serve-html-file (proc)
     "Serve an HTML file for GET requests."
     (with-temp-buffer
-      ;; (print "yes4")
+      (print "yes4")
       ;;(insert-file-contents my/html-file-path)
       (insert (my/server-html-string))
       (ws-response-header proc 200 '("Content-Type" . "text/html; charset=UTF-8"))
+      (print "yes4")
       ;;(ws-response-header proc 200 '("Content-Type" . "text/plain"))
       (process-send-string proc (buffer-string))
       ;;(process-send-region proc (point-min) (point-max))
@@ -77,12 +91,13 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
 
   (defun my/serve-buffer-contents (proc buffer-name)
     "Serve the contents of a buffer for POST requests."
-    ;; (print "yes10")
-    ;; (print buffer-name)
-    ;; (print (get-buffer buffer-name))
+    (print "yes11")
+    (print buffer-name)
+    (print (get-buffer buffer-name))
     (if-let ((buffer (get-buffer buffer-name)))
       (with-current-buffer buffer
-          ;;(print "yes3")
+          (print "yes3")
+          (print buffer)
           (ws-response-header proc 200 '("Content-Type" . "text/plain"))
           (process-send-string proc (buffer-string)))
       (ws-send-404 proc)))
@@ -90,15 +105,15 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
   (setq svr (ws-start
    '(((:POST . ".*") .
        (lambda (request)
-        ;; (print "yes0")
+        (print "yes0")
         (with-slots (process headers) request
           ;;(let ((buffer-name (cdr (assoc "buffer" (ws-parse-qs (cdr (assoc "Content-Length" headers)))))))
-          ;; (print "yes2")
+          (print "yes2")
           (let ((buffer-name (cdr (assoc "buffer" headers))))
           ;;(let ((buffer-name ""))
-            ;; (print "yes")
-            ;; (print headers)
-            ;; (print buffer-name)
+            (print "yes10")
+            (print headers)
+            (print buffer-name)
             (if buffer-name
               (my/serve-buffer-contents process buffer-name)
               (ws-send-404 process))))
@@ -202,7 +217,6 @@ f\left(x\right) = \frac{e^{x}-1}{x^3 - 1}
 ```
 
 ```py
-
 import win32com.client
 # Excelを開始
 excel = win32com.client.Dispatch("Excel.Application")
@@ -228,15 +242,15 @@ for i in range(2, 330):
     c2 = sheet.Cells(2, i).Formula or prev_c2
     prev_c2 = c2
     c3 = sheet.Cells(3, i).Formula
-    
+
     colname = f'{c1}.{c2}.{c3}'.rstrip('.').replace('\n', '')
-    
+
     f = sheet.Cells(5, i).Formula
     if not f: continue
     begin,last = f.split(",")[1:]
     last = last.rstrip(')')
     print(begin,last, f'{(i-1):03d}_{colname}', sep='\t')
-    
+
 
 ```
 
@@ -245,3 +259,4 @@ for i in range(2, 330):
 
 
 emacsのweb-serverでPOSTパラメータを取り出す方法を教えて
+(get-buffer (buffer-name (pm-base-buffer)))
