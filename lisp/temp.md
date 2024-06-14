@@ -226,7 +226,7 @@ ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer
 
 ```
 
-```py
+```python
 import win32com.client
 # Excelを開始
 excel = win32com.client.Dispatch("Excel.Application")

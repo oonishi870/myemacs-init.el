@@ -1202,3 +1202,128 @@ ssh localhost ~/bin/npm $@
       (chatgpt-shell-clear-buffer))
     )
   )
+
+
+
+(leaf my/markdown-preview
+  :require web-server
+  :ensure t
+  :config
+  (defvar my/html-file-path (locate-user-emacs-file "files/katex.html"))
+  (defvar my/bashe-html-file-path (locate-user-emacs-file "files/base.html"))
+  (defvar my/markdown-html-file-path (locate-user-emacs-file "files/default.html")
+    "Path to the HTML file to serve.")
+
+  (defun my/serve-html-file (proc)
+    "Serve an HTML file for GET requests."
+    (with-temp-buffer
+      (print "yes4")
+      ;;(insert-file-contents my/html-file-path)
+      (insert (my/server-html-string))
+      (ws-response-header proc 200 '("Content-Type" . "text/html; charset=UTF-8"))
+      (print "yes4")
+      ;;(ws-response-header proc 200 '("Content-Type" . "text/plain"))
+      (process-send-string proc (buffer-string))
+      ;;(process-send-region proc (point-min) (point-max))
+      ;;(process-send-string proc "hello")
+      ))
+      ;;(process-send-region proc (point-min) (point-max))))
+  
+  (defun my/server-html-string()
+    (with-temp-buffer
+      (insert-file-contents my/bashe-html-file-path)
+        (goto-char (point-min))
+        ;;(print "yes2")
+      ;; SSIタグを解析し、ファイル内容を挿入
+
+        (let* (
+            ;;(include-file (match-string 1))
+            (contents
+              (with-temp-buffer
+                (insert-file-contents my/markdown-html-file-path)
+                  (buffer-string))))
+          (if (re-search-forward "<!-- #include file -->" nil t)
+            (replace-match contents))
+          (buffer-string))
+      ;;(buffer-string)
+      ))
+
+  (defun my/serve-buffer-contents (proc buffer-name)
+    "Serve the contents of a buffer for POST requests."
+    (print "yes11")
+    (print buffer-name)
+    (print (get-buffer buffer-name))
+    (if-let ((buffer (get-buffer buffer-name)))
+      (with-current-buffer buffer
+          (print "yes3")
+          (print buffer)
+          (ws-response-header proc 200 '("Content-Type" . "text/plain"))
+          (process-send-string proc (buffer-string)))
+      (ws-send-404 proc)))
+
+  (setq svr (ws-start
+   '(((:POST . ".*") .
+       (lambda (request)
+        (print "yes0")
+        (with-slots (process headers) request
+          ;;(let ((buffer-name (cdr (assoc "buffer" (ws-parse-qs (cdr (assoc "Content-Length" headers)))))))
+          (print "yes2")
+          (let ((buffer-name (cdr (assoc "buffer" headers))))
+          ;;(let ((buffer-name ""))
+            (print "yes10")
+            (print headers)
+            (print buffer-name)
+            (if buffer-name
+              (my/serve-buffer-contents process buffer-name)
+              (ws-send-404 process))))
+          ))
+     ((:GET . ".*") .
+      (lambda (request)
+        (with-slots (process) request
+          (my/serve-html-file process)
+          ))))
+              9001))
+  ;;(ws-stop svr)
+
+
+  (require 'xwidget)
+  (defun my/markdown-live-preview-refresh(&rest _args)
+    (interactive)
+    (let ((js "sendPostRequest();"))
+      (when my/markdown-live-preview-buffer
+        (with-current-buffer my/markdown-live-preview-buffer
+          (xwidget-webkit-execute-script (xwidget-webkit-current-session) js)
+          ))))
+  (provide 'my/markdown-live-preview-refresh)
+  
+
+  (defvar-local my/markdown-live-preview-buffer nil)
+  (defun my/markdown-live-preview ()
+    (interactive)
+    (let ((buf (current-buffer)))
+      (xwidget-webkit-new-session
+        (format "http://localhost:9001/?buffer=%s"
+          (replace-regexp-in-string " " "%20" (buffer-name))))
+      (let ((browser-buffer (current-buffer)))
+        (with-current-buffer buf
+          (setq-local my/markdown-live-preview-buffer browser-buffer)))
+    ))
+  (provide 'my/markdown-live-preview)
+
+
+  ;; poly-markdown対応
+  (advice-add 'my/markdown-live-preview :around
+    (lambda (f &rest args)
+      (with-current-buffer (pm-base-buffer)
+        ;; ローカル変数にフラグをセット
+        (apply f args))))
+  
+  (advice-add 'my/markdown-live-preview-refresh :around
+    (lambda (f &rest args)
+      (with-current-buffer (pm-base-buffer)
+        ;; ローカル変数にフラグをセット
+        (apply f args))))
+
+  ;; save-bufferでwebkitをリロード
+  (advice-add 'save-buffer :after #'my/markdown-live-preview-refresh)
+  )
