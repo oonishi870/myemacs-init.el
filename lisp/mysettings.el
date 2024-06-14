@@ -815,7 +815,7 @@
     ;; (set-fontset-font t 'japanese-jisx0208 "MogihaPenFont")
     ;;(set-fontset-font t 'japanese-jisx0208 "APJapanesefontT")
     ;; (set-fontset-font t 'japanese-jisx0208 "RiiTegakiN-R")
-    (set-frame-font "NotoMono 11")
+    (set-frame-font "NotoMono 10")
     (setq face-font-rescale-alist '(
              (".*Zen Kurenaido.**" . 1.2) ;; Zenkurenaido
              (".*APJapanesefont.*" . 1.3) ;; あんずもじ
@@ -843,6 +843,9 @@
         '(ivy-minibuffer-match-face-2 ((t (:background "#434C5E" :foreground "#D8DEE9" :weight bold))))
         '(ivy-minibuffer-match-face-3 ((t (:background "#3B4252" :foreground "#D8DEE9" :weight bold))))
         '(ivy-minibuffer-match-face-4 ((t (:background "#2E3440" :foreground "#D8DEE9" :weight bold))))
+      (custom-set-faces
+        '(sh-quoted-exec ((t (:foreground "#FFB0B0" :extend t))))
+        '(sh-heredoc     ((t (:foreground "#FF6dad" :extend t)))))
  
       )))
 
@@ -1181,3 +1184,21 @@ ssh localhost ~/bin/npm $@
        ))
   )
 
+(leaf chatgpt-shell
+  :ensure t
+  :config
+  (setq chatgpt-shell-openai-key 
+    (shell-command-to-string "cat ~/private/openai"))
+
+  ;; shellを保存してクリアする
+  (defun my/chatgpt-shell-save-and-clear()
+    (interactive)
+    (let(
+      (shell-maker--file 
+        (expand-file-name 
+              (format-time-string "~/transcripts/%Y%m%d%H%M%S.txt")))
+        )
+      (chatgpt-shell-save-session-transcript)
+      (chatgpt-shell-clear-buffer))
+    )
+  )
