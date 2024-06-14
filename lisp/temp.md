@@ -6,9 +6,17 @@
 ## hello
 
 ```math
-\displaystyle f(x) =  \int_0^{\infty} \frac{ \sum_{k=1}^n k}{\displaystyle \prod_{k=1}^n k} \, dx
+\begin{equation}
+    y = \sin x  \label{eq:1}
+\end{equation}
 
+\begin{equation}
+    y = \cos x  \label{eq:2}
+\end{equation}
 
+後半の数式~\eqref{eq:2} だけに数式番号が付く.
+
+\end{document}
 ```
 
 
