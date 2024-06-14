@@ -6,7 +6,7 @@
 ## hello
 
 ```math
-f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
+f\left(x\right) =  \displaystylpe \int_0^{\infty} \displaystylpe  \frac{e^{x}-1}{x^2-10} dx
 
 ```
 
@@ -198,7 +198,9 @@ f\left(x\right) = \int_0^{\infty} \frac{e^{x}-1}{x^2-10} dx
 ```
 
 ```math
-f\left(x\right) = \frac{e^{x}-1}{x^3 - 1}
+\displaystyle
+\int_{0}^{\infty}f\left(x\right) = \frac{e^{x}-1}{x^3 - 1}
+
 ```
 
 ```py
@@ -245,3 +247,78 @@ for i in range(2, 330):
 
 
 emacsのweb-serverでPOSTパラメータを取り出す方法を教えて
+(setq redisplay-dont-pause t
+      scroll-margin 1
+      scroll-step 1
+      scroll-conservatively 10000
+      scroll-preserve-screen-position 1)
+      
+(cl-letf* (
+  (save-buffer-org #'write-file)
+  (save-buffer (lambda (&rest args)
+    (interactive)
+    (write-file "/tmp/test.txt")
+  )))
+    (chatgpt-shell-save-session-transcript)
+  )
+(advice-add 'save-buffer :after 
+  (lambda (&rest _)
+    (print "yes")
+  ))
+(advice-remove 'save-buffer nil) 
+(advice-remove 'write-file nil) 
+(let ((buffer-file-name (format-time-string "/tmp/host/%Y%m%d%H%M%S.txt")))
+  ;;(set-visited-file-name (format-time-string "/tmp/host/%Y%m%d%H%M%S.txt"))
+  ;;(chatgpt-shell-save-session-transcript)
+  ;;(chatgpt-shell-clear-buffer)
+  (print (buffer-file-name))
+)
+(print buffer-file-name)
+
+(read-file-name "/tmp/test.txt")    
+(cl-letf* (
+  (read-file-name-org #'read-file-name)
+  (read-file-name (lambda (&rest args)
+    (interactive)
+    "/tmp/test.txt"
+  )))
+    (chatgpt-shell-save-session-transcript)
+  )
+
+(defun my/chatgpt-shell-save-and-clear()
+  (interactive)
+  (cl-letf(
+      (ad/read-file-name
+        (lambda (fn &rest args)
+          (interactive)
+          (expand-file-name 
+            (format-time-string "~/transcripts/%Y%m%d%H%M%S.txt")))
+      )
+  )
+    (advice-add 'read-file-name :around ad/read-file-name)
+    (unwind-protect
+      (progn 
+        (chatgpt-shell-save-session-transcript)
+        (chatgpt-shell-clear-buffer))
+      (advice-remove 'read-file-name ad/read-file-name))
+  )
+)
+
+
+(defun my/chatgpt-shell-save-and-clear()
+  (interactive)
+  (let(
+    (shell-maker--file 
+      (expand-file-name 
+            (format-time-string "~/transcripts/%Y%m%d%H%M%S.txt")))
+      )
+    (chatgpt-shell-save-session-transcript)
+    (chatgpt-shell-clear-buffer))
+  )
+
+
+(provide 'my/chatgpt-shell-save-and-clear)
+(advice-remove 'write-file nil)
+(advice-remove 'save-buffer nil)
+  )
+(expand-file-name "~/hello")
