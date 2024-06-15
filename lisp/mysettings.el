@@ -1217,7 +1217,7 @@ ssh localhost ~/bin/npm $@
 
 (leaf my/markdown-preview
   :require web-server
-  :ensure t
+  ;;:ensure t
   :config
   (defvar my/html-file-path (locate-user-emacs-file "files/katex.html"))
   (defvar my/bashe-html-file-path (locate-user-emacs-file "files/base.html"))
@@ -1227,11 +1227,9 @@ ssh localhost ~/bin/npm $@
   (defun my/serve-html-file (proc)
     "Serve an HTML file for GET requests."
     (with-temp-buffer
-      (print "yes4")
       ;;(insert-file-contents my/html-file-path)
       (insert (my/server-html-string))
       (ws-response-header proc 200 '("Content-Type" . "text/html; charset=UTF-8"))
-      (print "yes4")
       ;;(ws-response-header proc 200 '("Content-Type" . "text/plain"))
       (process-send-string proc (buffer-string))
       ;;(process-send-region proc (point-min) (point-max))
@@ -1260,13 +1258,11 @@ ssh localhost ~/bin/npm $@
 
   (defun my/serve-buffer-contents (proc buffer-name)
     "Serve the contents of a buffer for POST requests."
-    (print "yes11")
-    (print buffer-name)
-    (print (get-buffer buffer-name))
+    ;;(print buffer-name)
+    ;;(print (get-buffer buffer-name))
     (if-let ((buffer (get-buffer buffer-name)))
       (with-current-buffer buffer
-          (print "yes3")
-          (print buffer)
+          ;;(print buffer)
           (ws-response-header proc 200 '("Content-Type" . "text/plain"))
           (process-send-string proc (buffer-string)))
       (ws-send-404 proc)))
@@ -1274,15 +1270,12 @@ ssh localhost ~/bin/npm $@
   (setq svr (ws-start
    '(((:POST . ".*") .
        (lambda (request)
-        (print "yes0")
         (with-slots (process headers) request
           ;;(let ((buffer-name (cdr (assoc "buffer" (ws-parse-qs (cdr (assoc "Content-Length" headers)))))))
-          (print "yes2")
           (let ((buffer-name (cdr (assoc "buffer" headers))))
           ;;(let ((buffer-name ""))
-            (print "yes10")
-            (print headers)
-            (print buffer-name)
+            ;;(print headers)
+            ;;(print buffer-name)
             (if buffer-name
               (my/serve-buffer-contents process buffer-name)
               (ws-send-404 process))))
@@ -1299,7 +1292,7 @@ ssh localhost ~/bin/npm $@
   (require 'xwidget)
   (defun my/markdown-live-preview-refresh(&rest _args)
     (interactive)
-    (let ((js "sendPostRequest();"))
+    (let ((js (format "sendPostRequest(\"%s\");" (buffer-name))))
       (when my/markdown-live-preview-buffer
         (with-current-buffer my/markdown-live-preview-buffer
           (xwidget-webkit-execute-script (xwidget-webkit-current-session) js)

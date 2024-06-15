@@ -1,11 +1,39 @@
+(buffer-name)
+test
+```bash
+#!/bin/bash
+
+```
+
 # test
 
 - test1
 - test2
 
+```bash
+echo yes
+
+```
+
+```math
+\begin{aligned}
+f\left(x\right) & = \left(y - 1\right)^2 \\\\
+                & = y^2 - 2y + 1 \\\\
+                & = \frac {\displaystyle \sum_{k=1}^{n}{k}}{\displaystyle \prod_{k=1}^{n}{k}}
+                   + \displaystyle \int_0^{\infty}g\left(t\right) dt
+                
+\end{aligned}
+                
+
+```
+
+
+
 ## hello
 
 ```math
+
+(pm-spa)
 \begin{equation}
     y = \sin x  \label{eq:1}
 \end{equation}
@@ -32,6 +60,7 @@ $$
 $$
 
 
+(poly-markdown-mode 1)
 
 ```elisp
 (defun my/edit-region-in-indirect-buffer (start end)
@@ -51,6 +80,68 @@ ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer
 ```
 
 
+```elisp
+
+;; バッファの先頭に移動し、buffer-nameを実行、その後もとの位置に戻る
+(defun my/execute-and-return-to-original-position (buffer-name)
+  "Execute BUFFER-NAME and return to the original position."
+  (let((p (point)))
+    (save-excursion
+    (goto-char (point-min))
+    (print (pm-base-buffer)))(pm-base-buffer)
+    (goto-char p ))
+    
+    (pm-base-buffer))
+  
+  (pm--span-at-point (point-min)))
+(print pm-root)
+(print pm-chunkmode)
+(with-current-buffer (pm-base-buffer)
+  (buffer-name))
+(pm-chunk-range)
+(pm-span-buffer )
+(goto-char 1206)
+(pm-innermost-range)
+  (pm-span-to-range (pm-span-buffer))
+  (pm-span-to-range (pm-span-buffer))
+  (pm-map-over-spans (lambda(b)(pm--outspan-p (pm-span-buffer))))
+  (pm-map-over-spans '(head))
+    (pm-get-span 'OBJECT)
+(pm-get-span)
+(get-buffer "temp.md")
+
+;; poly-markdown開始時にhelloと表示
+(defun my/poly-markdown-mode-hook(&rest _)
+  (message (buffer-name (pm-base-buffer))))
+(add-hook 'poly-markdown-mode 'my/poly-markdown-mode-hook)
+(remove-hook 'poly-markdown-mode 'my/poly-markdown-mode-hook)
+(remove-hook 'markdown-mode 'my/poly-markdown-mode-hook)
+(add-hook 'polymode-before-switch-buffer-hook 'my/poly-markdown-mode-hook)
+
+
+(pm-get-span markdown-root)
+;; 現在のmajor-modeを取得
+(defun my/get-major-mode()
+  (interactive)
+  (print major-mode)
+  )
+(polymode-with-current-base-buffer #'buffer-name)
+(polymode-next-chunk 0)
+(poly-markdown-mode 1)
+```
+
+(polymode-next-chunk 1)
+(polymode-with-current-base-buffer #'buffer-name)
+
+(print major-mode)
+
+```elisp
+
+```
+(get-buffer "temp.md")
+(pm-chunk-range)
+(pm-span-buffer)
+(pm-get-span 'BEG)
 
 ```elisp
 (require 'web-server)

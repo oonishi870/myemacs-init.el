@@ -13,7 +13,7 @@
 
   <script>
   // POSTメソッドのリクエストを送信する関数
-  function sendPostRequest() {
+  function sendPostRequest(buffername) {
       // XMLHttpRequestオブジェクトの生成
       var xhr = new XMLHttpRequest();
       // レスポンスがロードされた際のイベントハンドラ
@@ -40,23 +40,22 @@
               document.getElementById("response").textContent = 'Error: ' + xhr.status;
           }
       };
-    // URLからGETパラメータを取り出す
-    var url = new URL(window.location.href);
-    var parameters = url.searchParams;
-    var buffer = parameters.get("buffer");
     // URLからGETパラメータを削除
     url.search = '';
     // リクエストの設定
     xhr.open('POST', url.toString(), true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     // パラメータをPOSTとして送信
-    xhr.send('buffer='+buffer);
+    xhr.send('buffer='+buffername);
   }
 
-      // ページがロードされたらPOSTリクエストを自動的に送信
-      //sendPostRequest();
+  // URLからGETパラメータを取り出す
+  var url = new URL(window.location.href);
+  var parameters = url.searchParams;
+  var buffer = parameters.get("buffer");
+                              
   // ページの読み込み時にMarkdownを読み込む
-  window.addEventListener('load', sendPostRequest);
+  window.addEventListener('load', function(){sendPostRequest(buffer);});
 
   // 定期的にMarkdownを読み込み直す
   //setInterval(loadMarkdown, 1000); // 5秒ごとにポーリング
