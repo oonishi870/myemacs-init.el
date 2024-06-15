@@ -90,31 +90,46 @@
   (defun my/indent-or-unindent (&optional unindent)
     "Indent or unindent current line or region based on the presence of a prefix argument, or insert a tab/spaces if no region is selected."
     (interactive "P")
-    (if (not (use-region-p))
-      ;; 現在行を選択
+    ;; 空行だったら
+    (if (string-match-p "^[ \t]*$"
+          (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
+      (if (not unindent)
+        (if indent-tabs-mode
+            (insert "\t")  ; Insert a tab character
+          (insert (make-string (current-tab-width) ?\s)))
+        ;; Unindent
+        (let (
+          (width (if indent-tabs-mode 1 (current-tab-width)))
+               )
+          (goto-char (- (point) width))
+          (delete-char width)))
       (progn
-        (set-mark (line-beginning-position))
-        (goto-char (line-end-position)
-      )))
-    (let* ((start-pos (region-beginning) )
-           (end-pos  (region-end))
-           (start-line (line-number-at-pos start-pos))
-           (end-line (line-number-at-pos end-pos))
-           (start-line-start-pos (get-line-start-position start-line))
-           (end-line-end-pos (get-line-end-position end-line))
-           (deactivate-mark nil))  ; This keeps the selection active after the command
-      ;; Indent or unindent the region
-      (goto-char start-line-start-pos)
-      (set-mark (point))
-      (goto-char end-line-end-pos)
-      (if unindent
-          (indent-rigidly start-line-start-pos end-line-end-pos (- (current-tab-width)))
-        (indent-rigidly start-line-start-pos end-line-end-pos (current-tab-width)))
-      ;; Recalculate the start and end positions based on the original line numbers and columns
-      (goto-char start-line-start-pos)
-      (set-mark (point))
-      (goto-char (get-line-end-position end-line))
-      ))
+        (if (not (use-region-p))
+          ;; 現在行を選択
+          (progn
+            (set-mark (line-beginning-position))
+            (goto-char (line-end-position))
+            (advice-add 'handle-shift-selection :after #'my/unset-mark-on-next-move)
+          ))
+        (let* ((start-pos (region-beginning) )
+               (end-pos  (region-end))
+               (start-line (line-number-at-pos start-pos))
+               (end-line (line-number-at-pos end-pos))
+               (start-line-start-pos (get-line-start-position start-line))
+               (end-line-end-pos (get-line-end-position end-line))
+               (deactivate-mark nil))  ; This keeps the selection active after the command
+          ;; Indent or unindent the region
+          (goto-char start-line-start-pos)
+          (set-mark (point))
+          (goto-char end-line-end-pos)
+          (if unindent
+              (indent-rigidly start-line-start-pos end-line-end-pos (- (current-tab-width)))
+            (indent-rigidly start-line-start-pos end-line-end-pos (current-tab-width)))
+          ;; Recalculate the start and end positions based on the original line numbers and columns
+          (goto-char start-line-start-pos)
+          (set-mark (point))
+          (goto-char (get-line-end-position end-line))
+          ))))
       ;; No region selected, insert tab or equivalent spacest
       ;; (if indent-tabs-mode
       ;;     (insert "\t")  ; Insert a tab character
