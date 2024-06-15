@@ -565,7 +565,11 @@
       ;;( "C-k C-p") . switch-to-next-buffer)
       ;;( "C-k C-h") . swap-buffers)
       ;;( "C-k C-u") . helm-swoop)
-      ( "C-k C-j" . swiper-thing-at-point)
+      ( "C-k C-j" . (lambda (&optional args)
+                      (interactive)
+                      (if (use-region-p)
+                        (swiper-thing-at-point)
+                        (swiper))))
       ;; ( "C-k C-o" . helm-show-kill-ring)
       ( "C-k C-o" . counsel-yank-pop)
       ( "C-k C-t" . my/turn-buffer)
@@ -846,7 +850,13 @@
       (custom-set-faces
         '(sh-quoted-exec ((t (:foreground "#FFB0B0" :extend t))))
         '(sh-heredoc     ((t (:foreground "#FF6dad" :extend t)))))
- 
+      (custom-set-faces
+        '(ediff-even-diff-A   ((t (:background "#464c58" :extend t))))
+        '(ediff-even-diff-B   ((t (:background "#464c58" :extend t))))
+        '(ediff-odd-diff-A   ((t (:background "#464c58" :extend t))))
+        '(ediff-odd-diff-B   ((t (:background "#464c58" :extend t))))
+        '(ediff-current-diff-A   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t))))
+        '(ediff-current-diff-B   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t)))))
       )))
 
   (advice-add 'load-theme :after #'my/helm-customize-for-nord-theme)
