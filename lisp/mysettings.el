@@ -90,30 +90,36 @@
   (defun my/indent-or-unindent (&optional unindent)
     "Indent or unindent current line or region based on the presence of a prefix argument, or insert a tab/spaces if no region is selected."
     (interactive "P")
-    (if (use-region-p)
-        (let* ((start-pos (region-beginning) )
-               (end-pos  (region-end))
-               (start-line (line-number-at-pos start-pos))
-               (end-line (line-number-at-pos end-pos))
-               (start-line-start-pos (get-line-start-position start-line))
-               (end-line-end-pos (get-line-end-position end-line))
-               (deactivate-mark nil))  ; This keeps the selection active after the command
-          ;; Indent or unindent the region
-          (goto-char start-line-start-pos)
-          (set-mark (point))
-          (goto-char end-line-end-pos)
-          (if unindent
-              (indent-rigidly start-line-start-pos end-line-end-pos (- (current-tab-width)))
-            (indent-rigidly start-line-start-pos end-line-end-pos (current-tab-width)))
-          ;; Recalculate the start and end positions based on the original line numbers and columns
-          (goto-char start-line-start-pos)
-          (set-mark (point))
-          (goto-char (get-line-end-position end-line))
-          )
-      ;; No region selected, insert tab or equivalent spaces
-      (if indent-tabs-mode
-          (insert "\t")  ; Insert a tab character
-        (insert (make-string (current-tab-width) ?\s)))))  ; Insert spaces
+    (if (not (use-region-p))
+      ;; 現在行を選択
+      (progn
+        (set-mark (line-beginning-position))
+        (goto-char (line-end-position)
+      )))
+    (let* ((start-pos (region-beginning) )
+           (end-pos  (region-end))
+           (start-line (line-number-at-pos start-pos))
+           (end-line (line-number-at-pos end-pos))
+           (start-line-start-pos (get-line-start-position start-line))
+           (end-line-end-pos (get-line-end-position end-line))
+           (deactivate-mark nil))  ; This keeps the selection active after the command
+      ;; Indent or unindent the region
+      (goto-char start-line-start-pos)
+      (set-mark (point))
+      (goto-char end-line-end-pos)
+      (if unindent
+          (indent-rigidly start-line-start-pos end-line-end-pos (- (current-tab-width)))
+        (indent-rigidly start-line-start-pos end-line-end-pos (current-tab-width)))
+      ;; Recalculate the start and end positions based on the original line numbers and columns
+      (goto-char start-line-start-pos)
+      (set-mark (point))
+      (goto-char (get-line-end-position end-line))
+      ))
+      ;; No region selected, insert tab or equivalent spacest
+      ;; (if indent-tabs-mode
+      ;;     (insert "\t")  ; Insert a tab character
+      ;;   (insert (make-string (current-tab-width) ?\s)))))
+                                        ; Insert spaces
 
   (global-set-key (kbd "TAB") 'my/indent-or-unindent)
   (global-set-key (kbd "<backtab>") (lambda () (interactive) (my/indent-or-unindent t)))
@@ -173,6 +179,9 @@
         (switch-to-buffer-other-window (current-buffer))
         ;; オプション: この時点で追加の設定やモードの変更を行う
         )))
+  ;; 自動インデントをいい感じに
+  (electric-indent-mode 1)
+  (setq indent-line-function #'indent-relative)
   
 )
 
@@ -857,6 +866,8 @@
         '(ediff-odd-diff-B   ((t (:background "#464c58" :extend t))))
         '(ediff-current-diff-A   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t))))
         '(ediff-current-diff-B   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t)))))
+      (custom-set-faces
+        '(magit-diff-file-heading-highlight   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t)))))
       )))
 
   (advice-add 'load-theme :after #'my/helm-customize-for-nord-theme)
