@@ -197,7 +197,7 @@
   ;; 自動インデントをいい感じに
   (electric-indent-mode 1)
   (setq indent-line-function #'indent-relative)
-  
+  (setq electric-indent-inhibit t)
 )
 
 (leaf expand-region
@@ -683,7 +683,7 @@
   ;;(add-hook 'completion-at-point-functions #'cape-sgml)
   ;;(add-hook 'completion-at-point-functions #'cape-rfc1345)
   ;;(add-hook 'completion-at-point-functions #'cape-abbrev)
-  (add-hook 'completion-at-point-functions #'cape-dict)
+  ;;(add-hook 'completion-at-point-functions #'cape-dict)
   ;;(add-hook 'completion-at-point-functions #'cape-elisp-symbol)
   ;;(add-hook 'completion-at-point-functions #'cape-line)
 ;;   (setq dabbrev-search-these-buffers-only 
