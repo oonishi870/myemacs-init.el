@@ -8,11 +8,10 @@
   <!-- GitHub-style for code blocks -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/github.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/highlight.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js" integrity="sha384-/y1Nn9+QQAipbNQWU65krzJralCnuOasHncUFXGkdwntGeSvQicrYkiUBwsgUqc1" crossorigin="anonymous"></script>
 
   <script>
   // POSTメソッドのリクエストを送信する関数
+  var after_rendering;
   function sendPostRequest(buffername) {
       // XMLHttpRequestオブジェクトの生成
       var xhr = new XMLHttpRequest();
@@ -29,12 +28,21 @@
             document.querySelectorAll('pre code').forEach((block) => {
               hljs.highlightBlock(block);
             });
-
-            var mathElements = document.getElementsByClassName("language-math");
-            for (var i=0; i < mathElements.length; i++){
-              var texText = mathElements[i].firstChild
-              katex.render(texText.data, mathElements[i])
+      
+            // funcが定義されていたら
+            if (typeof after_rendering === 'function') {
+              after_rendering();
             }
+
+            // // ハイライト
+            // document.querySelectorAll('pre code').forEach((block) => {
+            //   hljs.highlightBlock(block);
+            // });
+            // var mathElements = document.getElementsByClassName("language-math");
+            // for (var i=0; i < mathElements.length; i++){
+            //   var texText = mathElements[i].firstChild
+            //   katex.render(texText.data, mathElements[i])
+            // }
           } else {
               // エラーメッセージを表示
               document.getElementById("response").textContent = 'Error: ' + xhr.status;

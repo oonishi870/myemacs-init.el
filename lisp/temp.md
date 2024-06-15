@@ -21,11 +21,38 @@ f\left(x\right) & = \left(y - 1\right)^2 \\\\
                 & = y^2 - 2y + 1 \\\\
                 & = \frac {\displaystyle \sum_{k=1}^{n}{k}}{\displaystyle \prod_{k=1}^{n}{k}}
                    + \displaystyle \int_0^{\infty}g\left(t\right) dt
-                
+                   + \displaystyle \int_0^{\infty}g\left(t\right) dt \\\\
+\displaystyle \frac{1}{x^2-1} \\\\
 \end{aligned}
-                
+
 
 ```
+
+```elisp
+(let*(
+      (line
+        ;; 現在行の文字列を取得(改行は含まない)
+        (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
+      (space-only (string-match-p "^[ \t]*$" line))
+      )
+  ;; lineが空白、タブだけの場合
+  (if (string-match-p "^[ \t]*$" line)
+    (message "空行です")
+    (message "空行ではありません"))
+            
+  )
+
+(defun test()
+  (interactive)
+  (print "yes1")
+  ;; 関数を終了
+  ()
+  (print "yes2")
+  )
+(test)
+
+```
+
 
 
 
@@ -430,3 +457,4 @@ emacsのweb-serverでPOSTパラメータを取り出す方法を教えて
 (advice-remove 'save-buffer nil)
   )
 (expand-file-name "~/hello")
+

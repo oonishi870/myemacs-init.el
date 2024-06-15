@@ -21,6 +21,17 @@
             , 'Lucida Console', 'Courier New', monospace;
     }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js" integrity="sha384-/y1Nn9+QQAipbNQWU65krzJralCnuOasHncUFXGkdwntGeSvQicrYkiUBwsgUqc1" crossorigin="anonymous"></script>
+  <script>
+    after_rendering = function (){
+        var mathElements = document.getElementsByClassName("language-math");
+        for (var i=0; i < mathElements.length; i++){
+          var texText = mathElements[i].firstChild
+          katex.render(texText.data, mathElements[i])
+        }
+    }
+  </script>
 </head>
 <body>
   <div id="markdown-content" class="markdown-body">
