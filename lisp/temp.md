@@ -5,7 +5,7 @@ test
 
 ```
 
-# test
+t# test
 
 - test1
 - test2
@@ -16,13 +16,19 @@ echo yes
 ```
 
 ```math
+f (x )
+```
+
+```math
 \begin{aligned}
-f\left(x\right) & = \left(y - 1\right)^2 \\\\
+f(x) & = (y - 1)^2 \\\\
                 & = y^2 - 2y + 1 \\\\
-                & = \frac {\displaystyle \sum_{k=1}^{n}{k}}{\displaystyle \prod_{k=1}^{n}{k}}
-                   + \displaystyle \int_0^{\infty}g\left(t\right) dt
-                   + \displaystyle \int_0^{\infty}g\left(t\right) dt \\\\
-\displaystyle \frac{1}{x^2-1} \\\\
+                & = \frac { \sum_{k=1}^{n}{k}}{ \prod_{k=1}^{n}{k}}
+                   +  \int_0^{\infty}g(t) dt
+                   +  \int_0^{\infty}g(t) dt
+                   +  \int_0^{\infty}g(t) dt \\\\
+
+\frac{1}{x^2-1} \\\\
 \end{aligned}
 
 

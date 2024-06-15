@@ -1267,7 +1267,6 @@ ssh localhost ~/bin/npm $@
     (with-temp-buffer
       (insert-file-contents my/bashe-html-file-path)
         (goto-char (point-min))
-        ;;(print "yes2")
       ;; SSIタグを解析し、ファイル内容を挿入
 
         (let* (
@@ -1275,20 +1274,17 @@ ssh localhost ~/bin/npm $@
             (contents
               (with-temp-buffer
                 (insert-file-contents my/markdown-html-file-path)
-                  (buffer-string))))
+                (buffer-string))))
           (if (re-search-forward "<!-- #include file -->" nil t)
-            (replace-match contents))
+            (replace-match (replace-regexp-in-string "\\\\" "\\\\\\\\" contents)))
           (buffer-string))
       ;;(buffer-string)
       ))
 
   (defun my/serve-buffer-contents (proc buffer-name)
     "Serve the contents of a buffer for POST requests."
-    ;;(print buffer-name)
-    ;;(print (get-buffer buffer-name))
     (if-let ((buffer (get-buffer buffer-name)))
       (with-current-buffer buffer
-          ;;(print buffer)
           (ws-response-header proc 200 '("Content-Type" . "text/plain"))
           (process-send-string proc (buffer-string)))
       (ws-send-404 proc)))
@@ -1300,14 +1296,12 @@ ssh localhost ~/bin/npm $@
           ;;(let ((buffer-name (cdr (assoc "buffer" (ws-parse-qs (cdr (assoc "Content-Length" headers)))))))
           (let ((buffer-name (cdr (assoc "buffer" headers))))
           ;;(let ((buffer-name ""))
-            ;;(print headers)
-            ;;(print buffer-name)
             (if buffer-name
               (my/serve-buffer-contents process buffer-name)
               (ws-send-404 process))))
           ))
      ((:GET . ".*") .
-      (lambda (request)
+       (lambda (request)
         (with-slots (process) request
           (my/serve-html-file process)
           ))))

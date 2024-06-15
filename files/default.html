@@ -27,8 +27,15 @@
     after_rendering = function (){
         var mathElements = document.getElementsByClassName("language-math");
         for (var i=0; i < mathElements.length; i++){
-          var texText = mathElements[i].firstChild
-          katex.render(texText.data, mathElements[i])
+            var texText = mathElements[i].firstChild;
+            // texTextの"("　を"\left("  に置換する
+            texText.data = texText.data.replace(/\(/g, "\\left(");
+            texText.data = texText.data.replace(/\)/g, "\\right)");
+            texText.data = texText.data.replace(/\\frac/g,  "\\displaystyle \\frac");
+            texText.data = texText.data.replace(/\\int/g,   "\\displaystyle \\int");
+            texText.data = texText.data.replace(/\\sum/g,   "\\displaystyle \\sum");
+            texText.data = texText.data.replace(/\\prod/g,  "\\displaystyle \\prod");
+            katex.render(texText.data, mathElements[i]);
         }
     }
   </script>
