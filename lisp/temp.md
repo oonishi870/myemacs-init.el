@@ -20,6 +20,17 @@ f (x )
 ```
 
 ```math
+\int_{0}^{\infty}f(x) = \frac{e^{x}-1}{x^3 - 1}
+
+```
+
+
+test
+```elisp
+(print "yes")
+```
+
+```math
 \begin{aligned}
 f(x) & = (y - 1)^2 \\\\
                 & = y^2 - 2y + 1 \\\\
@@ -27,19 +38,23 @@ f(x) & = (y - 1)^2 \\\\
                    +  \int_0^{\infty}g(t) dt
                    +  \int_0^{\infty}g(t) dt
                    +  \int_0^{\infty}g(t) dt \\\\
-
 \frac{1}{x^2-1} \\\\
 \end{aligned}
 
+```
+
+```math
+\int_{0}^{\infty}f(x) = \frac{e^{x}-1}{x^3 - 1}
 
 ```
+
 
 ```elisp
 (let*(
       (line
         ;; 現在行の文字列を取得(改行は含まない)
         (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
-      (space-only (string-match-p "^[ \t]*$" line))
+        (space-only (string-match-p "^[ \t]*$" line))
       )
   ;; lineが空白、タブだけの場合
   (if (string-match-p "^[ \t]*$" line)
@@ -64,21 +79,6 @@ f(x) & = (y - 1)^2 \\\\
 
 ## hello
 
-```math
-
-(pm-spa)
-\begin{equation}
-    y = \sin x  \label{eq:1}
-\end{equation}
-
-\begin{equation}
-    y = \cos x  \label{eq:2}
-\end{equation}
-
-後半の数式~\eqref{eq:2} だけに数式番号が付く.
-
-\end{document}
-```
 
 
 
@@ -345,122 +345,378 @@ ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer
 ```
 
 ```math
-\displaystyle
-\int_{0}^{\infty}f\left(x\right) = \frac{e^{x}-1}{x^3 - 1}
+\int_{0}^{\infty}f(x) = \frac{e^{x}-1}{x^3 - 1}
 
 ```
 
-```python
-import win32com.client
-# Excelを開始
-excel = win32com.client.Dispatch("Excel.Application")
-excel.Visible = True  # Excelを可視状態で開く
-
-# ブックを開く
-# \\172.16.19.171\大分県畜産共通システム基盤構築\233480_「大分県畜産共通システム構築」第２次開発\50_データ移行\03_データ分析\01_データ分析\子牛登記情報(令和６年出生分).xlsx
-#book = excel.Workbooks.Open(r'C:\Users\oonishi\Downloads\県内家畜市場取引結果_玖珠子牛.xlsx')
-#book = excel.Workbooks(r'コピー子牛登記情報(令和５年出生分).xlsx')
-book = excel.Workbooks(r'子牛登記情報(令和６年出生分).xlsx')
-#book = excel.Workbooks(r'母牛登録情報(令和４年、５年登録分).xlsx')
-#book = excel.Workbooks(r'母牛異動情報(BOGYUIDO).xlsx')
-
-sheet = book.Worksheets(2)
-
-prev_c1 = prev_c2 = ""
-for i in range(2, 330):
-    # print(dir(sheet.Cells(5, i)))
-    c1 = sheet.Cells(1, i).Formula or prev_c1
-    if prev_c1 != c1:
-        prev_c2 = ''
-    prev_c1 = c1
-    c2 = sheet.Cells(2, i).Formula or prev_c2
-    prev_c2 = c2
-    c3 = sheet.Cells(3, i).Formula
-
-    colname = f'{c1}.{c2}.{c3}'.rstrip('.').replace('\n', '')
-
-    f = sheet.Cells(5, i).Formula
-    if not f: continue
-    begin,last = f.split(",")[1:]
-    last = last.rstrip(')')
-    print(begin,last, f'{(i-1):03d}_{colname}', sep='\t')
 
 
-```
+```lisp
 
-日本語
+;; copilot-completeにadviceを追加
+(defun hello() (print "hello"))
+(advice-add 'copilot-complete :before #'hello)
+(advice-remove 'copilot-complete #'hello)
 
+(let ()
+    ;; copilot-completeの実行時にcorfuをoffにする
+  (defun my/corfu-disable()
+    (corfu-quit)
+    (corfu-mode -1)
+    )
+    (advice-add 'copilot-complete :before #'my/corfu-disable)
+    ;;(advice-remove 'copilot-complete  #'my/corfu-disable)
 
+  ;; print関数を別の関数として保存する
+  (setf (symbol-function 'print3) (symbol-function 'print))
+  
+  (defalias 'print2 'print)
+  (print3 "yes")
+  
+  ;; print2関数をprintに設定
+  (set 'print2 #'print)
 
-emacsのweb-serverでPOSTパラメータを取り出す方法を教えて
-
-(cl-letf* (
-  (save-buffer-org #'write-file)
-  (save-buffer (lambda (&rest args)
-    (interactive)
-    (write-file "/tmp/test.txt")
-  )))
-    (chatgpt-shell-save-session-transcript)
+  ;; pritn2関数を実行
+  (print2 "yes")
+  (set 'print2 #'print)
+  (print2 "yes")
+  (print2 "yes")
+  (company-mode -1)
+  (corfu-mode -1)
+  (cape-mode -1)
+  (print corfu-mode)
   )
-(advice-add 'save-buffer :after 
-  (lambda (&rest _)
-    (print "yes")
+
+;; corfuのポップアップが表示されるときにhello-worldを表示
+(defun hello1(&rest _)
+  (print "yes13")
+  (print (bound-and-true-p corfu--popup-show))
+  (if (and (bound-and-true-p corfu-mode) (bound-and-true-p corfu--overlay))
+    (print "yes1")))
+
+  (advice-add 'corfu--popup-show :after #'hello1)
+  ;;(advice-remove 'corfu-show  #'hello1)
+(corfu-mode 1)
+(print corfu-preview-current)
+(print corfu-mode)
+(print corfu-mode)
+(print corfu-mode)
+(print (corfu--overlay)
+  (corfu--popup-show)
+  (print corfu--on)
+  (corfu-reset)
+  (copilot--overlay-visible)
+
+
+  (defun hello1(&rest _)
+    copilot--display-overlay-completion COMPLETION UUID START END
+
+(defun hello2(&rest args)
+  (print "hello2")
+  (corfu-quit)
+  )
+(advice-add 'copilot--display-overlay-completion :after #'hello2)
+    
+    (copilot-mode -1)
+    (buffer
+      (corfu--post-command)
+      (corfu--update (point) )
+      ;; これ！      
+      (corfu--auto-complete-deferred)
+  
+      (corfu--update nil)
+
+      
+  ;; copilot-clear-overlayで補完が終わったときにcorfuをONにする
+  (defun my/corfu-enable-when-t(&optional value)
+    (print3 (buffer-name))
+    (print3 value)
+    (print3 corfu-mode)
+    (if (and (not value) (not corfu-mode))
+      (progn
+         (print3 "yes3")
+          (print3 (buffer-name))
+        ;;(corfu-mode 1)
+        (corfu--auto-complete-deferred)
+        )))
+  (advice-add 'copilot-clear-overlay :before #'my/corfu-enable-when-t)
+  ;;(advice-remove 'copilot-clear-overlay  #'my/corfu-enable-when-t)
+)
+    
+;; hello-worldを表示
+
+    
+(corfu-mode 1)
+
+(defun hello(f &rest args)
+  (print "hello")
+  (apply f args)
+  (print "good-bye")
+  )
+
+(advice-add 'copilot-complete :around #'hello)
+
+
+;; copilotのoverlayバッファが表示されたときにhello-worldを表示
+(defun hello1(&rest _)
+  (if (overlayp copilot--keymap-overlay)
+    
   ))
-(advice-remove 'save-buffer nil) 
-(advice-remove 'write-file nil) 
-(let ((buffer-file-name (format-time-string "/tmp/host/%Y%m%d%H%M%S.txt")))
-  ;;(set-visited-file-name (format-time-string "/tmp/host/%Y%m%d%H%M%S.txt"))
-  ;;(chatgpt-shell-save-session-transcript)
-  ;;(chatgpt-shell-clear-buffer)
-  (print (buffer-file-name))
-)
-(print buffer-file-name)
 
-(read-file-name "/tmp/test.txt")    
-(cl-letf* (
-  (read-file-name-org #'read-file-name)
-  (read-file-name (lambda (&rest args)
-    (interactive)
-    "/tmp/test.txt"
+(advice-add 'copilot-complete :after #'hello1)
+
+;; hello-worldを表示
+(defun hello2(&rest args)
+  (print "hello2")
+  (print args))
+(advice-add 'copilot-clear-overlay :after #'hello2)
+(advice-remove 'copilot-clear-overlay #'hello2)
+
+
+
+;; copilot-completeにadviceを追加
+(defun hello3() (print "hello3"))
+
+  (bind-keys :map copilot-completion-map
+      ("TAB" . copilot-accept-completion-by-word)
+      ("C-g" . copilot-clear-overlay)
+      ("C-o" . copilot-accept-completion-by-line)
+      ("C-n" . copilot-next-completion)
+      ("C-p" . copilot-previous-completion)
+  )
+  ;; copilotとcorfuの同居。C-gでcorfuだけ閉じる
+  (bind-keys :map corfu-map
+     ("C-g" .      (lambda () (interactive)
+       (corfu-quit)
+       ;; copilot-modeが有効だったら
+       (if (bound-and-true-p copilot-mode)
+         (copilot-complete)))))
+(define-key copilot-mode-map (kbd "C-o") 'copilot-complete)
+
+;; copilot-completeにadviceを追加
+(copilot-current-completion)
+;; マイナーモードの一覧を取得
+(print minor-mode-list)
+
+
+;; dynamic-completion-mode-hookにhookを仕掛ける
+(add-hook 'dynamic-completion-mode-hook 'hello)
+(add-remove 'dynamic-completion-mode-hook 'hello)
+
+;; copilotの補完が表示されているときだけキーバインドを変える
+(defun my/copilot-complete()
+  (interactive)
+  (if (bound-and-true-p copilot-mode)
+    (progn
+      (print "yes")
+      )
+    (progn
+      (print "no")
+      )
+    )
+)
+
+(add-hook 'copilot-mode-hook 'my/copilot-complete)
+(remove-hook 'copilot-mode-hook 'my/copilot-complete)
+
+
+
+```
+
+
+```elisp
+;; copilot-clear-overlayで補完が終わったときにcorfuをONにする
+(defun my/corfu-enable-when-t(&optional value)
+  (print3 (buffer-name))
+  (print3 value)
+  (print3 corfu-mode)
+  (if (and (not value) (not corfu-mode))
+    (progn
+       (print3 "yes3")
+        (print3 (buffer-name))
+      ;;(corfu-mode 1)
+      (corfu--auto-complete-deferred)
+      )))
+(advice-add 'copilot-clear-overlay :before #'my/corfu-enable-when-t)
+;;(advice-remove 'copilot-clear-overlay  #'my/corfu-enable-when-t)
+
+(print copilot--overlay)
+(overlays-at (point))
+
+
+(current-tab-width)
+(derived-mode-p 'emacs-lisp-mode)
+
+(defun hello(f &rest args)
+  (print "hello")
+  (apply f args)
+  (print "good-bye")
+  )
+
+(advice-add 'copilot-complete :around #'hello)
+
+
+;; hello-worldを表示
+
+
+;; corfuのポップアップが表示されるときにhello-worldを表示
+(defun hello1(&rest _)
+  (print "yes13")
+  (print (bound-and-true-p corfu--popup-show))
+  (if (and (bound-and-true-p corfu-mode) (bound-and-true-p corfu--overlay))
+    (print "yes1")))
+
+  (advice-add 'corfu--popup-show :after #'hello1)
+
+;; copilotの補完が表示中の場合は、corfu--popup-showを中止する
+(defun corfu-quit-when-copilot-completing(f &rest _)
+  ;; overlayが表示されている場合
+  ;;(print "yes1")
+  (let ((result))
+    (if (not (overlays-at (point)))
+      (setq result (apply f _)))
+    (print result)
+    result)
+  )
+    
+(advice-add    'corfu--popup-show :around 'corfu-quit-when-copilot-completing)
+(advice-remove 'corfu--popup-show  'corfu-quit-when-copilot-completing)
+
+;; corfuのポップアップが表示中のときはcopilotを表示しない
+(defun copilot-quit-when-corfu-show(f &rest _)
+  (let ((result))
+    (if (not (overlays-at (point)))
+      (setq result (apply f _)))))
+(advice-add    'copilot--show-completion :around 'copilot-quit-when-corfu-show)
+
+
+;; corfuのポップアップが表示されるときにhello-worldを表示
+(defun hello1(&rest _)
+  (if (overlayp copilot--keymap-overlay)
+    (print "yes1")))
+
+
+(print (my/corfu-enable-when-t))
+(my/markdown-live-preview
+
+;; copilotの補完が表示のときにcorfuをoffにする
+(defun my/corfu-disable()
+  (corfu-quit)
+  (corfu-mode -1)
+  )
+(advice-add    'copilot-complete :before #'my/corfu-disable)
+(advice-remove 'copilot-complete  #'my/corfu-disable)
+
+
+;; copilotの補完の終了時にcorfuを表示する
+(defun my/corfu-enable-when-copilot-close(&optional val)
+  (if (not val)
+    (progn
+      (corfu-mode 1)
+      (corfu--auto-complete-deferred)
   )))
-    (chatgpt-shell-save-session-transcript)
+(advice-add    'copilot-clear-overlay :before #'my/corfu-enable-when-copilot-close)
+(advice-remove 'copilot-clear-overlay  #'my/corfu-enable-when-copilot-close)
+
+
+;; copilot--show-completion
+;; copilotの補完を表示するときにcorfuを終了する
+(defun my/corfu-quit-when-copilot-show-completion(&rest _)
+  (corfu-quit)
+  ;;(corfu-mode -1)
+  )
+(advice-add    'copilot--show-completion :before #'my/corfu-quit-when-copilot-show-completion)
+(advice-remove 'copilot--show-completion  #'my/corfu-quit-when-copilot-show-completion)
+
+(overlays-at (point))
+
+
+
+;; corfuの表示中はcopilotは表示しない
+(defun my/copilot-quit-when-corfu-show(&rest _)
+  (if (bound-and-true-p corfu--overlay)
+
+    (corfu-mode 1)
+
+(corfu-mode -1)
+
+(bind-keys :map copilot-completion-map
+    ("TAB" . copilot-accept-completion-by-word)
+    ("C-w" . copilot-accept-completion-by-word)
+    ("C-g" . copilot-clear-overlay)
+    ("C-o" . copilot-accept-completion-by-line)
+    ("C-n" . copilot-next-completion)
+    ("C-p" . copilot-previous-completion)
   )
 
-(defun my/chatgpt-shell-save-and-clear()
-  (interactive)
-  (cl-letf(
-      (ad/read-file-name
-        (lambda (fn &rest args)
-          (interactive)
-          (expand-file-name 
-            (format-time-string "~/transcripts/%Y%m%d%H%M%S.txt")))
+;; copilotとcorfuの同居。C-gでcorfuだけ閉じる
+(bind-keys :map corfu-map
+   ("C-g" .      (lambda () (interactive)
+     (corfu-quit)
+     ;; copilot-modeが有効だったら
+     (if (bound-and-true-p copilot-mode)
+       (copilot-complete)))))
+
+;; after-change-functionsでcopilot--overlayが表示されている場合、corfuを非表示にする
+(defun check-overlay-visibility(&rest _)
+  (if (= (overlays-at (point)) copilot--overlay)
+    (progn
+      (corfu-quit)
+      (corfu-mode -1))
+    (progn
+      (corfu-mode 1)
+      (corfu--auto-complete-deferred)
       )
-  )
-    (advice-add 'read-file-name :around ad/read-file-name)
-    (unwind-protect
-      (progn 
-        (chatgpt-shell-save-session-transcript)
-        (chatgpt-shell-clear-buffer))
-      (advice-remove 'read-file-name ad/read-file-name))
-  )
-)
+    ))
+    
 
 
-(defun my/chatgpt-shell-save-and-clear()
-  (interactive)
-  (let(
-    (shell-maker--file 
-      (expand-file-name 
-            (format-time-string "~/transcripts/%Y%m%d%H%M%S.txt")))
-      )
-    (chatgpt-shell-save-session-transcript)
-    (chatgpt-shell-clear-buffer))
+(add-hook 'after-change-functions 'check-overlay-visibility)
+
+(remove-hook 'after-change-functions 'check-overlay-visibility)
+
+
+
+;; counsel-companyの実行後にcompany-modeを無効にする
+(defun my/company-mode-disable(&rest _)
+  (company-mode -1)
+  )
+(advice-add 'counsel-company :after #'my/company-mode-disable)
+(print company-mode)
+    
+    
+    
+
+
+    
+(defun my/markdown-html-file-path()
+  (locate-user-emacs-file "files/default.html")
   )
 
 
-(provide 'my/chatgpt-shell-save-and-clear)
-(advice-remove 'write-file nil)
-(advice-remove 'save-buffer nil)
-  )
-(expand-file-name "~/hello")
+    
+;; corfuのデフォルトの選択状態を変更する
+
+
+;; copilotの補完が表示されているときだけキーバインドを変える
+
+  (overlay-get copilot--overlay 'display )
+    (if (print copilot--overlay)
+    
+    (corfu
+  (if (bound-and-true-p copilot--overlay
+(overlays-in (point-min) (point-max))
+
+        (message (format "%s" (overlay-properties copilot--overlay)))
+        (overlay-get copilot--overlay ')
+        (overlays-at (point
+                       ))
+        ;; hello-worldを表示
+
+
+  (bind-keys :map corfu-map
+      ("<RET>" . nil) ;; 2018/06/27 tmux用
+    )
+        
+```
 

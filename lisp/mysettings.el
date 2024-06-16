@@ -372,7 +372,14 @@
 
     (provide 'my/counsel-mini)
     )
-  (leaf company :ensure t)
+  (leaf company
+    :config
+    ;; counsel-companyの実行後にcompany-modeを無効にする
+    (defun my/company-mode-disable(&rest _)
+      (company-mode -1)
+      )
+    (advice-add 'counsel-company :after #'my/company-mode-disable)
+    )
   :config
   ;; (require 'ivy)
   ;; (require 'counsel)
@@ -595,6 +602,8 @@
                       (if (use-region-p)
                         (swiper-thing-at-point)
                         (swiper))))
+      
+      ( "C-k C-u" . counsel-company)
       ;; ( "C-k C-o" . helm-show-kill-ring)
       ( "C-k C-o" . counsel-yank-pop)
       ( "C-k C-t" . my/turn-buffer)
@@ -724,6 +733,13 @@
           ;; Python専用のキーワード補完を追加
           (cape-capf-buster #'python-keywords))))))
 
+
+  ;; RETで選択候補が入力されるのをOFF
+  ;; →デフォルトで最上位が選択状態になるので、Enterで入力になると感覚と違う
+  ;;   特にshellとかだとパスの入力で手間取る
+  (bind-keys :map corfu-map
+      ("<RET>" . nil)
+    )
 ;;   (add-hook 'python-mode-hook
 ;;     (lambda ()
 ;; (setq-local completion-at-point-functions
