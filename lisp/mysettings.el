@@ -886,7 +886,9 @@
       (custom-set-faces
         '(magit-diff-file-heading-highlight   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t)))))
       (custom-set-faces
-        '(font-lock-comment-face   ((t (:foreground "#B080B0" :extend t))))
+        '(font-lock-comment-face             ((t (:foreground "#B080B0" :extend t))))
+        '(font-lock-comment-delimiter-face   ((t (:foreground "#B080B0" :extend t))))
+        '(font-lock-doc-face                 ((t (:foreground "#B080B0" :extend t))))
         '(shadow                   ((t (:foreground "#7C869A" :extend t))))
         ;;'(default                  ((t (:background "#2E3440" :foreground "#D8DEE9" :extend t))))
         '(default                  ((t (:background "#1E2430" :foreground "#E8EEF9" :extend t))))
