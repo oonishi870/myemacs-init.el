@@ -1127,14 +1127,14 @@ ssh localhost ~/bin/npm $@
     ;;(advice-remove 'counsel-yank-pop  #'my/disable-ivy-prescient-for-counsel-yank-pop)
     )
   
-  (leaf corfu-prescient
-    :ensure t
-    :after corfu
-    :config
-    (require 'corfu-prescient)
-    ;; (with-eval-after-load 'orderless
-    ;;   (setq corfu-prescient-enable-filtering nil))
-    (corfu-prescient-mode +1))
+  ;; (leaf corfu-prescient
+  ;;   :ensure t
+  ;;   :after corfu
+  ;;   :config
+  ;;   (require 'corfu-prescient)
+  ;;   ;; (with-eval-after-load 'orderless
+  ;;   ;;   (setq corfu-prescient-enable-filtering nil))
+  ;;   (corfu-prescient-mode +1))
   )
 
 

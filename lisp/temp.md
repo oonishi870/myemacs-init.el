@@ -746,6 +746,7 @@ ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer
   (bind-keys :map company-mode-map
       ("C-w" . company-common)
       ("C-e" . company-common)
+      ("<tab>" . company-common)
     )
         my/cmar
         (corfu-next nil)
@@ -755,6 +756,8 @@ ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer
         
         (corfu-mode -1)
         (company-mode 1)
+        (corfu-mode 1)
+        (company-mode -1)
 
         (setq company-prefix 2)
 
@@ -763,8 +766,28 @@ ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer
   (setq company-minimum-prefix-length 2)         ;; 補完できそうな文字が2文字以上入力されたら候補を表示
   (setq company-selection-wrap-around t)         ;; 候補の一番下でさらに下に行こうとすると一番上に戻る
         (setq company-transformers '(company-sort-by-occurrence company-sort-by-backend-importance))) ;; 利用頻度が高いものを候補の上に表示する
-my/markdown-
-   
-        
+
+
+    (setq-local completion-at-point-functions
+   '(company-bbdb company-semantic company-cmake company-capf company-clang company-files
+  (company-dabbrev-code company-gtags company-etags company-keywords)
+     company-oddmuse company-dabbrev))
+
+    (setq-local completion-at-point-functions
+      '(cape-keyword cape-dabbrev tags-completion-at-point-function))
+    (corfu-mode 1)
+
+    
+
+    ;; markdown-previewを起動する
+    (defun my/markdown-preview()
+      (interactive)
+      (let ((buf (current-buffer)))
+        (xwidget-webkit-browse-url
+          (format "http://localhost:9001/?buffer=%s"
+      
+    
+
+(print completion-at-point-functions)
 ```
 
