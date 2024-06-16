@@ -978,21 +978,23 @@ ssh localhost ~/bin/npm $@
 )
   (require 'copilot)
   (bind-keys :map copilot-completion-map
-      ("TAB" . copilot-accept-completion-by-word)
+      ;;("TAB" . copilot-accept-completion-by-word)
       ("C-g" . copilot-clear-overlay)
-      ("C-o" . copilot-accept-completion-by-line)
+      ;;("C-o" . copilot-accept-completion-by-line)
+      ("C-o" . copilot-accept-completion-by-word)
+      ("C-l" . copilot-accept-completion-by-line)
       ("C-n" . copilot-next-completion)
       ("C-p" . copilot-previous-completion)
   )
-  ;; copilotとcorfuの同居。C-gでcorfuだけ閉じる
-  (bind-keys :map corfu-map
-     ("C-g" .      (lambda () (interactive)
-       (corfu-quit)
-       ;; copilot-modeが有効だったら
-       (if (bound-and-true-p copilot-mode)
-         (copilot-complete)))))
- (define-key copilot-mode-map (kbd "C-o") 'copilot-complete)
-
+  ;; ;; copilotとcorfuの同居。C-gでcorfuだけ閉じる
+  ;; (bind-keys :map corfu-map
+  ;;    ("C-g" .      (lambda () (interactive)
+  ;;      (corfu-quit)
+  ;;      ;; copilot-modeが有効だったら
+  ;;      (if (bound-and-true-p copilot-mode)
+  ;;        (copilot-complete)))))
+  ;; (define-key copilot-mode-map (kbd "C-o") 'copilot-complete)
+  (global-copilot-mode 1)
 
 )
 
