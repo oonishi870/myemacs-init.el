@@ -85,6 +85,7 @@
       ((derived-mode-p 'ruby-mode) ruby-indent-level)
       ((derived-mode-p 'js-mode) js-indent-level)
       ((derived-mode-p 'emacs-lisp-mode) lisp-indent-offset)
+      ((derived-mode-p 'lisp-mode) lisp-indent-offset)
       (t tab-width)))  ; Default to tab-width if no specific setting is found
 
   (defun my/indent-or-unindent (&optional unindent)
@@ -884,8 +885,13 @@
         '(ediff-current-diff-B   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t)))))
       (custom-set-faces
         '(magit-diff-file-heading-highlight   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t)))))
+      (custom-set-faces
+        '(font-lock-comment-face   ((t (:foreground "#B080B0" :extend t))))
+        '(shadow                   ((t (:foreground "#7C869A" :extend t))))
+        ;;'(default                  ((t (:background "#2E3440" :foreground "#D8DEE9" :extend t))))
+        '(default                  ((t (:background "#1E2430" :foreground "#E8EEF9" :extend t))))
+        )
       )))
-
   (advice-add 'load-theme :after #'my/helm-customize-for-nord-theme)
   (load-theme 'nord t)
   
