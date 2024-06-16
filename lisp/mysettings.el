@@ -674,9 +674,10 @@
        (buffer-list))))
   (setq cape-dabbrev-check-other-buffers #'cape-dabbrev-check-other-buffers)
 
+  ;;(remove-hook 'completion-at-point-functions nil)
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  ;;(add-hook 'completion-at-point-functions #'cape-file)
+  ;;(add-hook 'completion-at-point-functions #'cape-elisp-block)
   ;;(add-hook 'completion-at-point-functions #'cape-history)
   (add-hook 'completion-at-point-functions #'cape-keyword)
   ;;(add-hook 'completion-at-point-functions #'cape-tex)
@@ -698,29 +699,29 @@
   ;;   (setq lsp-completion-provider :none))
   (setq corfu-auto-prefix 1)
   ;;(setq corfu-auto t) 
-  (setq cape-dabbrev-min-length 3)
+  (setq cape-dabbrev-min-length 1)
   (setq corfu-auto-delay 0.0)
   ;;(company-dabbrev-ignore-buffers '((get-buffer "*scratch*")))
 
-  ;; (defun python-keywords()
-  ;;   (interactive)
-  ;;   (cape-capf-case-fold '("False" "None" "True" "and" "as" "assert" "break" "class" "continue"
-  ;;     "def" "del" "elif" "else" "except" "finally" "for" "from" "global"
-  ;;     "if" "import" "in" "is" "lambda" "nonlocal" "not" "or" "pass" "raise"
-  ;;     "return" "try" "while" "with" "yield" "abs" "dict" "help" "min" "setattr"
-  ;;     "all" "dir" "hex" "next" "slice" "any" "divmod" "id" "object" "sorted"
-  ;;     "ascii" "enumerate" "input" "oct" "staticmethod" "bin" "eval" "int"
-  ;;     "open" "str" "bool" "exec" "isinstance" "ord" "sum" "bytearray" "filter"
-  ;;     "issubclass" "pow" "super" "bytes" "float" "iter" "print" "tuple"
-  ;;     "callable" "format" "len" "property" "type" "chr" "frozenset" "list"
-  ;;     "range" "vars" "classmethod" "getattr" "locals" "repr" "zip" "compile"
-  ;;     "globals" "map" "reversed" "__import__")))
-  ;; (add-hook 'python-mode-hook
-  ;;   (lambda ()
-  ;;     (setq-local completion-at-point-functions
-  ;;       (list (cape-capf-super #'cape-dabbrev 
-  ;;         ;; Python専用のキーワード補完を追加
-  ;;         (cape-capf-buster #'python-keywords))))))
+  (defun python-keywords()
+    (interactive)
+    (cape-capf-case-fold '("False" "None" "True" "and" "as" "assert" "break" "class" "continue"
+      "def" "del" "elif" "else" "except" "finally" "for" "from" "global"
+      "if" "import" "in" "is" "lambda" "nonlocal" "not" "or" "pass" "raise"
+      "return" "try" "while" "with" "yield" "abs" "dict" "help" "min" "setattr"
+      "all" "dir" "hex" "next" "slice" "any" "divmod" "id" "object" "sorted"
+      "ascii" "enumerate" "input" "oct" "staticmethod" "bin" "eval" "int"
+      "open" "str" "bool" "exec" "isinstance" "ord" "sum" "bytearray" "filter"
+      "issubclass" "pow" "super" "bytes" "float" "iter" "print" "tuple"
+      "callable" "format" "len" "property" "type" "chr" "frozenset" "list"
+      "range" "vars" "classmethod" "getattr" "locals" "repr" "zip" "compile"
+      "globals" "map" "reversed" "__import__")))
+  (add-hook 'python-mode-hook
+    (lambda ()
+      (setq-local completion-at-point-functions
+        (list (cape-capf-super #'cape-dabbrev 
+          ;; Python専用のキーワード補完を追加
+          (cape-capf-buster #'python-keywords))))))
 
 ;;   (add-hook 'python-mode-hook
 ;;     (lambda ()
