@@ -717,6 +717,54 @@ ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer
   (bind-keys :map corfu-map
       ("<RET>" . nil) ;; 2018/06/27 tmux用
     )
+
+(defun my-corfu-unselect-first ()
+  "Unselect the first completion candidate in Corfu."
+  (interactive)
+  (when (corfu--popup-showing-p)
+    ;; Move selection to a non-existing candidate to unselect all.
+    ;;(corfu--goto nil)
+    (corfu--index nil)
+    ))
+(corfu--goto)
+(use-package corfu
+  :init
+  (corfu-global-mode)  ; Corfu をグローバルに有効にする
+  :config
+  (add-hook 'corfu-popup-hook 'my-corfu-unselect-first))
+        (remove-hook 'corfu-popup-hook 'my-corfu-unselect-first)
+
+
+        (corfu-mode -1)
+        (company-mode 1)
+(company-complete-common)
+
+  (bind-keys :map corfu-map
+      ("C-w" . corfu-expand)
+      ("C-e" . corfu-expand)
+    )
+  (bind-keys :map company-mode-map
+      ("C-w" . company-common)
+      ("C-e" . company-common)
+    )
+        my/cmar
+        (corfu-next nil)
+        (global-copilot-mode -1)
+
+        (corfu-complete)
+        
+        (corfu-mode -1)
+        (company-mode 1)
+
+        (setq company-prefix 2)
+
+  (setq completion-ignore-case t)
+  (setq company-idle-delay 0)                    ;; 待ち時間を0秒にする
+  (setq company-minimum-prefix-length 2)         ;; 補完できそうな文字が2文字以上入力されたら候補を表示
+  (setq company-selection-wrap-around t)         ;; 候補の一番下でさらに下に行こうとすると一番上に戻る
+        (setq company-transformers '(company-sort-by-occurrence company-sort-by-backend-importance))) ;; 利用頻度が高いものを候補の上に表示する
+my/markdown-
+   
         
 ```
 

@@ -673,16 +673,16 @@
 ;;      (and (buffer-file-name buf)
 ;;                  (string-equal (file-name-extension (buffer-file-name buf)) "py")))
 ;;    (buffer-list)))
-  (defun cape-dabbrev-check-other-buffers(&optional args)
-    ;;(message "%s" major-mode)
-   (setq message-log-max 100000)
-   (funcall org-message "::: %s" major-mode)
-   ;;(funcall org-message "::: %s" (get-buffers-matching-mode major-mode))
-   (mapcar #'get-buffer  
-     (cl-remove-if-not 
-       (lambda (buf) (equal (buffer-local-value 'major-mode buf) major-mode))
-       (buffer-list))))
-  (setq cape-dabbrev-check-other-buffers #'cape-dabbrev-check-other-buffers)
+  ;; (defun cape-dabbrev-check-other-buffers(&optional args)
+  ;;   ;;(message "%s" major-mode)
+  ;;  (setq message-log-max 100000)
+  ;;  (funcall org-message "::: %s" major-mode)
+  ;;  ;;(funcall org-message "::: %s" (get-buffers-matching-mode major-mode))
+  ;;  (mapcar #'get-buffer  
+  ;;    (cl-remove-if-not 
+  ;;      (lambda (buf) (equal (buffer-local-value 'major-mode buf) major-mode))
+  ;;      (buffer-list))))
+  ;; (setq cape-dabbrev-check-other-buffers #'cape-dabbrev-check-other-buffers)
 
   ;;(remove-hook 'completion-at-point-functions nil)
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
@@ -733,13 +733,12 @@
           ;; Python専用のキーワード補完を追加
           (cape-capf-buster #'python-keywords))))))
 
-
   ;; RETで選択候補が入力されるのをOFF
   ;; →デフォルトで最上位が選択状態になるので、Enterで入力になると感覚と違う
   ;;   特にshellとかだとパスの入力で手間取る
-  (bind-keys :map corfu-map
-      ("<RET>" . nil)
-    )
+  ;; (bind-keys :map corfu-map
+  ;;     ("<RET>" . nil)
+  ;;   )
 ;;   (add-hook 'python-mode-hook
 ;;     (lambda ()
 ;; (setq-local completion-at-point-functions
@@ -994,7 +993,7 @@ ssh localhost ~/bin/npm $@
   ;;      (if (bound-and-true-p copilot-mode)
   ;;        (copilot-complete)))))
   ;; (define-key copilot-mode-map (kbd "C-o") 'copilot-complete)
-  (global-copilot-mode 1)
+  ;;(global-copilot-mode 1)
 
 )
 
