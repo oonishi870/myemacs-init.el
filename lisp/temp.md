@@ -5,7 +5,30 @@ test
 
 ```
 
-t# test
+```math
+\frac{\int\frac{\sum_{k=1}^nk}{888} \mathrm{d}x}{\partial{x_i}} 
+```
+
+```math
+\begin{pmatrix}
+a & b \\
+c & d 
+\end{pmatrix} 
+
+\begin{pmatrix}
+x \\
+y  
+\end{pmatrix} 
+=
+\begin{pmatrix}
+k \\
+t  
+\end{pmatrix} 
+
+```
+
+
+# test
 
 - test1
 - test2
@@ -791,3 +814,84 @@ ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer
 (print completion-at-point-functions)
 ```
 
+```elisp
+(global-corfu-mode -1)
+
+(leaf company
+  (leaf company-statistics
+    :ensure t
+    :config
+    (company-statistics-mode))
+  :ensure t
+  ;;:after company-statistics
+  ;; :bind (("M-<tab>" . company-complete) ;; Tabで自動補完を起動する
+  ;;        :map company-active-map
+  ;;        ;; C-n, C-pで補完候補を次/前の候補を選択
+  ;;        ("M-n" . nil)                      ;; M-nで次の候補への移動をキャンセル
+  ;;        ("M-p" . nil)                      ;; M-pでの前の候補への移動をキャンセル
+  ;;        ("C-n" . company-select-next)      ;; 次の補完候補を選択
+  ;;        ("C-p" . company-select-previous);; 前の補完候補を選択
+  ;;        ("C-s" . company-filter-candidates) ;; C-sで絞り込む
+  ;;        :map company-search-map
+  ;;        ;; 検索候補の移動をC-nとC-pで移動する
+  ;;        ("C-n" . company-select-next)
+  ;;        ("C-p" . company-select-previous))
+  :config
+  ;; 全バッファで有効にする
+  (global-company-mode)
+  :config
+  (define-key emacs-lisp-mode-map (kbd "C-M-i") nil) ;; CUI版のためにemacs-lisp-modeでバインドされるC-M-iをアンバインド
+  (global-set-key (kbd "C-M-i") 'company-complete)   ;; CUI版ではM-<tab>はC-M-iに変換されるのでそれを利用
+  (setq completion-ignore-case t)
+  (setq company-idle-delay 0)                    ;; 待ち時間を0秒にする
+  (setq company-minimum-prefix-length 2)         ;; 補完できそうな文字が2文字以上入力されたら候補を表示
+  (setq company-selection-wrap-around t)         ;; 候補の一番下でさらに下に行こうとすると一番上に戻る
+  (setq company-transformers '(company-sort-by-occurrence company-sort-by-backend-importance))) ;; 利用頻度が高いものを候補の上に表示する
+
+
+
+
+;; auto-completeに近い挙動で候補の絞り込みができる
+(use-package company-dwim
+  :straight '(company-dwim
+              :type git
+              :host github
+              :repo "zk-phi/company-dwim")
+  :ensure t
+  :init
+  (define-key company-active-map (kbd "TAB") 'company-dwim)
+  (setq company-frontends
+      '(company-pseudo-tooltip-unless-just-one-frontend
+        company-dwim-frontend
+        company-echo-metadata-frontend)))
+
+;; カーソルの位置がどこであってもcompanyを起動できる
+(use-package company-anywhere
+  :straight '(company-anywhere
+              :type git
+              :host github
+              :repo "zk-phi/company-anywhere")
+  :ensure t)
+
+;; プログラムの関数、変数のキーワード補完を強化
+(use-package company-same-mode-buffers
+  :straight '(company-same-mode-buffers
+              :type git
+              :host github
+              :repo "zk-phi/company-same-mode-buffers")
+  :after company
+  :ensure t
+  :init
+  (require 'company-same-mode-buffers)
+  (company-same-mode-buffers-initialize)
+  ;;
+  :config
+  (setq company-backends
+        '((company-capf :with company-same-mode-buffers)
+          (company-dabbrev-code :with company-same-mode-buffers)
+          company-keywords
+          company-files
+          company-dabbrev)))
+
+
+```
