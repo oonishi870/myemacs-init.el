@@ -56,6 +56,8 @@
   
   ;; ediffを左右分割にする
   (setq ediff-split-window-function (quote split-window-horizontally))
+  ;; コントロール用のバッファを同一フレーム内に表示する
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 
   ;; lispのインデント設定
   (setq-default lisp-indent-offset 2)
@@ -199,6 +201,26 @@
   (electric-indent-mode 1)
   (setq indent-line-function #'indent-relative)
   (setq electric-indent-inhibit t)
+
+  (leaf whitespace
+    (set-face-foreground 'whitespace-tab "gray")
+    (set-face-underline  'whitespace-tab nil)
+    (set-face-background 'whitespace-tab nil)
+
+    ;; タブの表示を変更
+    (setq whitespace-display-mappings
+      ;;'((tab-mark ?\t [?\xBB ?\t])))
+      '((tab-mark ?\t [?^ ?\t])))
+
+    (setq whitespace-style '(face           ; faceで可視化
+                             ;; trailing       ; 行末
+                             tabs           ; タブ
+                             ;;empty          ; 先頭/末尾の空行
+                             ;;spaces         ; 空白
+                             ;; space-mark     ; 表示のマッピング
+                             tab-mark))
+
+    (global-whitespace-mode 0))
 )
 
 (leaf expand-region
@@ -907,6 +929,9 @@
         '(shadow                   ((t (:foreground "#7C869A" :extend t))))
         ;;'(default                  ((t (:background "#2E3440" :foreground "#D8DEE9" :extend t))))
         '(default                  ((t (:background "#1E2430" :foreground "#E8EEF9" :extend t))))
+        )
+      (custom-set-faces
+        '(whitespace-tab             ((t (:foreground "#808080" :extend t))))
         )
       )))
   (advice-add 'load-theme :after #'my/helm-customize-for-nord-theme)
