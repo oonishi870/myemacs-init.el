@@ -784,6 +784,16 @@
   ;; デフォルトを選択なしに
   (setq-default company-selection-default nil)
   (setq-default company-selection nil)
+  ;; 選択なし状態のreturnを通常入力に
+  (bind-keys :map company-active-map
+    ("<return>" .
+      (lambda (&rest _)
+        (interactive)
+        (if (not company-selection)
+          (newline)
+          (company-complete)
+        ))
+      ))
   
   ;; 利用頻度が高いものを候補の上に表示する
   ;;(setq company-transformers '(company-sort-by-occurrence company-sort-by-backend-importance))

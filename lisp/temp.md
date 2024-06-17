@@ -916,6 +916,44 @@ abbrev--suggest-saved-recommendations
           company-keywords
           company-files
           company-dabbrev)))
+company-active-map
+company-selection
 
+(bind-keys :map company-active-map
+  ("<return>" .
+    (lambda (&rest _)
+      (interactive)(print "yes")))
+  ("<S-return>" . (lambda (&rest _)(interactive)(print "yes4")))
+  ("<RET>" . (lambda (&rest _)(interactive)(print "yes")))
+  ("S-<RET>" . (lambda (&rest _)(interactive)(print "yes4")))
+  ("<RETURN>" . (lambda (&rest _)(interactive)(print "yes")))
+  ("S-<RETURN>" . (lambda (&rest _)(interactive)(print "yes4")))
+  ("<ret>" . (lambda (&rest _)(interactive)(print "yes")))
+  ("C-m" . (lambda (&rest _)(interactive)(print "yes2")))
+  ("C-j" . (lambda (&rest _)(interactive)(print "yes3")))
+  )
+
+(bind-keys :map company-active-map
+  ("<return>" .
+    (lambda (&rest _)
+      (interactive)
+      (if (not company-selection)
+        (newline)
+        (company-complete)
+      ))
+    ))
+
+
+
+
+(describe-keymap (current-active-maps))
+(print (current-active-maps))
+(global-set-key [return] '(lambda (&rest _)(interactive)(print "yes6")))a
+
+
+
+
+(insert "\n")
+(print company-active-map)
 
 ```
