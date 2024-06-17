@@ -816,12 +816,10 @@ ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer
 
 ```elisp
 (global-corfu-mode -1)
+(company-mode 1)
+activate-mark-hook
 
 (leaf company
-  (leaf company-statistics
-    :ensure t
-    :config
-    (company-statistics-mode))
   :ensure t
   ;;:after company-statistics
   ;; :bind (("M-<tab>" . company-complete) ;; Tabで自動補完を起動する
@@ -848,8 +846,34 @@ ivy-prescient--old-ivy-sort-matches-completion-in-region-function  (let ((buffer
   (setq company-selection-wrap-around t)         ;; 候補の一番下でさらに下に行こうとすると一番上に戻る
   (setq company-transformers '(company-sort-by-occurrence company-sort-by-backend-importance))) ;; 利用頻度が高いものを候補の上に表示する
 
+(setq company-transformers '(company-sort-by-occurrence company-sort-by-occurrence ))
+(setq company-transformers nil)
+coding-category-utf-16-auto
+(setq-default company-selection-default nil)
+(setq-default company-selection nil)
+
+(setq corfu-preselected t)
 
 
+
+
+abbrev-expand-function
+a
+
+  (bind-keys :map company-active-map
+      ("C-m" . nil)
+      ("C-j" . nil)
+      ("<RET>" . nil)
+      ;;("C-m" . (lambda (&rest _)(interactive)(print "yes")))
+      ("C-w" . (lambda (&rest _)(interactive)(print "yes")))
+    )
+
+
+
+abbrev--suggest-saved-recommendations
+abbrev--suggest-saved-recommendations
+abbrev--suggest-saved-recommendations
+abbrev--suggest-saved-recommendations
 
 ;; auto-completeに近い挙動で候補の絞り込みができる
 (use-package company-dwim
