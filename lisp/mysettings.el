@@ -790,7 +790,7 @@
       (lambda (&rest _)
         (interactive)
         (if (not company-selection)
-          (newline)
+          (company-abort)
           (company-complete)
         ))
       ))
