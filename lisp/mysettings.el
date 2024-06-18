@@ -672,102 +672,102 @@
 	   )
 ))
 
-;; (leaf corfu
-;;   :ensure t  ; MELPAからcorfuをインストール
-;;   :custom ((corfu-cycle . t)  ; 候補リストの循環を有効にする
-;;            (corfu-auto . t)  ; 自動補完を有効にする
-;;            )
-;;   ;;:global-minor-mode 
-;;   :init
-;;   ;; (setq dabbrev-check-other-buffers nil)
-;;   ;; (setq dabbrev-check-all-buffers nil)
-;;   ;;
-;;   (global-corfu-mode +1)
-;;   (leaf cape :ensure t)
-;;   (leaf cl-lib :ensure t)
-;;   (setq org-message #'message)
-;; ;;   (defun cape-dabbrev-check-other-buffers(&optional args)
-;; ;; ;;(error "yes")
-;; ;;   (setq message-log-max 100000)
-;; ;;   (funcall org-message "::: %s" major-mode)
-;; ;;   (redisplay t)
-;; ;; (cl-remove-if-not
-;; ;;    (lambda (buf)
-;; ;;      (and (buffer-file-name buf)
-;; ;;                  (string-equal (file-name-extension (buffer-file-name buf)) "py")))
-;; ;;    (buffer-list)))
-;;   ;; (defun cape-dabbrev-check-other-buffers(&optional args)
-;;   ;;   ;;(message "%s" major-mode)
-;;   ;;  (setq message-log-max 100000)
-;;   ;;  (funcall org-message "::: %s" major-mode)
-;;   ;;  ;;(funcall org-message "::: %s" (get-buffers-matching-mode major-mode))
-;;   ;;  (mapcar #'get-buffer  
-;;   ;;    (cl-remove-if-not 
-;;   ;;      (lambda (buf) (equal (buffer-local-value 'major-mode buf) major-mode))
-;;   ;;      (buffer-list))))
-;;   ;; (setq cape-dabbrev-check-other-buffers #'cape-dabbrev-check-other-buffers)
+(leaf corfu
+  ;;:ensure t  ; MELPAからcorfuをインストール
+  :custom ((corfu-cycle . t)  ; 候補リストの循環を有効にする
+           (corfu-auto . t)  ; 自動補完を有効にする
+           )
+  ;;:global-minor-mode 
+  :init
+  ;; (setq dabbrev-check-other-buffers nil)
+  ;; (setq dabbrev-check-all-buffers nil)
+  ;;
+  ;;(global-corfu-mode +1)
+  (leaf cape :ensure t)
+  (leaf cl-lib :ensure t)
+  (setq org-message #'message)
+;;   (defun cape-dabbrev-check-other-buffers(&optional args)
+;; ;;(error "yes")
+;;   (setq message-log-max 100000)
+;;   (funcall org-message "::: %s" major-mode)
+;;   (redisplay t)
+;; (cl-remove-if-not
+;;    (lambda (buf)
+;;      (and (buffer-file-name buf)
+;;                  (string-equal (file-name-extension (buffer-file-name buf)) "py")))
+;;    (buffer-list)))
+  ;; (defun cape-dabbrev-check-other-buffers(&optional args)
+  ;;   ;;(message "%s" major-mode)
+  ;;  (setq message-log-max 100000)
+  ;;  (funcall org-message "::: %s" major-mode)
+  ;;  ;;(funcall org-message "::: %s" (get-buffers-matching-mode major-mode))
+  ;;  (mapcar #'get-buffer  
+  ;;    (cl-remove-if-not 
+  ;;      (lambda (buf) (equal (buffer-local-value 'major-mode buf) major-mode))
+  ;;      (buffer-list))))
+  ;; (setq cape-dabbrev-check-other-buffers #'cape-dabbrev-check-other-buffers)
 
-;;   ;;(remove-hook 'completion-at-point-functions nil)
-;;   (add-hook 'completion-at-point-functions #'cape-dabbrev)
-;;   ;;(add-hook 'completion-at-point-functions #'cape-file)
-;;   ;;(add-hook 'completion-at-point-functions #'cape-elisp-block)
-;;   ;;(add-hook 'completion-at-point-functions #'cape-history)
-;;   (add-hook 'completion-at-point-functions #'cape-keyword)
-;;   ;;(add-hook 'completion-at-point-functions #'cape-tex)
-;;   ;;(add-hook 'completion-at-point-functions #'cape-sgml)
-;;   ;;(add-hook 'completion-at-point-functions #'cape-rfc1345)
-;;   ;;(add-hook 'completion-at-point-functions #'cape-abbrev)
-;;   ;;(add-hook 'completion-at-point-functions #'cape-dict)
-;;   ;;(add-hook 'completion-at-point-functions #'cape-elisp-symbol)
-;;   ;;(add-hook 'completion-at-point-functions #'cape-line)
-;; ;;   (setq dabbrev-search-these-buffers-only 
-;; ;; (cl-remove-if
-;; ;;    (lambda (buf)
-;; ;;      (not (with-current-buffer buf
-;; ;;             (and buffer-file-name
-;; ;;                  (string-equal (file-name-extension buffer-file-name) "py")))))
-;; ;;    (buffer-list)))
-;;   :config
-;;   ;; (with-eval-after-load 'lsp-mode
-;;   ;;   (setq lsp-completion-provider :none))
-;;   (setq corfu-auto-prefix 1)
-;;   ;;(setq corfu-auto t) 
-;;   (setq cape-dabbrev-min-length 1)
-;;   (setq corfu-auto-delay 0.0)
-;;   ;;(company-dabbrev-ignore-buffers '((get-buffer "*scratch*")))
+  ;;(remove-hook 'completion-at-point-functions nil)
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  ;;(add-hook 'completion-at-point-functions #'cape-file)
+  ;;(add-hook 'completion-at-point-functions #'cape-elisp-block)
+  ;;(add-hook 'completion-at-point-functions #'cape-history)
+  (add-hook 'completion-at-point-functions #'cape-keyword)
+  ;;(add-hook 'completion-at-point-functions #'cape-tex)
+  ;;(add-hook 'completion-at-point-functions #'cape-sgml)
+  ;;(add-hook 'completion-at-point-functions #'cape-rfc1345)
+  ;;(add-hook 'completion-at-point-functions #'cape-abbrev)
+  ;;(add-hook 'completion-at-point-functions #'cape-dict)
+  ;;(add-hook 'completion-at-point-functions #'cape-elisp-symbol)
+  ;;(add-hook 'completion-at-point-functions #'cape-line)
+;;   (setq dabbrev-search-these-buffers-only 
+;; (cl-remove-if
+;;    (lambda (buf)
+;;      (not (with-current-buffer buf
+;;             (and buffer-file-name
+;;                  (string-equal (file-name-extension buffer-file-name) "py")))))
+;;    (buffer-list)))
+  :config
+  ;; (with-eval-after-load 'lsp-mode
+  ;;   (setq lsp-completion-provider :none))
+  (setq corfu-auto-prefix 1)
+  ;;(setq corfu-auto t) 
+  (setq cape-dabbrev-min-length 1)
+  (setq corfu-auto-delay 0.0)
+  ;;(company-dabbrev-ignore-buffers '((get-buffer "*scratch*")))
 
-;;   (defun python-keywords()
-;;     (interactive)
-;;     (cape-capf-case-fold '("False" "None" "True" "and" "as" "assert" "break" "class" "continue"
-;;       "def" "del" "elif" "else" "except" "finally" "for" "from" "global"
-;;       "if" "import" "in" "is" "lambda" "nonlocal" "not" "or" "pass" "raise"
-;;       "return" "try" "while" "with" "yield" "abs" "dict" "help" "min" "setattr"
-;;       "all" "dir" "hex" "next" "slice" "any" "divmod" "id" "object" "sorted"
-;;       "ascii" "enumerate" "input" "oct" "staticmethod" "bin" "eval" "int"
-;;       "open" "str" "bool" "exec" "isinstance" "ord" "sum" "bytearray" "filter"
-;;       "issubclass" "pow" "super" "bytes" "float" "iter" "print" "tuple"
-;;       "callable" "format" "len" "property" "type" "chr" "frozenset" "list"
-;;       "range" "vars" "classmethod" "getattr" "locals" "repr" "zip" "compile"
-;;       "globals" "map" "reversed" "__import__")))
+  (defun python-keywords()
+    (interactive)
+    (cape-capf-case-fold '("False" "None" "True" "and" "as" "assert" "break" "class" "continue"
+      "def" "del" "elif" "else" "except" "finally" "for" "from" "global"
+      "if" "import" "in" "is" "lambda" "nonlocal" "not" "or" "pass" "raise"
+      "return" "try" "while" "with" "yield" "abs" "dict" "help" "min" "setattr"
+      "all" "dir" "hex" "next" "slice" "any" "divmod" "id" "object" "sorted"
+      "ascii" "enumerate" "input" "oct" "staticmethod" "bin" "eval" "int"
+      "open" "str" "bool" "exec" "isinstance" "ord" "sum" "bytearray" "filter"
+      "issubclass" "pow" "super" "bytes" "float" "iter" "print" "tuple"
+      "callable" "format" "len" "property" "type" "chr" "frozenset" "list"
+      "range" "vars" "classmethod" "getattr" "locals" "repr" "zip" "compile"
+      "globals" "map" "reversed" "__import__")))
+  (add-hook 'python-mode-hook
+    (lambda ()
+      (setq-local completion-at-point-functions
+        (list (cape-capf-super #'cape-dabbrev 
+          ;; Python専用のキーワード補完を追加
+          (cape-capf-buster #'python-keywords))))))
+
+  ;; RETで選択候補が入力されるのをOFF
+  ;; →デフォルトで最上位が選択状態になるので、Enterで入力になると感覚と違う
+  ;;   特にshellとかだとパスの入力で手間取る
+  ;; (bind-keys :map corfu-map
+  ;;     ("<RET>" . nil)
+  ;;   )
 ;;   (add-hook 'python-mode-hook
 ;;     (lambda ()
-;;       (setq-local completion-at-point-functions
-;;         (list (cape-capf-super #'cape-dabbrev 
-;;           ;; Python専用のキーワード補完を追加
-;;           (cape-capf-buster #'python-keywords))))))
-
-;;   ;; RETで選択候補が入力されるのをOFF
-;;   ;; →デフォルトで最上位が選択状態になるので、Enterで入力になると感覚と違う
-;;   ;;   特にshellとかだとパスの入力で手間取る
-;;   ;; (bind-keys :map corfu-map
-;;   ;;     ("<RET>" . nil)
-;;   ;;   )
-;; ;;   (add-hook 'python-mode-hook
-;; ;;     (lambda ()
-;; ;; (setq-local completion-at-point-functions
-;; ;;   (mapcar #'cape-company-to-capf
-;; ;;     (list #'company-files #'company-keywords #'company-dabbrev)))))
-;; )
+;; (setq-local completion-at-point-functions
+;;   (mapcar #'cape-company-to-capf
+;;     (list #'company-files #'company-keywords #'company-dabbrev)))))
+)
 
 
 (leaf company
@@ -986,6 +986,16 @@
   ;;(setq mozc-candidate-style 'echo-area)
   ;;(setq mozc-candidate-style 'overlay)
   (setq default-input-method 'japanese-mozc)
+  
+  ;; ターミナルモードで半角スペースがうてない問題の対処
+  (defun my/mozc-spc()
+    (interactive)
+    (if mozc-preedit-in-session-flag
+      (mozc-handle-event 32)
+      (insert " ")
+      )
+  )
+  (define-key mozc-mode-map (kbd "SPC") 'my/mozc-spc)
 )
 
 (leaf copilot

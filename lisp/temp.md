@@ -955,9 +955,22 @@ company-selection
 (global-set-key [return] '(lambda (&rest _)(interactive)(print "yes6")))a
 
 
-
+aa
+  
 
 (insert "\n")
 (print company-active-map)
 
+(require 'corfu)
+(corfu-mode 1)
+(company-mode -1)
+
+  (setq corfu-preselect 'prompt)
+  (print corfu-preselected)
+  ;; test te
+  my/markdown-live-preview-buffer
+  my/markdown-html-file-path
+
+
 ```
+
