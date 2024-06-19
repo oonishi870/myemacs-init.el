@@ -905,26 +905,31 @@
   (require 'nord-theme)
   
 
-    ;;(load-theme 'deeper-blue t)
-    ;;(load-theme 'wombat t)
-    (load-theme 'github t)
-    ;; 日本語フォントを設定。フォント名はfc-queryで調べる
-    ;;(set-fontset-font t 'japanese-jisx0208 "あずきフォント")
-    (set-fontset-font t 'japanese-jisx0208 "azuki_font")
-    ;; (set-fontset-font t 'japanese-jisx0208 "Klee One")
-    ;; (set-fontset-font t 'japanese-jisx0208 "Zenkurenaido")
-    ;; (set-fontset-font t 'japanese-jisx0208 "MogihaPenFont")
-    ;;(set-fontset-font t 'japanese-jisx0208 "APJapanesefontT")
-    ;; (set-fontset-font t 'japanese-jisx0208 "RiiTegakiN-R")
-    (set-frame-font "NotoMono 10")
-    (setq face-font-rescale-alist '(
-             (".*Zen Kurenaido.**" . 1.2) ;; Zenkurenaido
-             (".*APJapanesefont.*" . 1.3) ;; あんずもじ
-             (".*azuki.*" . 1.2)          ;; あずきフォント
-             (".*Klee.*" . 1.2)          ;; Klee One
-             (".*MogihaPenFont.*" . 1.2)          ;;mogiha
-             (".*RiiTegakiN.*" . 1.2)          ;;りい手書き
-             ))
+  ;;(load-theme 'deeper-blue t)
+  ;;(load-theme 'wombat t)
+  (load-theme 'github t)
+  ;; 日本語フォントを設定。フォント名はfc-queryで調べる
+  ;;(set-fontset-font t 'japanese-jisx0208 "あずきフォント")
+  (set-fontset-font t 'japanese-jisx0208 "azuki_font")
+  ;; (set-fontset-font t 'japanese-jisx0208 "Klee One")
+  ;; (set-fontset-font t 'japanese-jisx0208 "Zenkurenaido")
+  ;; (set-fontset-font t 'japanese-jisx0208 "MogihaPenFont")
+  ;;(set-fontset-font t 'japanese-jisx0208 "APJapanesefontT")
+  ;; (set-fontset-font t 'japanese-jisx0208 "RiiTegakiN-R")
+  (set-frame-font "NotoMono 10")
+  (setq face-font-rescale-alist '(
+           (".*Zen Kurenaido.**" . 1.2) ;; Zenkurenaido
+           (".*APJapanesefont.*" . 1.3) ;; あんずもじ
+           (".*azuki.*" . 1.2)          ;; あずきフォント
+           (".*Klee.*" . 1.2)          ;; Klee One
+           (".*MogihaPenFont.*" . 1.2)          ;;mogiha
+           (".*RiiTegakiN.*" . 1.2)          ;;りい手書き
+                                   ))
+  
+  ;; (set-frame-font "azuki_font 12")
+  ;; (set-fontset-font t 'japanese-jisx0208 nil)
+  ;; (setq face-font-rescale-alist '())
+  
   (set-face-underline 'hl-line nil)
 
   ;; nord-themeでhelm-find-fileが背景白になって見にくい
@@ -957,7 +962,7 @@
         '(ediff-current-diff-A   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t))))
         '(ediff-current-diff-B   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t)))))
       (custom-set-faces
-        '(magit-diff-file-heading-highlight   ((t (:background "#363c48" :foreground "#ECEFF4" :extend t)))))
+        '(magit-diff-file-heading-highlight ((t (:background "#363c48" :foreground "#ECEFF4" :extend t)))))
       (custom-set-faces
         '(font-lock-comment-face             ((t (:foreground "#B080B0" :extend t))))
         '(font-lock-comment-delimiter-face   ((t (:foreground "#B080B0" :extend t))))
@@ -969,7 +974,7 @@
       (custom-set-faces
         '(whitespace-tab             ((t (:foreground "#808080" :extend t))))
         )
-      )))
+      ))
   (advice-add 'load-theme :after #'my/helm-customize-for-nord-theme)
   (load-theme 'nord t)
   

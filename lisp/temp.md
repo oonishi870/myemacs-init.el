@@ -973,7 +973,24 @@ my/*file
   (interactive)
   (switch-to-buffer (concat (make-temp-name "*scratch") "*"))
 
-  
+
+(let (
+    (agpath (locate-user-emacs-file "bin/ag"))
+    (shell-command (format "mkdir -p %s" (locate-user-emacs-file "bin")))
+    (s "\
+#!/bin/sh
+ssh localhost ag $@
+")) 
+    (with-temp-file agpath
+      (insert s)
+    )
+    (shell-command (format "chmod +x %s" agpath))
+    (setq counsel-ag-command agpath)
+)
+
+
+(setq counsel-ag-command nil)
+  (shell-command-to-string "ssh localhost ag -G 'sql$' usi ./")
   
 ```
 
