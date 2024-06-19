@@ -1,3 +1,7 @@
-*
-*/
+*/*
 *~
+recentf
+tramp
+!lisp/*
+lisp/*~
+

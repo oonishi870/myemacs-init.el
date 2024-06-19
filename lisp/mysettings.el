@@ -636,6 +636,7 @@
       ( "C-k C-k C-d" . my/mdcoderun-again)
       ( "C-k C-k C-@" . describe-key)
       ( "C-k C-@" . my/repeat-last-evaluated-sexp)
+      ( "C-k C-h" . counsel-ag)
 ;;      ( "C-k C-<left>" . split-window-left)
       ;; ( "C-k C-<right>" . split-window-right)
       ;; ( "C-k C-<down>" . split-window-below)
@@ -949,7 +950,7 @@
         '(ivy-minibuffer-match-face-2 ((t (:background "#434C5E" :foreground "#D8DEE9" :weight bold))))
         '(ivy-minibuffer-match-face-3 ((t (:background "#3B4252" :foreground "#D8DEE9" :weight bold))))
         '(ivy-minibuffer-match-face-4 ((t (:background "#2E3440" :foreground "#D8DEE9" :weight bold))))
-        '(ivy-current-match ((t (:background "#71206a" :foreground "#E8EEF9" :extend t))))
+        '(ivy-current-match ((t (:background "#71206a" :foreground "#E8EEF9"))))
         )
       (custom-set-faces
         '(sh-quoted-exec ((t (:foreground "#FFB0B0" :extend t))))
