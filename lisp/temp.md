@@ -925,7 +925,8 @@ company-selection
 (bind-keys :map company-active-map
   ("<return>" .
     (lambda (&rest _)
-      (interactive)(print "yes")))
+      (interactive)
+      (print "yes")))
   ("<S-return>" . (lambda (&rest _)(interactive)(print "yes4")))
   ("<RET>" . (lambda (&rest _)(interactive)(print "yes")))
   ("S-<RET>" . (lambda (&rest _)(interactive)(print "yes4")))
@@ -946,17 +947,11 @@ company-selection
       ))
     ))
 
-
 (print
-
 
 (describe-keymap (current-active-maps))
 (print (current-active-maps))
 (global-set-key [return] '(lambda (&rest _)(interactive)(print "yes6")))a
-
-
-aa
-  
 
 (insert "\n")
 (print company-active-map)
@@ -964,13 +959,21 @@ aa
 (require 'corfu)
 (corfu-mode 1)
 (company-mode -1)
-
+my/*file
   (setq corfu-preselect 'prompt)
   (print corfu-preselected)
-  ;; test te
+  ;; test test
   my/markdown-live-preview-buffer
   my/markdown-html-file-path
 
+  my/markdown-html-file-path
+  
+;; 
+(defun my/generate-temp-buffer ()
+  (interactive)
+  (switch-to-buffer (concat (make-temp-name "*scratch") "*"))
 
+  
+  
 ```
 

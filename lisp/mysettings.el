@@ -673,39 +673,42 @@
 ))
 
 (leaf corfu
-  ;;:ensure t  ; MELPAからcorfuをインストール
+  :ensure t  ; MELPAからcorfuをインストール
   :custom ((corfu-cycle . t)  ; 候補リストの循環を有効にする
            (corfu-auto . t)  ; 自動補完を有効にする
            )
   ;;:global-minor-mode 
-  :init
+  :config
   ;; (setq dabbrev-check-other-buffers nil)
   ;; (setq dabbrev-check-all-buffers nil)
   ;;
-  ;;(global-corfu-mode +1)
+  ;; デフォルトを選択なしにする
+  (setq corfu-preselect 'prompt)
+  (global-corfu-mode +1)
   (leaf cape :ensure t)
   (leaf cl-lib :ensure t)
   (setq org-message #'message)
-;;   (defun cape-dabbrev-check-other-buffers(&optional args)
-;; ;;(error "yes")
-;;   (setq message-log-max 100000)
-;;   (funcall org-message "::: %s" major-mode)
-;;   (redisplay t)
-;; (cl-remove-if-not
-;;    (lambda (buf)
-;;      (and (buffer-file-name buf)
-;;                  (string-equal (file-name-extension (buffer-file-name buf)) "py")))
-;;    (buffer-list)))
   ;; (defun cape-dabbrev-check-other-buffers(&optional args)
-  ;;   ;;(message "%s" major-mode)
-  ;;  (setq message-log-max 100000)
-  ;;  (funcall org-message "::: %s" major-mode)
-  ;;  ;;(funcall org-message "::: %s" (get-buffers-matching-mode major-mode))
-  ;;  (mapcar #'get-buffer  
-  ;;    (cl-remove-if-not 
-  ;;      (lambda (buf) (equal (buffer-local-value 'major-mode buf) major-mode))
-  ;;      (buffer-list))))
-  ;; (setq cape-dabbrev-check-other-buffers #'cape-dabbrev-check-other-buffers)
+  ;;   ;;(error "yes")
+  ;;   (setq message-log-max 100000)
+  ;;   ;;(funcall org-message "::: %s" major-mode)
+  ;;   (redisplay t)
+  ;;   (cl-remove-if-not
+  ;;    (lambda (buf)
+  ;;      (and (buffer-file-name buf)
+  ;;                  (string-equal (file-name-extension (buffer-file-name buf)) "py")))
+  ;;     (buffer-list))
+  ;;   )
+  (defun cape-dabbrev-check-other-buffers(&optional args)
+    ;;(message "%s" major-mode)
+   (setq message-log-max 100000)
+   ;;(funcall org-message "::: %s" major-mode)
+   ;;(funcall org-message "::: %s" (get-buffers-matching-mode major-mode))
+   (mapcar #'get-buffer  
+     (cl-remove-if-not 
+       (lambda (buf) (equal (buffer-local-value 'major-mode buf) major-mode))
+       (buffer-list))))
+  (setq cape-dabbrev-check-other-buffers #'cape-dabbrev-check-other-buffers)
 
   ;;(remove-hook 'completion-at-point-functions nil)
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
@@ -727,7 +730,6 @@
 ;;             (and buffer-file-name
 ;;                  (string-equal (file-name-extension buffer-file-name) "py")))))
 ;;    (buffer-list)))
-  :config
   ;; (with-eval-after-load 'lsp-mode
   ;;   (setq lsp-completion-provider :none))
   (setq corfu-auto-prefix 1)
@@ -770,34 +772,35 @@
 )
 
 
-(leaf company
-  :ensure t
-  :config
-  ;; 全バッファで有効にする
-  (global-company-mode)
-  :config
-  (setq completion-ignore-case t)
-  (setq company-idle-delay 0)                    ;; 待ち時間を0秒にする
-  (setq company-minimum-prefix-length 1)         ;; 補完できそうな文字が2文字以上入力されたら候補を表示
-  (setq company-selection-wrap-around t)         ;; 候補の一番下でさらに下に行こうとすると一番上に戻る
+;; 2024/06/19 corfuでもデフォルトを選択なしにできそうなのでやっぱcorfuを試す
+;; (leaf company
+;;   :ensure t
+;;   :config
+;;   ;; 全バッファで有効にする
+;;   (global-company-mode)
+;;   :config
+;;   (setq completion-ignore-case t)
+;;   (setq company-idle-delay 0)                    ;; 待ち時間を0秒にする
+;;   (setq company-minimum-prefix-length 1)         ;; 補完できそうな文字が2文字以上入力されたら候補を表示
+;;   (setq company-selection-wrap-around t)         ;; 候補の一番下でさらに下に行こうとすると一番上に戻る
 
-  ;; デフォルトを選択なしに
-  (setq-default company-selection-default nil)
-  (setq-default company-selection nil)
-  ;; 選択なし状態のreturnを通常入力に
-  (bind-keys :map company-active-map
-    ("<return>" .
-      (lambda (&rest _)
-        (interactive)
-        (if (not company-selection)
-          (company-abort)
-          (company-complete)
-        ))
-      ))
+;;   ;; デフォルトを選択なしに
+;;   (setq-default company-selection-default nil)
+;;   (setq-default company-selection nil)
+;;   ;; 選択なし状態のreturnを通常入力に
+;;   (bind-keys :map company-active-map
+;;     ("<return>" .
+;;       (lambda (&rest _)
+;;         (interactive)
+;;         (if (not company-selection)
+;;           (company-abort)
+;;           (company-complete)
+;;         ))
+;;       ))
   
-  ;; 利用頻度が高いものを候補の上に表示する
-  ;;(setq company-transformers '(company-sort-by-occurrence company-sort-by-backend-importance))
-  ) 
+;;   ;; 利用頻度が高いものを候補の上に表示する
+;;   ;;(setq company-transformers '(company-sort-by-occurrence company-sort-by-backend-importance))
+;;   ) 
 
 ;; (leaf doom-themes
 ;;   :el-get ( doomemacs/themes
@@ -941,6 +944,8 @@
         '(ivy-minibuffer-match-face-2 ((t (:background "#434C5E" :foreground "#D8DEE9" :weight bold))))
         '(ivy-minibuffer-match-face-3 ((t (:background "#3B4252" :foreground "#D8DEE9" :weight bold))))
         '(ivy-minibuffer-match-face-4 ((t (:background "#2E3440" :foreground "#D8DEE9" :weight bold))))
+        '(ivy-current-match ((t (:background "#71206a" :foreground "#E8EEF9" :extend t))))
+        )
       (custom-set-faces
         '(sh-quoted-exec ((t (:foreground "#FFB0B0" :extend t))))
         '(sh-heredoc     ((t (:foreground "#FF6dad" :extend t)))))
