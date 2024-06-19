@@ -30,8 +30,8 @@
             });
               
               // funcが定義されていたら
-              if (typeof after_rendering === 'function') {
-              after_rendering();
+            if (typeof after_rendering === 'function') {
+              after_rendering(xhr.responseText);
             }
 
             // // ハイライト
