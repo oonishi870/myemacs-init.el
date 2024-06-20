@@ -994,3 +994,53 @@ ssh localhost ag $@
   
 ```
 
+
+```elisp
+(defun my/set-auto-inednt(&rest _)
+  (interactive)
+  (electric-indent-mode 1)
+  (setq indent-line-function #'indent-relative)
+  (setq electric-indent-inhibit t))
+
+;; 特定のモードのときに自動で設定する
+(let()
+  (add-hook  'emacs-lisp-mode-hook  'my/set-auto-inednt)
+  (add-hook  'python-mode-hook      'my/set-auto-inednt)
+  (add-hook  'c-mode-hook           'my/set-auto-inednt)
+  (add-hook  'c++mode-hook          'my/set-auto-inednt)
+  (add-hook  'sql-mode-hook         'my/set-auto-inednt)
+  (add-hook  'sh-mode               'my/set-auto-inednt)
+)
+
+
+
+  
+;; 文字列から「;」を検索する。ただし「'’」「""」「/**/」の囲み、行頭「--」は無視する
+(defun my/search-semicolon()
+  (interactive)
+  (let ((p (point))
+        (s (buffer-substring-no-properties (point-min) (point-max)))
+        (result))
+    (setq result (string-match ";"
+      ;; 文字列から「'’」「""」「/**/」の囲み、行頭「--」を「 」に置き換える
+        (my/my/search-semicolon--replace-sequences s)
+      )
+    (if result
+      (goto-char (+ (point-min) result))
+      (goto-char p))
+    )
+  )
+
+(defun my/my/search-semicolon--replace-sequences (s)
+  ;; 「\’」「\"」「\\」を「  」に置き換える
+  (setq s (replace-regexp-in-string "\\\\" "  " s))
+  (setq s (replace-regexp-in-string "\\'" "  " s))
+  (setq s (replace-regexp-in-string "\\\"" "  " s))
+  ;; 「'’」「""」「/**/」の囲み、行頭「--」を同じ長さの「 」に置き換える
+  ;; ただし改行は維持する
+  (string-match "\\('[^']*'\\|\"[^\"]*\"\\|/\\*[^*]*\\*/\\|^--.*$\\)" s)
+  (match-string 1 s)
+)
+(message (my/my/search-semicolon--replace-sequences "test'12\n3'test"))
+
+```

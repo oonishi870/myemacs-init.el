@@ -446,37 +446,38 @@
 ;; )
 
 (leaf unemacsesque-search
-;;  :after corfu
+  ;; :ensure t
+  :after corfu
   :config
-  ;; (let (
-  ;;     (local-file (locate-user-emacs-file "lisp/unemacsesque-search.el"))
-  ;;     (url "https://raw.githubusercontent.com/oonishi870/unemacsesque-search/main/unemacsesque-search.el")
-  ;;   )
-  ;;   (unless (file-exists-p local-file)
-  ;;     (url-copy-file url local-file t))
-  ;;   (load local-file)
+  (let (
+      (local-file (locate-user-emacs-file "lisp/unemacsesque-search.el"))
+      (url "https://raw.githubusercontent.com/oonishi870/unemacsesque-search/main/unemacsesque-search.el")
+    )
+    (unless (file-exists-p local-file)
+      (url-copy-file url local-file t))
+    (load local-file)
 
-  ;;   (require 'corfu)
-  ;;   ;; 検索ワードをcorfuで補完する
-  ;;   (defun my/unemacslike-search-completion()
-  ;;     (if unemacslike-search-mode
-  ;;       (progn
-  ;;         ;; (print (current-buffer))
-  ;;         ;; (print (window-buffer (minibuffer-selected-window)))
-  ;;         (corfu-mode 1)
-  ;;         (setq-local completion-at-point-functions
-  ;;           (with-current-buffer (window-buffer (minibuffer-selected-window))
-  ;;             completion-at-point-functions))
+    (require 'corfu)
+    ;; 検索ワードをcorfuで補完する
+    (defun my/unemacslike-search-completion()
+      (if unemacslike-search-mode
+        (progn
+          ;; (print (current-buffer))
+          ;; (print (window-buffer (minibuffer-selected-window)))
+          (corfu-mode 1)
+          (setq-local completion-at-point-functions
+            (with-current-buffer (window-buffer (minibuffer-selected-window))
+              completion-at-point-functions))
           
-  ;;         (setq-local cape-dabbrev-check-other-buffers
-  ;;           (lambda (&optional args) 
-  ;;             (with-current-buffer (window-buffer (minibuffer-selected-window))
-  ;;               (cape-dabbrev-check-other-buffers args))))
-  ;;         )))
+          (setq-local cape-dabbrev-check-other-buffers
+            (lambda (&optional args) 
+              (with-current-buffer (window-buffer (minibuffer-selected-window))
+                (cape-dabbrev-check-other-buffers args))))
+          )))
 
-  ;;   ;;(remove-hook 'unemacslike-search-mode-hook #'my/unemacslike-search-completion)
-  ;;   (add-hook 'unemacslike-search-mode-hook #'my/unemacslike-search-completion 1)
-  ;;   )
+    ;;(remove-hook 'unemacslike-search-mode-hook #'my/unemacslike-search-completion)
+    (add-hook 'unemacslike-search-mode-hook #'my/unemacslike-search-completion 1)
+    )
   )
 
 
@@ -1203,7 +1204,8 @@ ssh localhost ~/bin/npm $@
     (advice-add 'counsel-yank-pop :around #'my/disable-ivy-prescient-for-counsel-yank-pop)
     ;;(advice-remove 'counsel-yank-pop  #'my/disable-ivy-prescient-for-counsel-yank-pop)
     )
-  
+
+  ;; 絞り込みの動作が手になじまない
   ;; (leaf corfu-prescient
   ;;   :ensure t
   ;;   :after corfu
@@ -1211,6 +1213,7 @@ ssh localhost ~/bin/npm $@
   ;;   (require 'corfu-prescient)
   ;;   ;; (with-eval-after-load 'orderless
   ;;   ;;   (setq corfu-prescient-enable-filtering nil))
+  ;;   ;;(corfu-prescient-mode -1)
   ;;   (corfu-prescient-mode +1))
   )
 
