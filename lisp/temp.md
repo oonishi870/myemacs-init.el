@@ -991,7 +991,9 @@ ssh localhost ag $@
 
 (setq counsel-ag-command nil)
   (shell-command-to-string "ssh localhost ag -G 'sql$' usi ./")
-  
+
+  (vertico-mode 1)
+  (vertico-posframe-mode 1)
 ```
 
 
@@ -1010,6 +1012,7 @@ ssh localhost ag $@
   (add-hook  'c++mode-hook          'my/set-auto-inednt)
   (add-hook  'sql-mode-hook         'my/set-auto-inednt)
   (add-hook  'sh-mode               'my/set-auto-inednt)
+  
 )
 
 
@@ -1043,4 +1046,6 @@ ssh localhost ag $@
 )
 (message (my/my/search-semicolon--replace-sequences "test'12\n3'test"))
 
+(ivy-migemo-toggle-fuzzy -1)
+  
 ```
