@@ -3,6 +3,16 @@ test
 ```bash
 #!/bin/bash
 
+cat <<EOF
+$(echo "test")
+EOF
+
+echo $(echo "test")
+
+for i in $(seq 10);
+do
+    echo $i
+done
 ```
 
 ```math
@@ -1257,5 +1267,175 @@ Return the list of results."
         
 
         (helm-find-files args)))
+(define-key input-decode-map [control up] [C-up])
+(global-set-key [C-up] (lambda () (interactive) (message "Control key released!")))
+
+(defvar my-last-ctrl-state nil "Last state of the CTRL key.")
+
+(defun check-ctrl-release (&rest _)
+  (let ((current-state (memq 'control (event-modifiers (read-event "Press any key: " nil 0.1)))))
+    (when (and my-last-ctrl-state (not current-state))
+      (message "Control key released!"))
+    (setq my-last-ctrl-state current-state)))
+(check-ctrl-release)
+(setq tt (run-with-idle-timer 0.1 t 'check-ctrl-release))
+           
+           (cancel-timer tt)
+
+           (check-ctrl-release)
+           (this-command-keys)
+(defun test()
+  (interactive)
+  ;; (this-command-keys)がC-<tab>かチェック
+  (unless (or
+        (equal (kbd "C-<tab>") (this-command-keys))
+        (equal (kbd "C-<iso-lefttab>") (this-command-keys)))
+    
+    )
+  )
+(type-of (this-command-keys))
+(type-of (kbd "C-<tab>"))
+           
+(add-hook 'pre-command-hook #'test)
+(remove-hook 'pre-command-hook #'test)
+
+           
+           (print (buffer-list))
+           (switch-to-buffer (nth 1 (window-prev-buffers)))
+(let()
+  (define-minor-mode my/buffer-switch-mode
+    "My custom minor mode example."
+    :lighter " MyCustom"
+    :keymap  '() 
+    :global t
+    )
+           
+  (defvar my/buffer-switch--buffer-list nil)
+  (defvar my/buffer-switch--buffer-list-index 0)
+
+  ;; 除外するバッファリスト
+  (defvar my/buffer-switch--exclude-buffer-regexp
+    '("\\*ivy-.*" "\\*Minibuf.*" "^helm.*" ".*completion.*" "\\*Echo"
+       "\\*copilot-" "\\*corfu" "\\*company" "\\*eldoc" "\\*migemo"))
+  (defun my/buffer-switch--buffer-list-function()
+    ;; minibufferやivyバッファを除外する
+    (cl-remove-if
+      (lambda (x)
+        (cl-some
+          (lambda (y)
+            (string-match y (buffer-name x)))
+          my/buffer-switch--exclude-buffer-regexp))
+          (cl-remove-duplicates
+            ;;(append (nth 0 (window-prev-buffers)) (buffer-list))
+            (append (mapcar #'car (window-prev-buffers)) (buffer-list))
+            :test 'eq))
+    )
+  (defun my/buffer-switch-mode-hook-init(&rest _)
+    ;; (window-prev-buffers)と(buffer-list)のユニークなリスト
+    (setq my/buffer-switch--buffer-list (my/buffer-switch--buffer-list-function))
+    (setq my/buffer-switch--buffer-list-index 0)
+    (add-hook 'pre-command-hook #'my/buffer-switch-mode--cancel)
+    (global-my/buffer-switch-mode 1)
+    )
+
+  (defun my/buffer-switch-mode-hook-exit(&rest _)
+    ;; (window-prev-buffers)と(buffer-list)のユニークなリスト
+    (setq my/buffer-switch--buffer-list nil)
+    (setq my/buffer-switch--buffer-list-index 0)
+    (remove-hook 'pre-command-hook #'my/buffer-switch--cancel)
+    (global-my/buffer-switch-mode -1)
+    )
+  (defun my/buffer-switch-next()
+    (interactive)
+    (print my/buffer-switch--buffer-list-index)
+    (setq my/buffer-switch--buffer-list-index
+      (mod (1+ my/buffer-switch--buffer-list-index)
+        (length my/buffer-switch--buffer-list)))
+    (switch-to-buffer (nth my/buffer-switch--buffer-list-index my/buffer-switch--buffer-list))
+    )
+  (defun my/buffer-switch-prev()
+    (interactive)
+    (setq my/buffer-switch--buffer-list-index
+      (mod (1- my/buffer-switch--buffer-list-index)
+        (length my/buffer-switch--buffer-list)))
+    (switch-to-buffer (nth my/buffer-switch--buffer-list-index my/buffer-switch--buffer-list))
+    )
+  (bind-keys :map my/buffer-switch-mode-map
+    ( "C-<tab>" . my/buffer-switch-next)
+    ( "C-<iso-lefttab>" . my/buffer-switch-prev)
+    )
+  (defun my/buffer-switch--cancel(&rest _)
+    (interactive)
+    ;; (this-command-keys)がC-<tab>かチェック
+    (print (this-command-keys))
+    (unless (or
+          (equal (kbd "C-<tab>") (this-command-keys))
+          (equal (kbd "C-<iso-lefttab>") (this-command-keys)))
+      ;;(my/buffer-switch-mode -1)
+      (my/buffer-switch-mode-hook-exit)
+      )
+    )
+  (define-globalized-minor-mode global-my/buffer-switch-mode my/buffer-switch-mode my/buffer-switch-mode-on)
+
+  (defun my/buffer-switch-mode-on ()
+    "Enable `my/buffer-switch-mode'."
+    (unless (minibufferp)
+      (my/buffer-switch-mode 1)))
+
+  (defun my/buffer-switch(&optional _)
+    (interactive)
+    (my/buffer-switch-mode-hook-init)
+    (my/buffer-switch-next))
+  )
+(require 'expand-region)
+
+(defvar my-expand-region-max-lines 10
+  "The maximum number of lines expand-region is allowed to select.")
+
+(defun my-expand-region-limit (start end)
+  "Limit the selection to a maximum of `my-expand-region-max-lines` lines."
+  (let ((lines (count-lines start end)))
+    (if (> lines my-expand-region-max-lines)
+        (progn
+          (message "Selection limited to %d lines." my-expand-region-max-lines)
+          nil)
+      t)))
+
+(defun my-er-add-limit ()
+  "Add a limit to expand-region's expansion functions."
+  (print "yes")
+  (add-to-list 'er/try-expand-list 'my-expand-region-limit t))
+
+(add-hook 'er/prepare-expansion-functions-hook 'my-er-add-limit)
+
+(global-set-key (kbd "C-=") 'er/expand-region)
+
+
+
+
+           
+(require 'expand-region)
+
+(defvar my-expand-region-max-lines 10
+  "The maximum number of lines expand-region is allowed to select.")
+
+(defun my-expand-region-advice (orig-fun &rest args)
+  "Advice to limit expand-region to `my-expand-region-max-lines` lines."
+  (let ((initial-point (point))
+        (initial-mark (mark)))
+    (apply orig-fun args)
+    (let ((line-count (count-lines (region-beginning) (region-end))))
+      (when (> line-count my-expand-region-max-lines)
+        (goto-char initial-point)
+        (set-mark initial-mark)
+        (message "Selection limited to %d lines." my-expand-region-max-lines)))))
+
+(advice-add 'er/expand-region :around #'my-expand-region-advice)
+
+(global-set-key (kbd "C-=") 'er/expand-region)
+
+
+
 
 ```
+
