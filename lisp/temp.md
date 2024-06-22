@@ -922,6 +922,7 @@ abbrev--suggest-saved-recommendations
 company-active-map
 company-selection
 
+
 (bind-keys :map company-active-map
   ("<return>" .
     (lambda (&rest _)
@@ -972,6 +973,7 @@ my/*file
 (defun my/generate-temp-buffer ()
   (interactive)
   (switch-to-buffer (concat (make-temp-name "*scratch") "*"))
+  )
 
 
 (let (
@@ -1048,4 +1050,212 @@ ssh localhost ag $@
 
 (ivy-migemo-toggle-fuzzy -1)
   
+```
+
+```elisp
+(defun my/headered-buffer--get-window-header-windowds (win)
+  (let (hwin)
+    (if 
+      (and
+        (window-valid-p win)
+        (setq hwin (window-prev-sibling win)))
+        (if (window-parameter hwin 'my/headered-buffer--winprm--is-header-window)
+          (append (my/headered-buffer--get-window-header-windowds hwin) (list hwin))
+          nil
+        )
+      nil
+    )
+  )
+)
+
+
+(setq a '(1 2 3))
+(number-sequence 1 (max (length win) count))
+(number-sequence 3 1)
+
+(mapcar* (quote +) '(1 2 3) '(4 5 6))
+
+
+(defun mapcar* (function &rest args)
+  "Apply FUNCTION to successive cars of all ARGS.
+Return the list of results."
+  ;; リストが消費されていなければ、
+  (if (not (memq nil args))
+      ;; CARに関数を適用する。
+      (cons (apply function (mapcar 'car args))
+            (apply 'mapcar* function
+                   ;; 残りの要素のための再帰。
+                   (mapcar 'cdr args)))))
+
+(defun my/headered-buffer--update-header-window (target-win count)
+
+  (setq wins (my/headered-buffer--get-window-header-windowds target-win))
+  (mapcar*
+   (lambda (win ith) 
+     (if (not win)
+         (progn 
+           (setq hwin (split-window win (- (window-height win) 3) 'above))
+           (set-window-dedicated-p hwin nil)
+           ;;(set-window-buffer hwin hbuffer)
+           (run-hook-with-args 'my/headered-buffer--reflesh-header-window target-win hwin ith)
+           (set-window-dedicated-p hwin t)
+           (set-window-parameter hwin 'no-other-window t)
+           (set-window-parameter hwin 'my/headered-buffer--winprm--is-header-window t)
+           )))
+  (mapcar
+      (lambda (ith) (nth (- ith 1) wins))
+      (number-sequence 1 count) )
+  (number-sequence 1 count))
+
+
+  (mapcar 
+   (lambda (win) 
+     (if win (delete-window win)))
+   (mapcar
+      (lambda (ith) (nth ith wins))
+      (number-sequence count (length wins)))
+  )
+)
+
+
+(defun my/test2(target-win header-win ith)
+  (print "Yes")
+  (set-window-buffer header-win "*scratch*")
+  (with-current-buffer (window-buffer header-win)
+    (setq mode-line-format nil)
+    )
+  ;;(setq window-min-height 0)
+  (window-resize header-win (- 2 (window-height header-win)))
+  (window-resize header-win (- 2 (line-pixel-height)) nil t t)
+)
+(require 'cl-lib)
+(my/headered-buffer--update-header-window (get-buffer-window) 0)
+
+
+(add-hook 'my/headered-buffer--reflesh-header-window 'my/test2)
+(remove-hook 'my/headered-buffer--reflesh-header-window 'my/test2)
+
+
+(defun my/test(frame)
+  (remove-hook 'window-buffer-change-functions 'my/test)
+  (mapcar
+   (lambda (win)
+     (if (and (window-valid-p win) (string= (buffer-name (window-buffer win)) "*test1*") )
+       (my/headered-buffer--create-header-window win (get-buffer "*scratch*") 4)
+       (my/headered-buffer--delete-header-window win)
+       ))
+   (window-list)
+   )
+  (add-hook 'window-buffer-change-functions 'my/test)
+  )
+(my/test)
+(get-frame)
+(current-frame-configuration)
+
+
+(add-hook 'window-buffer-change-functions 'my/test)
+(remove-hook 'window-buffer-change-functions 'my/test)
+
+(add-hook 'test-hook (lambda (&optional a b)(message "test-hook %S %S" a b)))
+(remove-hook 'test-hook (lambda (&optional a b)(message "test-hook %S %S" a b)))
+(run-hook-with-args 'test-hook 1 2)
+
+
+(setq mode-line-compact t)
+```
+
+```elisp
+
+(defun my/headered-buffer--create-header-window (win hbuffer hbuffer-size)
+  (let (hwin)
+    (setq hwin (window-prev-sibling win))
+    (if (not (window-parameter hwin 'my/headered-buffer--winprm--is-header-window))
+        (setq hwin (split-window win (- (window-height win) hbuffer-size) 'above)))
+
+    (set-window-dedicated-p hwin nil)
+    (set-window-buffer hwin hbuffer)
+    (set-window-dedicated-p hwin t)
+    (with-current-buffer (window-buffer hwin)
+      (setq mode-line-format nil)
+    )
+
+    (set-window-parameter hwin 'no-other-window t)
+    (set-window-parameter hwin 'my/headered-buffer--winprm--is-header-window t)
+    hwin
+))
+
+
+;;(my/headered-buffer--create-header-window (get-buffer-window (current-buffer)) (get-buffer "*scratch*") 4)
+
+
+(defun my/headered-buffer--delete-header-window (win)
+  (while (and 
+          (window-valid-p win) 
+          (setq hwin (window-prev-sibling win))
+          (window-parameter hwin 'my/headered-buffer--winprm--is-header-window))
+    (delete-window hwin))
+)
+
+;;(my/headered-buffer--delete-header-window (get-buffer-window (current-buffer)))
+
+
+(defun my/test(frame)
+  (remove-hook 'window-buffer-change-functions 'my/test)
+  (mapcar 
+   (lambda (win)
+     (if (and (window-valid-p win) (string= (buffer-name (window-buffer win)) "*test1*") )
+       (my/headered-buffer--create-header-window win (get-buffer "*scratch*") 4)
+       (my/headered-buffer--delete-header-window win)
+       ))
+   (window-list)
+   )
+  (add-hook 'window-buffer-change-functions 'my/test)
+)
+
+(add-hook 'window-buffer-change-functions 'my/test)
+(remove-hook 'window-buffer-change-functions 'my/test)
+
+;; helm-find-filesで選択されたファイル名をクリップボードにコピーする
+(leaf helm-clipboard
+  :config
+  (defun my/helm-clipboard-action ()
+    (interactive)
+    ;; helmでカーソル位置のアイテムを取得
+    (let ((candidate (helm-get-selection
+    (print candidate)
+    (kill-new candidate)
+    (message "%s => kill-ring" candidate))
+  ;; Returnでファイルを開く代わりにファイル名をクリップボードにコピーする
+  (bind-keys :map helm-find-files-map
+    ("C-c C-y" . my/helm-clipboard-action))
+  
+  
+
+            )
+
+  (bind-keys :map helm-find-files-map
+    ("<tab>" . helm-ff-RET)
+    ("<return>".
+      (lambda (&optional args)
+        (interactive)
+        ;; ディレクトリならdired。ファイルなら開く
+        (if (file-directory-p (helm-get-selection))
+          (helm-exit-and-execute-action
+            (lambda (x) (dired x)))
+          (helm-execute-persistent-action))))
+    )
+  ;; diredバッファでhelm-find-filesを開いたときに同じウィンドウにhelmバッファを開く
+  (defun my/helm-find-files-other-window (&optional args)
+    (interactive)
+    ;; currentバッファがdiredバッファなら
+    (if (eq major-mode 'dired-mode)
+      (progn
+        ;; helmバッファをカレントバッファの下に表示
+        (let ((display-buffer-overriding-action
+                '(display-buffer-same-window)))
+          (helm-find-files args)))
+        
+
+        (helm-find-files args)))
+
 ```
