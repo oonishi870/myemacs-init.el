@@ -1043,7 +1043,7 @@
 ;;  (setq copilot-install-dir "/home/owner/copilot")
   (let (
     (nodepath (locate-user-emacs-file "bin/node"))
-    (shell-command (format "mkdir -p %s" (locate-user-emacs-file "bin/node")))
+    (shell-command (format "mkdir -p %s" (locate-user-emacs-file "bin")))
     (s "\
 #!/bin/sh
 ssh localhost ~/bin/node $@

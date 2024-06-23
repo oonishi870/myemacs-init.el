@@ -1439,3 +1439,191 @@ Return the list of results."
 
 ```
 
+```elisp
+
+(defun er/add-sh-mode-expansions ()
+  "Expansions for `sh-mode'."
+  (set (make-local-variable 'er/try-expand-list)
+       (append er/try-expand-list
+               '(
+                  er/mark-sh-variable
+                  er/mark-sh-function))))
+
+(defun er/mark-sh-function ()
+  "Mark the current shell function."
+  (interactive)
+  (let ((start (point))
+        (end (point)))
+    (save-excursion
+      (sh-beginning-of-command)
+      (setq start (point))
+      (sh-end-of-command)
+      (setq end (point)))
+    (set-mark start)
+    (goto-char end)))
+
+(defun er/mark-sh-variable ()
+  "Mark the current shell variable."
+  (interactive)
+  (let ((start (point))
+        (end (point)))
+    (save-excursion
+      (skip-syntax-backward "w_")
+      (setq start (point))
+      (skip-syntax-forward "w_")
+      (setq end (point)))
+    (set-mark start)
+    (goto-char end)))
+
+(remove-hook 'sh-mode-hook 'er/add-sh-mode-expansions)
+(add-hook 'sh-mode-hook 'er/add-sh-mode-expansions)
+
+
+(setq counsel-ag-base-command '("ag" "--skip-vcs-ignores" "--vimgrep" "%s"))
+
+(er/mark-word)
+(er/mark-next-accessor)
+(er/mark-method-call)
+(looking-at "\\sw")aaaaa
+/home/owner/emacs.d/init.elaa
+
+(er/looking-back-on-line "\\w")
+(looking-back "\\w")
+(
+  init init test/init.init
+  )
+
+
+
+(progn
+  (defun test(f &rest _)
+    (let ((result))
+      (print f)
+      (print (list (region-beginning) (region-end)))
+      (setq result (apply f _))
+      (print (list (region-beginning) (region-end)))
+      result
+      ))
+  (advice-add 'er/mark-word :around #'test)
+  (advice-add 'er/mark-symbol :around #'test)
+  (advice-add 'er/mark-symbol-with-prefix :around #'test)
+  (advice-add 'er/mark-next-accessor :around #'test)
+  (advice-add 'er/mark-method-call :around #'test)
+  (advice-add 'er/mark-line :around #'test)
+  (advice-add 'er/mark-inside-quotes :around #'test)
+  (advice-add 'er/mark-outside-quotes :around #'test)
+  (advice-add 'er/mark-inside-pairs :around #'test)
+  (advice-add 'er/mark-outside-pairs :around #'test)
+)
+(progn
+  (advice-remove 'er/mark-word  #'test)
+  (advice-remove 'er/mark-symbol  #'test)
+  (advice-remove 'er/mark-symbol-with-prefix  #'test)
+  (advice-remove 'er/mark-next-accessor  #'test)
+  (advice-remove 'er/mark-method-call  #'test)
+  (advice-remove 'er/mark-line  #'test)
+  (advice-remove 'er/mark-inside-quotes  #'test)
+  (advice-remove 'er/mark-outside-quotes  #'test)
+ t (advice-remove 'er/mark-inside-pairs  #'test)
+  (advice-remove 'er/mark-outside-pairs  #'test)
+)
+
+(defun er/mark-line ()
+  "Mark the entire line from beginning to end."
+  (interactive)
+  (beginning-of-line)
+  (set-mark (point))
+  (end-of-line)
+  ;; This ensures the mark is activated for visual feedback
+  (exchange-point-and-mark))
+
+(defun er/mark-slash ()
+  "Mark the current symbol (including slashes) until the next non-symbol character or space."
+  (interactive)
+  (let ((symbol-regexp "\\(\\s_\\|\\sw\\|/\\)+"))
+    (when (or (looking-at symbol-regexp)
+            (er/looking-back-on-line symbol-regexp))
+      (print "yes1")
+      (skip-syntax-backward "/")
+      (set-mark (point))
+      (when (looking-at symbol-regexp)
+        (print "yes2")
+        (goto-char (match-end 0)))
+      (exchange-point-and-mark))))
+
+(setq er/try-expand-list)
+(require 'expand-region)
+(setq-local er/try-expand-list
+      (append '(er/mark-word
+                er/mark-symbol
+                ;;er/mark-symbol-with-prefix
+                er/mark-method-call
+                er/mark-next-accessor
+                ;;er/mark-slash
+                 
+
+                er/mark-line
+                 
+                er/mark-inside-quotes
+                er/mark-outside-quotes
+                er/mark-inside-pairs
+                er/mark-outside-pairs
+                er/mark-comment
+                er/mark-url
+                er/mark-email
+                er/mark-defun)
+                er/try-expand-list))
+
+```
+
+```bash
+#!/bi/bash
+
+
+
+```
+
+```python
+#!/bin/bash
+
+
+
+x = xxx + bnhdbb(test)*aaaa, cccc
+
+(print (syntax-table))
+
+```
+
+```elisp
+
+;; 現在のカーソル位置から正規表現の文字列を検索する(最長マッチ)
+(search-forward-regexp "\\(\\(([^)]*)\\)\\|\\(\"\"\\)[^()]*\\)*)")
+(search-forward-regexp "\"[^\"]*(\\(\\\\\\\\\\)*\\\")*[^\"]*\"")
+(search-forward-regexp "\"\\([^\"]*\\\"\\)*[^\"]*\"")
+(search-forward-regexp "\"[^\"]*\\\"*[^\"]*\"")
+(search-forward-regexp "[^\\]\"\\([^\"]*\\\"\\)*[^\"]*\"")
+;; キーバインドC-wに関数を設定
+(global-set-key (kbd "C-w")
+  (lambda (&rest _)(interactive)
+    (search-forward-regexp "\"")
+    (search-forward-regexp "\\([^\"]*\\(\\\\\\\\\\)*\\\\\"\\)*?[^\"]*\"")
+    ))
+
+(re-search-forward "^\"" nil t)
+(search-forward-regexp "\"")
+ "te\"s\\"t"
+"test"
+
+(looking-at "\\(([^)]*)[^()]*\\)*)")
+(())()()()()())
+"test test"
+;; test
+cl-struct-ert-test-aborted-with-non-local-exit-tags
+() "aa"
+
+font-lock-string-face
+
+
+```
+
+
