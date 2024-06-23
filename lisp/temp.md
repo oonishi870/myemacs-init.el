@@ -1596,34 +1596,62 @@ x = xxx + bnhdbb(test)*aaaa, cccc
 
 ```elisp
 
-;; 現在のカーソル位置から正規表現の文字列を検索する(最長マッチ)
-(search-forward-regexp "\\(\\(([^)]*)\\)\\|\\(\"\"\\)[^()]*\\)*)")
-(search-forward-regexp "\"[^\"]*(\\(\\\\\\\\\\)*\\\")*[^\"]*\"")
-(search-forward-regexp "\"\\([^\"]*\\\"\\)*[^\"]*\"")
-(search-forward-regexp "\"[^\"]*\\\"*[^\"]*\"")
-(search-forward-regexp "[^\\]\"\\([^\"]*\\\"\\)*[^\"]*\"")
-;; キーバインドC-wに関数を設定
-(global-set-key (kbd "C-w")
-  (lambda (&rest _)(interactive)
-    (search-forward-regexp "\"")
-    (search-forward-regexp "\\([^\"]*\\(\\\\\\\\\\)*\\\\\"\\)*?[^\"]*\"")
-    ))
+;; shift選択した状態をmarkで選択した状態に変更する
+(defun my/mark-enable()
+  (interactive)
+  (if (region-active-p)
+    (let ((start (region-beginning))
+           (end (region-end)))
+      ;; expand-regionの独自拡張対策
+      (advice-remove 'handle-shift-selection #'my/unset-mark-on-next-move)
+      ;; 通常のshift選択用
+      (deactivate-mark)
+      (set-mark-command nil)
+      (goto-char start)
+      (set-mark-command nil)
+      (goto-char end)
+      (message "Mark enabled"))))
 
-(re-search-forward "^\"" nil t)
-(search-forward-regexp "\"")
- "te\"s\\"t"
-"test"
+;; hook handle-shift-selectionの実行
+(run-hooks 'handle-shift-selection)
 
-(looking-at "\\(([^)]*)[^()]*\\)*)")
-(())()()()()())
-"test test"
-;; test
-cl-struct-ert-test-aborted-with-non-local-exit-tags
-() "aa"
+;; リージョン選択の前後を入れ替える
+(defun my/exchange-point-and-mark()
+  (interactive)
+  ;; expand-regionの独自拡張対策
+  (advice-remove 'handle-shift-selection #'my/unset-mark-on-next-move)
+  (exchange-point-and-mark))
+  
+(search-backward-regexp "(\\|\\[\\|{")
+(search-forward-regexp ")\\|\\]\\|}")
+[]
+testaaaaaa-test
 
-font-lock-string-face
-
-
+(defun p() (interactive)(print "yes"))
+(add-hook 'handle-shift-selection 'p)
+(remove-hook 'handle-shift-selection 'p)
+(remove-hook 'handle-shift-selection 'p)
+(advice-add 'handle-shift-selection :before #'p)
+(advice-remove 'handle-shift-selection  #'p)
+(advice-remove 'handle-shift-selection #'my/unset-mark-on-next-move)
+(advice-get 'handle-shift-selection )
+;; C-wに割り当てる
+(bind-keys :map global-map
+  ("C-w" . my/mark-enable)
+  ("C-a" . my/exchange-point-and-mark)
+  ("M-<left>" . (lambda (&rest _)
+                  (interactive)
+                  ;; (print (and shift-select-mode this-command-keys-shift-translated))
+                  ;; (print mark-active)
+                  (search-backward-regexp "(\\|\\[\\|{")
+                  (handle-shift-selection)))
+  ("M-<right>" . (lambda (&rest _)
+                  (interactive)
+                  ;; (print (and shift-select-mode this-command-keys-shift-translated))
+                  ;; (print mark-active)
+                  (search-forward-regexp ")\\|\\]\\|}")
+                  (handle-shift-selection)))
+  )
 ```
 
 
