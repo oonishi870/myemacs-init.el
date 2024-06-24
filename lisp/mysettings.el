@@ -991,7 +991,10 @@
         '(default                  ((t (:background "#1E2430" :foreground "#E8EEF9" :extend t))))
         )
       (custom-set-faces
-        '(markdown-header-face-1             ((t (:foreground "#8080F0" :extend t))))
+        '(markdown-header-face-1             ((t (:foreground "#C0C0FF" :underline t :extend t))))
+        '(markdown-header-face-2             ((t (:foreground "#C0C0FF" :underline t :extend t))))
+        '(markdown-header-face-3             ((t (:foreground "#C0C0FF" :underline t :extend t))))
+        '(markdown-header-face-4             ((t (:foreground "#C0C0FF" :underline t :extend t))))
         )
       (custom-set-faces
         '(whitespace-tab             ((t (:foreground "#808080" :extend t))))
