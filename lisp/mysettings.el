@@ -974,6 +974,9 @@
         '(default                  ((t (:background "#1E2430" :foreground "#E8EEF9" :extend t))))
         )
       (custom-set-faces
+        '(markdown-header-face-1             ((t (:foreground "#8080F0" :extend t))))
+        )
+      (custom-set-faces
         '(whitespace-tab             ((t (:foreground "#808080" :extend t))))
         )
       ))
