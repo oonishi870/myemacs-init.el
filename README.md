@@ -3,7 +3,6 @@ my emacs setting
 
 
 ```bash
-
 ln -s /tmp /tmp/host
 DIR=~/emacs.d
 DISPLAY=:0

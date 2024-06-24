@@ -427,7 +427,24 @@
   ;; 2024/02/08 アクティブでないwindowにhelmを表示
   (setq helm-split-window-inside-p t)
   (setq helm-split-width-threshold 1024)
+
+  ;; helm-find-filesのキーバインド
+  (bind-keys :map helm-find-files-map
+    ("<tab>" . helm-ff-RET)
+    ("<return>".
+      (lambda (&optional args)
+        (interactive)
+        ;; ディレクトリならdired。ファイルなら開く
+        (if (file-directory-p (helm-get-selection))
+          (helm-exit-and-execute-action
+            (lambda (x) (dired x)))
+          (helm-execute-persistent-action))))
+    )
+
 )
+
+
+
 
 (leaf *basic-settings
   :config
@@ -736,7 +753,7 @@
   ;;   (setq lsp-completion-provider :none))
   (setq corfu-auto-prefix 1)
   ;;(setq corfu-auto t) 
-  (setq cape-dabbrev-min-length 1)
+  (setq cape-dabbrev-min-length 2)
   (setq corfu-auto-delay 0.0)
   ;;(company-dabbrev-ignore-buffers '((get-buffer "*scratch*")))
 
@@ -944,7 +961,7 @@
        '(helm-selection ((t (:background "#434C5E" :foreground "#E5E9F0"))))
        '(helm-match ((t (:foreground "#81A1C1" :background "#2E3440" :weight bold))))
        '(helm-visible-mark ((t (:foreground "#2E3440" :background "#8FBCBB"))))
-        '(helm-ff-file ((t (:background "#2E3440" :foreground "#ECEFF4")))))
+       '(helm-ff-file ((t (:background "#2E3440" :foreground "#ECEFF4")))))
       (custom-set-faces
         '(ivy-current-match ((t (:background "#4C566A" :foreground "#ECEFF4" :extend t))))
         '(ivy-minibuffer-match-face-1 ((t (:background "#4C566A" :foreground "#D8DEE9" :weight bold))))
@@ -1029,7 +1046,7 @@
 ;;  (setq copilot-install-dir "/home/owner/copilot")
   (let (
     (nodepath (locate-user-emacs-file "bin/node"))
-    (shell-command (format "mkdir -p %s" (locate-user-emacs-file "bin/node")))
+    (shell-command (format "mkdir -p %s" (locate-user-emacs-file "bin")))
     (s "\
 #!/bin/sh
 ssh localhost ~/bin/node $@

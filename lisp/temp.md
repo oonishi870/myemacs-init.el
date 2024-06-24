@@ -3,6 +3,16 @@ test
 ```bash
 #!/bin/bash
 
+cat <<EOF
+$(echo "test")
+EOF
+
+echo $(echo "test")
+
+for i in $(seq 10);
+do
+    echo $i
+done
 ```
 
 ```math
@@ -922,6 +932,7 @@ abbrev--suggest-saved-recommendations
 company-active-map
 company-selection
 
+
 (bind-keys :map company-active-map
   ("<return>" .
     (lambda (&rest _)
@@ -972,6 +983,7 @@ my/*file
 (defun my/generate-temp-buffer ()
   (interactive)
   (switch-to-buffer (concat (make-temp-name "*scratch") "*"))
+  )
 
 
 (let (
@@ -1049,3 +1061,597 @@ ssh localhost ag $@
 (ivy-migemo-toggle-fuzzy -1)
   
 ```
+
+```elisp
+(defun my/headered-buffer--get-window-header-windowds (win)
+  (let (hwin)
+    (if 
+      (and
+        (window-valid-p win)
+        (setq hwin (window-prev-sibling win)))
+        (if (window-parameter hwin 'my/headered-buffer--winprm--is-header-window)
+          (append (my/headered-buffer--get-window-header-windowds hwin) (list hwin))
+          nil
+        )
+      nil
+    )
+  )
+)
+
+
+(setq a '(1 2 3))
+(number-sequence 1 (max (length win) count))
+(number-sequence 3 1)
+
+(mapcar* (quote +) '(1 2 3) '(4 5 6))
+
+
+(defun mapcar* (function &rest args)
+  "Apply FUNCTION to successive cars of all ARGS.
+Return the list of results."
+  ;; リストが消費されていなければ、
+  (if (not (memq nil args))
+      ;; CARに関数を適用する。
+      (cons (apply function (mapcar 'car args))
+            (apply 'mapcar* function
+                   ;; 残りの要素のための再帰。
+                   (mapcar 'cdr args)))))
+
+(defun my/headered-buffer--update-header-window (target-win count)
+
+  (setq wins (my/headered-buffer--get-window-header-windowds target-win))
+  (mapcar*
+   (lambda (win ith) 
+     (if (not win)
+         (progn 
+           (setq hwin (split-window win (- (window-height win) 3) 'above))
+           (set-window-dedicated-p hwin nil)
+           ;;(set-window-buffer hwin hbuffer)
+           (run-hook-with-args 'my/headered-buffer--reflesh-header-window target-win hwin ith)
+           (set-window-dedicated-p hwin t)
+           (set-window-parameter hwin 'no-other-window t)
+           (set-window-parameter hwin 'my/headered-buffer--winprm--is-header-window t)
+           )))
+  (mapcar
+      (lambda (ith) (nth (- ith 1) wins))
+      (number-sequence 1 count) )
+  (number-sequence 1 count))
+
+
+  (mapcar 
+   (lambda (win) 
+     (if win (delete-window win)))
+   (mapcar
+      (lambda (ith) (nth ith wins))
+      (number-sequence count (length wins)))
+  )
+)
+
+
+(defun my/test2(target-win header-win ith)
+  (print "Yes")
+  (set-window-buffer header-win "*scratch*")
+  (with-current-buffer (window-buffer header-win)
+    (setq mode-line-format nil)
+    )
+  ;;(setq window-min-height 0)
+  (window-resize header-win (- 2 (window-height header-win)))
+  (window-resize header-win (- 2 (line-pixel-height)) nil t t)
+)
+(require 'cl-lib)
+(my/headered-buffer--update-header-window (get-buffer-window) 0)
+
+
+(add-hook 'my/headered-buffer--reflesh-header-window 'my/test2)
+(remove-hook 'my/headered-buffer--reflesh-header-window 'my/test2)
+
+
+(defun my/test(frame)
+  (remove-hook 'window-buffer-change-functions 'my/test)
+  (mapcar
+   (lambda (win)
+     (if (and (window-valid-p win) (string= (buffer-name (window-buffer win)) "*test1*") )
+       (my/headered-buffer--create-header-window win (get-buffer "*scratch*") 4)
+       (my/headered-buffer--delete-header-window win)
+       ))
+   (window-list)
+   )
+  (add-hook 'window-buffer-change-functions 'my/test)
+  )
+(my/test)
+(get-frame)
+(current-frame-configuration)
+
+
+(add-hook 'window-buffer-change-functions 'my/test)
+(remove-hook 'window-buffer-change-functions 'my/test)
+
+(add-hook 'test-hook (lambda (&optional a b)(message "test-hook %S %S" a b)))
+(remove-hook 'test-hook (lambda (&optional a b)(message "test-hook %S %S" a b)))
+(run-hook-with-args 'test-hook 1 2)
+
+
+(setq mode-line-compact t)
+```
+
+```elisp
+
+(defun my/headered-buffer--create-header-window (win hbuffer hbuffer-size)
+  (let (hwin)
+    (setq hwin (window-prev-sibling win))
+    (if (not (window-parameter hwin 'my/headered-buffer--winprm--is-header-window))
+        (setq hwin (split-window win (- (window-height win) hbuffer-size) 'above)))
+
+    (set-window-dedicated-p hwin nil)
+    (set-window-buffer hwin hbuffer)
+    (set-window-dedicated-p hwin t)
+    (with-current-buffer (window-buffer hwin)
+      (setq mode-line-format nil)
+    )
+
+    (set-window-parameter hwin 'no-other-window t)
+    (set-window-parameter hwin 'my/headered-buffer--winprm--is-header-window t)
+    hwin
+))
+
+
+;;(my/headered-buffer--create-header-window (get-buffer-window (current-buffer)) (get-buffer "*scratch*") 4)
+
+
+(defun my/headered-buffer--delete-header-window (win)
+  (while (and 
+          (window-valid-p win) 
+          (setq hwin (window-prev-sibling win))
+          (window-parameter hwin 'my/headered-buffer--winprm--is-header-window))
+    (delete-window hwin))
+)
+
+;;(my/headered-buffer--delete-header-window (get-buffer-window (current-buffer)))
+
+
+(defun my/test(frame)
+  (remove-hook 'window-buffer-change-functions 'my/test)
+  (mapcar 
+   (lambda (win)
+     (if (and (window-valid-p win) (string= (buffer-name (window-buffer win)) "*test1*") )
+       (my/headered-buffer--create-header-window win (get-buffer "*scratch*") 4)
+       (my/headered-buffer--delete-header-window win)
+       ))
+   (window-list)
+   )
+  (add-hook 'window-buffer-change-functions 'my/test)
+)
+
+(add-hook 'window-buffer-change-functions 'my/test)
+(remove-hook 'window-buffer-change-functions 'my/test)
+
+;; helm-find-filesで選択されたファイル名をクリップボードにコピーする
+(leaf helm-clipboard
+  :config
+  (defun my/helm-clipboard-action ()
+    (interactive)
+    ;; helmでカーソル位置のアイテムを取得
+    (let ((candidate (helm-get-selection
+    (print candidate)
+    (kill-new candidate)
+    (message "%s => kill-ring" candidate))
+  ;; Returnでファイルを開く代わりにファイル名をクリップボードにコピーする
+  (bind-keys :map helm-find-files-map
+    ("C-c C-y" . my/helm-clipboard-action))
+  
+  
+
+            )
+
+  (bind-keys :map helm-find-files-map
+    ("<tab>" . helm-ff-RET)
+    ("<return>".
+      (lambda (&optional args)
+        (interactive)
+        ;; ディレクトリならdired。ファイルなら開く
+        (if (file-directory-p (helm-get-selection))
+          (helm-exit-and-execute-action
+            (lambda (x) (dired x)))
+          (helm-execute-persistent-action))))
+    )
+  ;; diredバッファでhelm-find-filesを開いたときに同じウィンドウにhelmバッファを開く
+  (defun my/helm-find-files-other-window (&optional args)
+    (interactive)
+    ;; currentバッファがdiredバッファなら
+    (if (eq major-mode 'dired-mode)
+      (progn
+        ;; helmバッファをカレントバッファの下に表示
+        (let ((display-buffer-overriding-action
+                '(display-buffer-same-window)))
+          (helm-find-files args)))
+        
+
+        (helm-find-files args)))
+(define-key input-decode-map [control up] [C-up])
+(global-set-key [C-up] (lambda () (interactive) (message "Control key released!")))
+
+(defvar my-last-ctrl-state nil "Last state of the CTRL key.")
+
+(defun check-ctrl-release (&rest _)
+  (let ((current-state (memq 'control (event-modifiers (read-event "Press any key: " nil 0.1)))))
+    (when (and my-last-ctrl-state (not current-state))
+      (message "Control key released!"))
+    (setq my-last-ctrl-state current-state)))
+(check-ctrl-release)
+(setq tt (run-with-idle-timer 0.1 t 'check-ctrl-release))
+           
+           (cancel-timer tt)
+
+           (check-ctrl-release)
+           (this-command-keys)
+(defun test()
+  (interactive)
+  ;; (this-command-keys)がC-<tab>かチェック
+  (unless (or
+        (equal (kbd "C-<tab>") (this-command-keys))
+        (equal (kbd "C-<iso-lefttab>") (this-command-keys)))
+    
+    )
+  )
+(type-of (this-command-keys))
+(type-of (kbd "C-<tab>"))
+           
+(add-hook 'pre-command-hook #'test)
+(remove-hook 'pre-command-hook #'test)
+
+           
+           (print (buffer-list))
+           (switch-to-buffer (nth 1 (window-prev-buffers)))
+(let()
+  (define-minor-mode my/buffer-switch-mode
+    "My custom minor mode example."
+    :lighter " MyCustom"
+    :keymap  '() 
+    :global t
+    )
+           
+  (defvar my/buffer-switch--buffer-list nil)
+  (defvar my/buffer-switch--buffer-list-index 0)
+
+  ;; 除外するバッファリスト
+  (defvar my/buffer-switch--exclude-buffer-regexp
+    '("\\*ivy-.*" "\\*Minibuf.*" "^helm.*" ".*completion.*" "\\*Echo"
+       "\\*copilot-" "\\*corfu" "\\*company" "\\*eldoc" "\\*migemo"))
+  (defun my/buffer-switch--buffer-list-function()
+    ;; minibufferやivyバッファを除外する
+    (cl-remove-if
+      (lambda (x)
+        (cl-some
+          (lambda (y)
+            (string-match y (buffer-name x)))
+          my/buffer-switch--exclude-buffer-regexp))
+          (cl-remove-duplicates
+            ;;(append (nth 0 (window-prev-buffers)) (buffer-list))
+            (append (mapcar #'car (window-prev-buffers)) (buffer-list))
+            :test 'eq))
+    )
+  (defun my/buffer-switch-mode-hook-init(&rest _)
+    ;; (window-prev-buffers)と(buffer-list)のユニークなリスト
+    (setq my/buffer-switch--buffer-list (my/buffer-switch--buffer-list-function))
+    (setq my/buffer-switch--buffer-list-index 0)
+    (add-hook 'pre-command-hook #'my/buffer-switch-mode--cancel)
+    (global-my/buffer-switch-mode 1)
+    )
+
+  (defun my/buffer-switch-mode-hook-exit(&rest _)
+    ;; (window-prev-buffers)と(buffer-list)のユニークなリスト
+    (setq my/buffer-switch--buffer-list nil)
+    (setq my/buffer-switch--buffer-list-index 0)
+    (remove-hook 'pre-command-hook #'my/buffer-switch--cancel)
+    (global-my/buffer-switch-mode -1)
+    )
+  (defun my/buffer-switch-next()
+    (interactive)
+    (print my/buffer-switch--buffer-list-index)
+    (setq my/buffer-switch--buffer-list-index
+      (mod (1+ my/buffer-switch--buffer-list-index)
+        (length my/buffer-switch--buffer-list)))
+    (switch-to-buffer (nth my/buffer-switch--buffer-list-index my/buffer-switch--buffer-list))
+    )
+  (defun my/buffer-switch-prev()
+    (interactive)
+    (setq my/buffer-switch--buffer-list-index
+      (mod (1- my/buffer-switch--buffer-list-index)
+        (length my/buffer-switch--buffer-list)))
+    (switch-to-buffer (nth my/buffer-switch--buffer-list-index my/buffer-switch--buffer-list))
+    )
+  (bind-keys :map my/buffer-switch-mode-map
+    ( "C-<tab>" . my/buffer-switch-next)
+    ( "C-<iso-lefttab>" . my/buffer-switch-prev)
+    )
+  (defun my/buffer-switch--cancel(&rest _)
+    (interactive)
+    ;; (this-command-keys)がC-<tab>かチェック
+    (print (this-command-keys))
+    (unless (or
+          (equal (kbd "C-<tab>") (this-command-keys))
+          (equal (kbd "C-<iso-lefttab>") (this-command-keys)))
+      ;;(my/buffer-switch-mode -1)
+      (my/buffer-switch-mode-hook-exit)
+      )
+    )
+  (define-globalized-minor-mode global-my/buffer-switch-mode my/buffer-switch-mode my/buffer-switch-mode-on)
+
+  (defun my/buffer-switch-mode-on ()
+    "Enable `my/buffer-switch-mode'."
+    (unless (minibufferp)
+      (my/buffer-switch-mode 1)))
+
+  (defun my/buffer-switch(&optional _)
+    (interactive)
+    (my/buffer-switch-mode-hook-init)
+    (my/buffer-switch-next))
+  )
+(require 'expand-region)
+
+(defvar my-expand-region-max-lines 10
+  "The maximum number of lines expand-region is allowed to select.")
+
+(defun my-expand-region-limit (start end)
+  "Limit the selection to a maximum of `my-expand-region-max-lines` lines."
+  (let ((lines (count-lines start end)))
+    (if (> lines my-expand-region-max-lines)
+        (progn
+          (message "Selection limited to %d lines." my-expand-region-max-lines)
+          nil)
+      t)))
+
+(defun my-er-add-limit ()
+  "Add a limit to expand-region's expansion functions."
+  (print "yes")
+  (add-to-list 'er/try-expand-list 'my-expand-region-limit t))
+
+(add-hook 'er/prepare-expansion-functions-hook 'my-er-add-limit)
+
+(global-set-key (kbd "C-=") 'er/expand-region)
+
+
+
+
+           
+(require 'expand-region)
+
+(defvar my-expand-region-max-lines 10
+  "The maximum number of lines expand-region is allowed to select.")
+
+(defun my-expand-region-advice (orig-fun &rest args)
+  "Advice to limit expand-region to `my-expand-region-max-lines` lines."
+  (let ((initial-point (point))
+        (initial-mark (mark)))
+    (apply orig-fun args)
+    (let ((line-count (count-lines (region-beginning) (region-end))))
+      (when (> line-count my-expand-region-max-lines)
+        (goto-char initial-point)
+        (set-mark initial-mark)
+        (message "Selection limited to %d lines." my-expand-region-max-lines)))))
+
+(advice-add 'er/expand-region :around #'my-expand-region-advice)
+
+(global-set-key (kbd "C-=") 'er/expand-region)
+
+
+
+
+```
+
+```elisp
+
+(defun er/add-sh-mode-expansions ()
+  "Expansions for `sh-mode'."
+  (set (make-local-variable 'er/try-expand-list)
+       (append er/try-expand-list
+               '(
+                  er/mark-sh-variable
+                  er/mark-sh-function))))
+
+(defun er/mark-sh-function ()
+  "Mark the current shell function."
+  (interactive)
+  (let ((start (point))
+        (end (point)))
+    (save-excursion
+      (sh-beginning-of-command)
+      (setq start (point))
+      (sh-end-of-command)
+      (setq end (point)))
+    (set-mark start)
+    (goto-char end)))
+
+(defun er/mark-sh-variable ()
+  "Mark the current shell variable."
+  (interactive)
+  (let ((start (point))
+        (end (point)))
+    (save-excursion
+      (skip-syntax-backward "w_")
+      (setq start (point))
+      (skip-syntax-forward "w_")
+      (setq end (point)))
+    (set-mark start)
+    (goto-char end)))
+
+(remove-hook 'sh-mode-hook 'er/add-sh-mode-expansions)
+(add-hook 'sh-mode-hook 'er/add-sh-mode-expansions)
+
+
+(setq counsel-ag-base-command '("ag" "--skip-vcs-ignores" "--vimgrep" "%s"))
+
+(er/mark-word)
+(er/mark-next-accessor)
+(er/mark-method-call)
+(looking-at "\\sw")aaaaa
+/home/owner/emacs.d/init.elaa
+
+(er/looking-back-on-line "\\w")
+(looking-back "\\w")
+(
+  init init test/init.init
+  )
+
+
+
+(progn
+  (defun test(f &rest _)
+    (let ((result))
+      (print f)
+      (print (list (region-beginning) (region-end)))
+      (setq result (apply f _))
+      (print (list (region-beginning) (region-end)))
+      result
+      ))
+  (advice-add 'er/mark-word :around #'test)
+  (advice-add 'er/mark-symbol :around #'test)
+  (advice-add 'er/mark-symbol-with-prefix :around #'test)
+  (advice-add 'er/mark-next-accessor :around #'test)
+  (advice-add 'er/mark-method-call :around #'test)
+  (advice-add 'er/mark-line :around #'test)
+  (advice-add 'er/mark-inside-quotes :around #'test)
+  (advice-add 'er/mark-outside-quotes :around #'test)
+  (advice-add 'er/mark-inside-pairs :around #'test)
+  (advice-add 'er/mark-outside-pairs :around #'test)
+)
+(progn
+  (advice-remove 'er/mark-word  #'test)
+  (advice-remove 'er/mark-symbol  #'test)
+  (advice-remove 'er/mark-symbol-with-prefix  #'test)
+  (advice-remove 'er/mark-next-accessor  #'test)
+  (advice-remove 'er/mark-method-call  #'test)
+  (advice-remove 'er/mark-line  #'test)
+  (advice-remove 'er/mark-inside-quotes  #'test)
+  (advice-remove 'er/mark-outside-quotes  #'test)
+ t (advice-remove 'er/mark-inside-pairs  #'test)
+  (advice-remove 'er/mark-outside-pairs  #'test)
+)
+
+(defun er/mark-line ()
+  "Mark the entire line from beginning to end."
+  (interactive)
+  (beginning-of-line)
+  (set-mark (point))
+  (end-of-line)
+  ;; This ensures the mark is activated for visual feedback
+  (exchange-point-and-mark))
+
+(defun er/mark-slash ()
+  "Mark the current symbol (including slashes) until the next non-symbol character or space."
+  (interactive)
+  (let ((symbol-regexp "\\(\\s_\\|\\sw\\|/\\)+"))
+    (when (or (looking-at symbol-regexp)
+            (er/looking-back-on-line symbol-regexp))
+      (print "yes1")
+      (skip-syntax-backward "/")
+      (set-mark (point))
+      (when (looking-at symbol-regexp)
+        (print "yes2")
+        (goto-char (match-end 0)))
+      (exchange-point-and-mark))))
+
+(setq er/try-expand-list)
+(require 'expand-region)
+(setq-local er/try-expand-list
+      (append '(er/mark-word
+                er/mark-symbol
+                ;;er/mark-symbol-with-prefix
+                er/mark-method-call
+                er/mark-next-accessor
+                ;;er/mark-slash
+                 
+
+                er/mark-line
+                 
+                er/mark-inside-quotes
+                er/mark-outside-quotes
+                er/mark-inside-pairs
+                er/mark-outside-pairs
+                er/mark-comment
+                er/mark-url
+                er/mark-email
+                er/mark-defun)
+                er/try-expand-list))
+
+```
+
+```bash
+#!/bi/bash
+
+
+
+```
+
+```python
+#!/bin/bash
+
+
+
+x = xxx + bnhdbb(test)*aaaa, cccc
+
+(print (syntax-table))
+
+```
+
+```elisp
+
+;; shift選択した状態をmarkで選択した状態に変更する
+(defun my/mark-enable()
+  (interactive)
+  (if (region-active-p)
+    (let ((start (region-beginning))
+           (end (region-end)))
+      ;; expand-regionの独自拡張対策
+      (advice-remove 'handle-shift-selection #'my/unset-mark-on-next-move)
+      ;; 通常のshift選択用
+      (deactivate-mark)
+      (set-mark-command nil)
+      (goto-char start)
+      (set-mark-command nil)
+      (goto-char end)
+      (message "Mark enabled"))))
+
+;; hook handle-shift-selectionの実行
+(run-hooks 'handle-shift-selection)
+
+;; リージョン選択の前後を入れ替える
+(defun my/exchange-point-and-mark()
+  (interactive)
+  ;; expand-regionの独自拡張対策
+  (advice-remove 'handle-shift-selection #'my/unset-mark-on-next-move)
+  (exchange-point-and-mark))
+  
+(search-backward-regexp "(\\|\\[\\|{")
+(search-forward-regexp ")\\|\\]\\|}")
+[]
+testaaaaaa-test
+
+(defun p() (interactive)(print "yes"))
+(add-hook 'handle-shift-selection 'p)
+(remove-hook 'handle-shift-selection 'p)
+(remove-hook 'handle-shift-selection 'p)
+(advice-add 'handle-shift-selection :before #'p)
+(advice-remove 'handle-shift-selection  #'p)
+(advice-remove 'handle-shift-selection #'my/unset-mark-on-next-move)
+(advice-get 'handle-shift-selection )
+;; C-wに割り当てる
+(bind-keys :map global-map
+  ("C-w" . my/mark-enable)
+  ("C-a" . my/exchange-point-and-mark)
+  ("M-<left>" . (lambda (&rest _)
+                  (interactive)
+                  ;; (print (and shift-select-mode this-command-keys-shift-translated))
+                  ;; (print mark-active)
+                  (search-backward-regexp "(\\|\\[\\|{")
+                  (handle-shift-selection)))
+  ("M-<right>" . (lambda (&rest _)
+                  (interactive)
+                  ;; (print (and shift-select-mode this-command-keys-shift-translated))
+                  ;; (print mark-active)
+                  (search-forward-regexp ")\\|\\]\\|}")
+                  (handle-shift-selection)))
+  )
+```
+
+
