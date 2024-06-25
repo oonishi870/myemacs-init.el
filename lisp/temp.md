@@ -1662,7 +1662,33 @@ testaaaaaa-test
 
 ```
 
-```latex
+```elisp
+
+(defun my-consult-query-transform (input &rest _)
+  "Transform spaces in INPUT to asterisks."
+  (print "yes")
+  (replace-regexp-in-string " " "*" input))
 
 
+(defun my-consult-line ()
+  "Consult line with space-to-asterisk transformation."
+  (interactive)
+  ;;(cl-letf (((symbol-function 'consult--read) #'my-consult-query-transform))
+  (cl-letf (((symbol-function 'consult--regexp-compiler) #'my-consult-query-transform))
+    ;;(consult-line)))
+    (consult-buffer)))
+
+(advice-add 'consult--regexp-compiler :around #'my-consult-query-transform)
+(advice-remove 'consult--regexp-compiler  #'my-consult-query-transform)
+(provide 'my-consult-line)
+(toggle-input-method)
+
+(defun my/replace-space2asterisk(f &rest args)
+  (let ((result (apply f args)))
+    (replace-regexp-in-string " " "*" result)
+  ))
+(advice-add 'minibuffer-contents-no-properties :around #'my/replace-space2asterisk)
+(replace-regexp-in-string "t" "a" "test")
+
+(consult-buffer)
 ```
