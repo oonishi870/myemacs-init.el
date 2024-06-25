@@ -1686,8 +1686,37 @@ testaaaaaa-test
 (defun my/replace-space2asterisk(f &rest args)
   (let ((result (apply f args)))
     (replace-regexp-in-string " " "*" result)
+    ))
+
+
+(defun my/add-narrow(f &rest args)
+  (print args)
+  (let ((result (apply f  (append args (list :narrow '())))))
+    result
   ))
+
+(append (list 1 2 3) (list 4))
+(list (consult--source-hidden-buffer consult--source-modified-buffer consult--source-buffer consult--source-recent-file consult--source-file-register consult--source-bookmark consult--source-project-buffer-hidden consult--source-project-recent-file-hidden) :require-match confirm-after-completion :prompt "Switch to: " :history consult--buffer-history :sort nil)
+
+test-completion
+
+(defun my/test-completion(f content &rest args)
+  (print (replace-regexp-in-string " " "*" content))
+  (apply f (replace-regexp-in-string " " "*" content) args ))
+(advice-add 'test-completion :around #'my/test-completion)
+
+(defun my/replace-space2asterisk(f &rest args)
+  (let ((result (apply f args)))
+    (replace-regexp-in-string " " "*" result)
+    ))
 (advice-add 'minibuffer-contents-no-properties :around #'my/replace-space2asterisk)
+(advice-remove 'minibuffer-contents-no-properties  #'my/replace-space2asterisk)
+(advice-add 'consult--multi :around #'my/add-narrow)
+(advice-remove 'consult--multi  #'my/add-narrow)
+
+(setq completion-ignore-case t)
+
+
 (replace-regexp-in-string "t" "a" "test")
 
 (consult-buffer)
