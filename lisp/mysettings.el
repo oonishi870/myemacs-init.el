@@ -935,11 +935,14 @@
   ;; (set-fontset-font t 'japanese-jisx0208 "MogihaPenFont")
   ;;(set-fontset-font t 'japanese-jisx0208 "APJapanesefontT")
   ;; (set-fontset-font t 'japanese-jisx0208 "RiiTegakiN-R")
+  ;; (set-frame-font "azuki_font 11")
+  ;; (setq face-font-rescale-alist '())
   (set-frame-font "NotoMono 10")
+  (set-frame-font "DejaVu Sans Mono 10")
   (setq face-font-rescale-alist '(
            (".*Zen Kurenaido.**" . 1.2) ;; Zenkurenaido
-           (".*APJapanesefont.*" . 1.3) ;; あんずもじ
-           (".*azuki.*" . 1.2)          ;; あずきフォント
+           (".*APJapanesefont.*" . 1.2) ;; あんずもじ
+           (".*azuki.*" . 1.3)          ;; あずきフォント
            (".*Klee.*" . 1.2)          ;; Klee One
            (".*MogihaPenFont.*" . 1.2)          ;;mogiha
            (".*RiiTegakiN.*" . 1.2)          ;;りい手書き

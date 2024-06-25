@@ -1008,6 +1008,8 @@ ssh localhost ag $@
 
   (vertico-mode 1)
   (vertico-posframe-mode 1)
+  (consult-line "*consult-line")
+  
 ```
 
 
@@ -1654,5 +1656,13 @@ testaaaaaa-test
                   (search-forward-regexp ")\\|\\]\\|}")
                   (handle-shift-selection)))
   )
+(consult-ag "~/note.d" "mdcodrun hook")
+(consult-line "*" (point-min))
+(setq consult-line-start-from-top nil)
+
 ```
 
+```latex
+
+
+```

@@ -3,7 +3,7 @@
 (defvar history-index 0
   "Current index in the position-history.")
 
-(defun add-position-to-history (&optional args)
+(defun add-position-to-history (&rest args)
   "Add the current buffer, position, and window to the position-history list."
   (let ((entry (list (current-buffer) (point) (selected-window))))
     (unless (equal entry (car position-history))
