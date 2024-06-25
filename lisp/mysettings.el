@@ -643,6 +643,15 @@
                       (if (use-region-p)
                         (swiper-thing-at-point)
                         (swiper))))
+
+      ( "C-k C-j" . (lambda (&optional args)
+                      (interactive)
+                      (if (use-region-p)
+                        (consult-line (concat "*"
+                                        (buffer-substring-no-properties
+                                          (region-beginning)
+                                          (region-end))))
+                        (consult-line "*"))))
       
       ( "C-k C-u" . counsel-company)
       ;; ( "C-k C-o" . helm-show-kill-ring)
@@ -1374,6 +1383,9 @@ ssh localhost ~/bin/npm $@
 
 
 (leaf my/markdown-preview
+  :init
+  (leaf web-server
+    :ensure 1)
   :require web-server
   ;;:ensure t
   :config
@@ -1482,3 +1494,23 @@ ssh localhost ~/bin/npm $@
   ;; save-bufferでwebkitをリロード
   (advice-add 'save-buffer :after #'my/markdown-live-preview-refresh)
   )
+
+(leaf consult
+  :ensure t
+  :init
+  (leaf vertico
+    :ensure t
+    :config
+    (vertico-mode 1)
+    (setq vertico-cycle t)
+    )
+
+  (leaf vertico-posframe
+    :ensure t
+    :config
+    (vertico-posframe-mode 1)
+    )
+  :config
+  )
+
+  
