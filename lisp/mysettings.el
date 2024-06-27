@@ -665,6 +665,7 @@
       ( "C-k C-k C-@" . describe-key)
       ( "C-k C-@" . my/repeat-last-evaluated-sexp)
       ( "C-k C-h" . counsel-ag)
+      ( "<zenkaku-hankaku>" . toggle-input-method)
       ;;( "C-k C-h" . consult-ag)
 ;;      ( "C-k C-<left>" . split-window-left)
       ;; ( "C-k C-<right>" . split-window-right)
