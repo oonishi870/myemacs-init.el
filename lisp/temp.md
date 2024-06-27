@@ -1699,11 +1699,22 @@ testaaaaaa-test
 (list (consult--source-hidden-buffer consult--source-modified-buffer consult--source-buffer consult--source-recent-file consult--source-file-register consult--source-bookmark consult--source-project-buffer-hidden consult--source-project-recent-file-hidden) :require-match confirm-after-completion :prompt "Switch to: " :history consult--buffer-history :sort nil)
 
 test-completion
+(keymap)
+
+(advice-add 'exit-minibuffer :before (lambda (&rest _)(print "yes")))
+(advice-add 'exit-minibuffer :before
+  (lambda (&rest _)
+    (print "yes")
+    (advice-remove 'test-completion  #'my/test-completion)
+    ))
+
+
 
 (defun my/test-completion(f content &rest args)
   (print (replace-regexp-in-string " " "*" content))
   (apply f (replace-regexp-in-string " " "*" content) args ))
 (advice-add 'test-completion :around #'my/test-completion)
+(advice-remove 'test-completion  #'my/test-completion)
 
 (defun my/replace-space2asterisk(f &rest args)
   (let ((result (apply f args)))
@@ -1716,9 +1727,78 @@ test-completion
 
 (setq completion-ignore-case t)
 
-
 (replace-regexp-in-string "t" "a" "test")
 
 (consult-buffer)
+
+comp-ctxt
+
+(print completion-in-region)
+(completion-in-region (point) (1+ (point)))
+
+(corfu-complete)
+(print completion-at-point-functions)
+(advice--p 'corfu-complete)
+
+(advice-mapc #'print #'corfu-complete)
+(advice-mapc #'print #'complete)
+(advice-mapc #'print #'comint-dynamic-complete)
+(advice-mapc #'print #'completion-at-point-functions)
+(advice-mapc #'print #'comint-completion-at-point)
+(advice-mapc #'print #'corfu--exit-function)
+(advice-mapc #'print #'corfu--done)
+(print #'corfu--exit-function)
+
+
+(defun test(&rest _)
+  (print "yes")
+  ;;(print (backtrace-frame 9))
+  (print completion-extra-properties)
+  )
+(advice-add #'insert :before #'test)
+(advice-remove #'insert  #'test)
+
+
+
+(print pcomplete-suffix-list)
+(require 'comint)
+(comint-dynamic-complete)
+(setq comint-redirect-completed nil)
+
+(character 47)
+(char 47)
+
+(print company-after-completion-hook nil)
+(print company-after-completion-hook)
 ```
 
+
+```elisp : cape.el:850付近
+                 (lambda (input)
+                   (let ((cands (cape--company-call backend 'candidates input)))
+                     ;; The candidate string including text properties should be
+                     ;; restored in the :exit-function, if the UI does not
+                     ;; guarantee this itself.  Restoration is not necessary for
+                     ;; Corfu since the introduction of `corfu--exit-function'.
+                     (unless (and (bound-and-true-p corfu-mode) (fboundp 'corfu--exit-function))
+                       (setq restore-props cands))
+                     (cons (apply-partially valid input) cands))))
+                :category backend
+                :sort (not (cape--company-call backend 'sorted))))
+              :exclusive 'no
+              :company-prefix-length (cdr-safe prefix)
+              :company-doc-buffer (lambda (x) (cape--company-call backend 'doc-buffer x))
+              :company-location (lambda (x) (cape--company-call backend 'location x))
+              :company-docsig (lambda (x) (cape--company-call backend 'meta x))
+              :company-deprecated (lambda (x) (cape--company-call backend 'deprecated x))
+              :company-kind (lambda (x) (cape--company-call backend 'kind x))
+              :annotation-function (lambda (x)
+                                     (when-let (ann (cape--company-call backend 'annotation x))
+                                       (concat " " (string-trim ann))))
+              :exit-function (lambda (x _status)
+                               ;; Restore the candidate string including
+                               ;; properties if restore-props is non-nil.  See
+                               ;; the comment above.
+                               (setq x (or (car (member x restore-props)) x))
+                               (cape--company-call backend 'post-completion x)))))))
+```

@@ -714,7 +714,9 @@
   ;; (setq dabbrev-check-all-buffers nil)
   ;;
   ;; デフォルトを選択なしにする
-  (setq corfu-preselect 'prompt)
+  ;;(setq corfu-preselect 'prompt)
+  (setq corfu-preselect 'valid)
+  
   (global-corfu-mode +1)
   (leaf cape :ensure t)
   (leaf cl-lib :ensure t)
