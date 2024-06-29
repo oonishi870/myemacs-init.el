@@ -1705,7 +1705,8 @@ test-completion
 (advice-add 'exit-minibuffer :before
   (lambda (&rest _)
     (print "yes")
-    (advice-remove 'test-completion  #'my/test-completion)
+    ;;(advice-remove 'test-completion  #'my/test-completion)
+    (advice-remove 'minibuffer-contents-no-properties  #'my/test-completion2)
     ))
 
 
@@ -1713,8 +1714,26 @@ test-completion
 (defun my/test-completion(f content &rest args)
   (print (replace-regexp-in-string " " "*" content))
   (apply f (replace-regexp-in-string " " "*" content) args ))
+
 (advice-add 'test-completion :around #'my/test-completion)
 (advice-remove 'test-completion  #'my/test-completion)
+
+
+(defun my/test-completion2(f &rest args)
+  ;;(print (replace-regexp-in-string " " "*" content))
+  (replace-regexp-in-string " " "*" (apply f  args )))
+
+
+(advice-add 'minibuffer-contents-no-properties :around #'my/test-completion2)
+(advice-remove 'minibuffer-contents-no-properties  #'my/test-completion2)
+
+(defun test(&rest _)
+  (print "yes")
+  ;;(advice-remove 'test-completion  #'my/test-completion)
+  (advice-remove 'minibuffer-contents-no-properties  #'my/test-completion2)
+  )
+vertico-exit
+(advice-add 'vertico-exit :before #'test)
 
 (defun my/replace-space2asterisk(f &rest args)
   (let ((result (apply f args)))
@@ -1802,3 +1821,4 @@ comp-ctxt
                                (setq x (or (car (member x restore-props)) x))
                                (cape--company-call backend 'post-completion x)))))))
 ```
+
