@@ -1828,8 +1828,8 @@ comp-ctxt
 
 ;; " "->"*"変換+先頭に"*"を追加
 (defun my/minibuffer-contents-no-properties(f &rest args)
-  (concat "*" (replace-regexp-in-string " " "*" (apply f  args )))
-  )
+    (concat "*" (replace-regexp-in-string " " "*" (apply f  args ))))
+  
 
 (defun my/cancel-advice--minibuffer-contents-no-properties(&rest args)
   (advice-remove 'minibuffer-contents-no-properties  #'my/minibuffer-contents-no-properties))
@@ -1855,8 +1855,34 @@ comp-ctxt
 
 (advice-add 'consult-line :around  #'my/advice-smart-consult)
 (advice-add 'consult-buffer   :around  #'my/advice-smart-consult)
+(advice-remove 'consult-buffer     #'my/advice-smart-consult)
+(advice-add 'consult-ag   :around  #'my/advice-smart-consult)
+(advice-remove 'consult-ag  #'my/advice-smart-consult)
 
+(setq vertico-preselect 'prompt)
 
+(defun consult-ag (&optional target initial)
+  "Consult ag for query in TARGET file(s) with INITIAL input."
+  (interactive)
+  (print initial)
+  (pcase-let* ((`(,prompt ,paths ,dir) (consult--directory-prompt "Consult ag: " target))
+               (default-directory dir))
+    (consult--read (consult--async-command #'consult-ag--builder
+                     (consult--async-map #'consult-ag--format))
+                   :prompt prompt
+                   :lookup #'consult--lookup-member
+                   :state (consult-ag--grep-state)
+                   :initial (consult--async-split-initial initial)
+                   :require-match t
+                   :category 'file
+                   :sort nil)))
+
+(defun consult-ag--builder (input)
+  "Build command line given INPUT."
+  (print input)
+  (pcase-let* ((cmd (split-string-and-unquote "ag --vimgrep"))
+               (`(,arg . ,opts) (consult--command-split input)))
+    `(,@cmd ,@opts ,arg ".")))
 
 ```
 
