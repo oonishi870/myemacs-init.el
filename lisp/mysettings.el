@@ -645,14 +645,21 @@
                         (swiper-thing-at-point)
                         (swiper))))
 
+      ;; ( "C-k C-j" . (lambda (&optional args)
+      ;;                 (interactive)
+      ;;                 (if (use-region-p)
+      ;;                   (consult-line (concat "*"
+      ;;                                   (buffer-substring-no-properties
+      ;;                                     (region-beginning)
+      ;;                                     (region-end))))
+      ;;                   (consult-line "*"))))
       ( "C-k C-j" . (lambda (&optional args)
                       (interactive)
                       (if (use-region-p)
-                        (consult-line (concat "*"
-                                        (buffer-substring-no-properties
+                        (consult-line (buffer-substring-no-properties
                                           (region-beginning)
-                                          (region-end))))
-                        (consult-line "*"))))
+                                          (region-end)))
+                        (consult-line ))))
       
       ( "C-k C-u" . counsel-company)
       ;; ( "C-k C-o" . helm-show-kill-ring)
