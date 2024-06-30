@@ -663,7 +663,8 @@
       
       ( "C-k C-u" . counsel-company)
       ;; ( "C-k C-o" . helm-show-kill-ring)
-      ( "C-k C-o" . counsel-yank-pop)
+      ;;( "C-k C-o" . counsel-yank-pop)
+      ( "C-k C-o" . consult-yank-pop)
       ( "C-k C-t" . my/turn-buffer)
       ( "C-k C-k C-t" . (lambda ()(interactive) (my/turn-buffer 1)))
       ;;( "C-k C-;" . helm-comint-input-ring)
@@ -1527,7 +1528,12 @@ ssh localhost ~/bin/npm $@
 
   ;; " "->"*"変換+先頭に"*"を追加
   (defun my/minibuffer-contents-no-properties(f &rest args)
-      (concat "*" (replace-regexp-in-string " " "*" (apply f  args ))))
+    (let*(
+           (s (apply f  args ))
+           (s (replace-regexp-in-string " " "*" s))
+           (s (if (string= s "") "" (concat "*" s)))
+           )
+      s))
 
 
   (defun my/cancel-advice--minibuffer-contents-no-properties(&rest args)
@@ -1550,10 +1556,14 @@ ssh localhost ~/bin/npm $@
           (advice-remove 'vertico-exit  #'my/cancel-advice--minibuffer-contents-no-properties))
         result)
       ))
-  (advice-add 'consult-line   :around  #'my/advice-smart-consult)
-  (advice-add 'consult-buffer :around  #'my/advice-smart-consult)
+  (setq completion-ignore-case t)
+  (advice-add 'consult-line     :around  #'my/advice-smart-consult)
+  (advice-add 'consult-buffer   :around  #'my/advice-smart-consult)
+  (advice-add 'consult-yank-pop :around  #'my/advice-smart-consult)
+  
   ;; (advice-remove 'consult-line       #'my/advice-smart-consult)
   ;; (advice-remove 'consult-buffer     #'my/advice-smart-consult)
+  ;; (advice-remove 'consult-yank-pop   #'my/advice-smart-consult)
   )
 
   
