@@ -639,11 +639,11 @@
       ;;( "C-k C-p") . switch-to-next-buffer)
       ;;( "C-k C-h") . swap-buffers)
       ;;( "C-k C-u") . helm-swoop)
-      ( "C-k C-j" . (lambda (&optional args)
-                      (interactive)
-                      (if (use-region-p)
-                        (swiper-thing-at-point)
-                        (swiper))))
+      ;; ( "C-k C-j" . (lambda (&optional args)
+      ;;                 (interactive)
+      ;;                 (if (use-region-p)
+      ;;                   (swiper-thing-at-point)
+      ;;                   (swiper))))
 
       ;; ( "C-k C-j" . (lambda (&optional args)
       ;;                 (interactive)
@@ -1523,6 +1523,37 @@ ssh localhost ~/bin/npm $@
     (vertico-posframe-mode 1)
     )
   :config
+  ;; consultで*を打つのがめんどくさいので、" "を"*"に変換する
+
+  ;; " "->"*"変換+先頭に"*"を追加
+  (defun my/minibuffer-contents-no-properties(f &rest args)
+      (concat "*" (replace-regexp-in-string " " "*" (apply f  args ))))
+
+
+  (defun my/cancel-advice--minibuffer-contents-no-properties(&rest args)
+    (advice-remove 'minibuffer-contents-no-properties  #'my/minibuffer-contents-no-properties))
+
+  ;; advice関数
+  (defun my/advice-smart-consult(f &rest args)
+    ;; C-gでキャンセルの場合も解除
+    (let ((result))
+      (unwind-protect
+        (progn
+          ;; minibuffer-contents-no-propertiesにアドバイスを追加し実行後解除する
+          (advice-add 'minibuffer-contents-no-properties :around #'my/minibuffer-contents-no-properties)
+          ;; verico-exitの中で上記を解除する（解除しないとenterで確定できない
+          (advice-add 'vertico-exit :before #'my/cancel-advice--minibuffer-contents-no-properties)
+          (advice-add 'minibuffer-contents-no-properties :around #'my/minibuffer-contents-no-properties)
+          (setq result (apply f args)))
+        (progn
+          (advice-remove 'minibuffer-contents-no-properties  #'my/minibuffer-contents-no-properties)
+          (advice-remove 'vertico-exit  #'my/cancel-advice--minibuffer-contents-no-properties))
+        result)
+      ))
+  (advice-add 'consult-line   :around  #'my/advice-smart-consult)
+  (advice-add 'consult-buffer :around  #'my/advice-smart-consult)
+  ;; (advice-remove 'consult-line       #'my/advice-smart-consult)
+  ;; (advice-remove 'consult-buffer     #'my/advice-smart-consult)
   )
 
   

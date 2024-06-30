@@ -1853,8 +1853,9 @@ comp-ctxt
     ))
 
 
-(advice-add 'consult-line :around  #'my/advice-smart-consult)
-(advice-add 'consult-buffer   :around  #'my/advice-smart-consult)
+(advice-add 'consult-line   :around  #'my/advice-smart-consult)
+(advice-add 'consult-buffer :around  #'my/advice-smart-consult)
+(advice-remove 'consult-line       #'my/advice-smart-consult)
 (advice-remove 'consult-buffer     #'my/advice-smart-consult)
 (advice-add 'consult-ag   :around  #'my/advice-smart-consult)
 (advice-remove 'consult-ag  #'my/advice-smart-consult)
