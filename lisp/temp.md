@@ -1886,5 +1886,258 @@ comp-ctxt
                (`(,arg . ,opts) (consult--command-split input)))
     `(,@cmd ,@opts ,arg ".")))
 
+(cl-defun consult--read-1 (table &key
+                                 prompt predicate require-match history default
+                                 keymap category initial narrow add-history annotate
+                                 state preview-key sort lookup group inherit-input-method)
+  "See `consult--read' for the documentation of the arguments."
+  ;;(message "yes")
+  (consult--minibuffer-with-setup-hook
+      (:append (lambda ()
+                 (add-hook 'after-change-functions #'consult--tofu-hide-in-minibuffer nil 'local)
+                 (consult--setup-keymap keymap (consult--async-p table) narrow preview-key)
+                 (setq-local minibuffer-default-add-function
+                             (apply-partially #'consult--add-history (consult--async-p table) add-history))))
+    (consult--with-async (async table)
+      (consult--with-preview
+          preview-key state
+          (lambda (narrow input cand)
+            (funcall lookup cand (funcall async nil) input narrow))
+          (apply-partially #'run-hook-with-args-until-success
+                           'consult--completion-candidate-hook)
+          (pcase-exhaustive history
+            (`(:input ,var) var)
+            ((pred symbolp)))
+        ;; Do not unnecessarily let-bind the lambdas to avoid over-capturing in
+        ;; the interpreter.  This will make closures and the lambda string
+        ;; representation larger, which makes debugging much worse.  Fortunately
+        ;; the over-capturing problem does not affect the bytecode interpreter
+        ;; which does a proper scope analysis.
+        (let* ((metadata `(metadata
+                           ,@(when category `((category . ,category)))
+                           ,@(when group `((group-function . ,group)))
+                           ,@(when annotate
+                               `((affixation-function
+                                  . ,(apply-partially #'consult--read-affixate annotate))
+                                 (annotation-function
+                                  . ,(apply-partially #'consult--read-annotate annotate))))
+                           ,@(unless sort '((cycle-sort-function . identity)
+                                            (display-sort-function . identity)))))
+               (consult--annotate-align-width 0)
+               (selected
+                (completing-read
+                 prompt
+                 (lambda (str pred action)
+                   (let ((result (complete-with-action action (funcall async nil) str pred)))
+                     (if (eq action 'metadata)
+                         (if (and (eq (car result) 'metadata) (cdr result))
+                             ;; Merge metadata
+                             `(metadata ,@(cdr metadata) ,@(cdr result))
+                           metadata)
+                       result)))
+                 predicate require-match initial
+                 (if (symbolp history) history (cadr history))
+                 default
+                 inherit-input-method)))
+          ;; Repair the null completion semantics. `completing-read' may return
+          ;; an empty string even if REQUIRE-MATCH is non-nil. One can always
+          ;; opt-in to null completion by passing the empty string for DEFAULT.
+          (when (and (eq require-match t) (not default) (equal selected ""))
+            (user-error "No selection"))
+          selected)))))
+
+(progn
+  (message "yes")
+  (message "yes2"))
+(defun vertico--exhibit (&rest _)
+  "Exhibit completion UI."
+  (message "yes2")
+  (let ((buffer-undo-list t)) ;; Overlays affect point position and undo list!
+    (message "yes5")
+    (vertico--update 'interruptible)
+    (message "yes6")
+    (vertico--prompt-selection)
+    (message "yes7")
+    (vertico--display-count)
+    (message "yes8")
+    (vertico--display-candidates (vertico--arrange-candidates))
+    (message "yes4")
+    ))
+(defun vertico--update (&optional interruptible)
+  "Update state, optionally INTERRUPTIBLE."
+  (let* ((pt (max 0 (- (point) (minibuffer-prompt-end))))
+         (content (minibuffer-contents-no-properties))
+         (input (cons content pt)))
+    (unless (or (and interruptible (input-pending-p)) (equal vertico--input input))
+      ;; Redisplay to make input immediately visible before expensive candidate
+      ;; recomputation (gh:minad/vertico#89).  No redisplay during init because
+      ;; of flicker.
+      (when (and interruptible (consp vertico--input))
+        ;; Prevent recursive exhibit from timer (`consult-vertico--refresh').
+        (cl-letf (((symbol-function #'vertico--exhibit) #'ignore)) (redisplay)))
+      (pcase (let ((vertico--metadata (completion-metadata (substring content 0 pt)
+                                                           minibuffer-completion-table
+                                                           minibuffer-completion-predicate)))
+               ;; If Tramp is used, do not compute the candidates in an
+               ;; interruptible fashion, since this will break the Tramp
+               ;; password and user name prompts (See gh:minad/vertico#23).
+               (if (or (not interruptible)
+                       (and (eq 'file (vertico--metadata-get 'category))
+                            (or (vertico--remote-p content) (vertico--remote-p default-directory))))
+                   (vertico--recompute pt content)
+                 (let ((non-essential t))
+                   (while-no-input (vertico--recompute pt content)))))
+        ('nil (abort-recursive-edit))
+        ((and state (pred consp))
+         (setq vertico--input input)
+          (dolist (s state) (set (car s) (cdr s))))))))
+
+
+(cl-defgeneric vertico--prepare (&rest _)
+  "Ensure that the state is prepared before running the next command."
+  (when (and (symbolp this-command) (string-prefhix-p "vertico-" (symbol-name this-command)))
+    (vertico--update)))
+
+(consult-ag :INTIAL "a")
+(consult-ag--builder "test")
+
+(setf org_message #'message)
+;;;###autoload
+(defun consult-ag (&optional target initial)
+  "Consult ag for query in TARGET file(s) with INITIAL input."
+  (interactive)
+  (setq xxx "yes")
+  (apply org_message (list initial))
+  (pcase-let* ((`(,prompt ,paths ,dir) (consult--directory-prompt "Consult ag: " target))
+               (default-directory dir))
+    (consult--read (consult--async-command #'consult-ag--builder
+                     (consult--async-map #'consult-ag--format))
+                   :prompt prompt
+                   :lookup #'consult--lookup-member
+                   :state (consult-ag--grep-state)
+      :initial (consult--async-split-initial initial)
+      ;;:initial initial
+                   :require-match t
+                   :category 'file
+      :sort nil)))
+(consult-ag--format "test")
+(apply org_message '("yes"))
+(print xxx)
+```
+
+
+
+```elisp
+
+(defun setup-cape-dict (dict-file)
+  "Set up cape-dict with the specified DICT-FILE."
+  (setq-local cape-dict-file dict-file)
+  (setq-local completion-at-point-functions
+              (list #'cape-dict)))
+
+(defun my-text-mode-setup ()
+  "Set up cape-dict for text-mode."
+  (setup-cape-dict "/path/to/text-mode-dictionary.txt"))
+
+(defun my-prog-mode-setup ()
+  "Set up cape-dict for prog-mode."
+  (setup-cape-dict "/path/to/prog-mode-dictionary.txt"))
+
+(add-hook 'text-mode-hook #'my-text-mode-setup)
+(add-hook 'prog-mode-hook #'my-prog-mode-setup)
+
+(corfu-prescient-mode -1)
+
+
+(leaf orderless
+  :ensure t
+  :config
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides nil)
+
+  (with-eval-after-load 'migemo
+    ;; orderlessをmigemo対応
+    (defun orderless-migemo (component)
+      (let ((pattern (downcase (migemo-get-pattern component))))
+        (condition-case nil
+            (progn (string-match-p pattern "") pattern)
+          (invalid-regexp nil))))
+    (add-to-list 'orderless-matching-styles 'orderless-migemo))
+
+  (with-eval-after-load 'corfu
+    (defun orderless-fast-dispatch (word index total)
+      (and (= index 0) (= total 1) (length< word 3)
+           `(orderless-regexp . ,(concat "^" (regexp-quote word)))))
+
+    (orderless-define-completion-style orderless-fast
+      (orderless-style-dispatchers '(orderless-fast-dispatch))
+      (orderless-matching-styles '(orderless-flex)))
+
+    (add-hook 'corfu-mode-hook
+              (lambda ()
+                (setq-local corfu-auto-delay 0
+                            corfu-auto-prefix 1
+                            compleion-styles '(orderless-fast basic))))))
+
+
+;; Abbrev mode を有効にする
+(setq-default abbrev-mode t)
+
+
+;; 変更を保存するファイルを指定
+(setq abbrev-file-name "~/.emacs.d/abbrev_defs")
+
+;; 保存された abbrev を読み込む
+(if (file-exists-p abbrev-file-name)
+    (quietly-read-abbrev-file))
+
+;; 定義された abbrev を保存
+(setq save-abbrevs 'silently)
+
+;; Abbrev 定義を追加
+(define-abbrev-table 'global-abbrev-table '(
+    ("ba" "testtesttest2" nil 0)
+    ("aa" "testtesttest" nil 0)
+    ("()" "\\left(\\right)" nil 0)
+    ("__" "\\left(\\right)" nil 0)
+    ("kk" "\\left(\\right)" nil 0)
+    ("[]" "\\left(\\right)" nil 0)
+))
+
+(add-hook 'completion-at-point-functions #'cape-abbrev)
+
+(setq-local completion-at-point-functions
+  (list (cape-capf-super #'cape-dabbrev
+          #'cape-abbrev 
+          ;; Python専用のキーワード補完を追加
+          (cape-capf-buster #'python-keywords))))
+
+testtesttest2
+\left(\right)
+
+testtesttest
+testtesttest2
+
+kkkk
+
+
+__
+
+testtesttest
+
+testtesttest2
+__
+
+(let()
+  (modify-syntax-entry ?\( "w")
+  (modify-syntax-entry ?\) "w")
+)
+\left(\right)
+\left(\right)
+\left( \right)
+
+
+
 ```
 
