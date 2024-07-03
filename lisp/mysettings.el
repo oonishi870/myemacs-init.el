@@ -660,6 +660,14 @@
                                           (region-beginning)
                                           (region-end)))
                         (consult-line ))))
+      ( "C-k C-k C-j" . (lambda (&optional args)
+                      (interactive)
+                      (if (use-region-p)
+                        (consult-line-multi t
+                          (buffer-substring-no-properties
+                                          (region-beginning)
+                                          (region-end)))
+                        (consult-line-multi t))))
       
       ( "C-k C-u" . counsel-company)
       ;; ( "C-k C-o" . helm-show-kill-ring)
@@ -672,7 +680,8 @@
       ( "C-k C-k C-d" . my/mdcoderun-again)
       ( "C-k C-k C-@" . describe-key)
       ( "C-k C-@" . my/repeat-last-evaluated-sexp)
-      ( "C-k C-h" . counsel-ag)
+      ;;( "C-k C-h" . counsel-ag)
+      ( "C-k C-h" . consult-ag)
       ( "<zenkaku-hankaku>" . toggle-input-method)
       ;;( "C-k C-h" . consult-ag)
 ;;      ( "C-k C-<left>" . split-window-left)

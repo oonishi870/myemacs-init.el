@@ -1439,8 +1439,6 @@ Return the list of results."
 (global-set-key (kbd "C-=") 'er/expand-region)
 
 
-
-
 ```
 
 ```elisp
@@ -1759,6 +1757,8 @@ comp-ctxt
 (print completion-at-point-functions)
 (advice--p 'corfu-complete)
 
+(consult-ag--builder "test")
+
 (advice-mapc #'print #'corfu-complete)
 (advice-mapc #'print #'complete)
 (advice-mapc #'print #'comint-dynamic-complete)
@@ -1886,5 +1886,104 @@ comp-ctxt
                (`(,arg . ,opts) (consult--command-split input)))
     `(,@cmd ,@opts ,arg ".")))
 
+
+
+(consult-ag--builder "test")
+(list "ag" "--vimgrep" "--skip-vcs-ignores" "--ignore" "*~")
+
+;; 一時的に元の関数 y を保存する変数を用意
+(defvar _original/consult-ag--builder (symbol-function 'consult-ag--builder))
+
+(defun my/consult-ag--builder(&rest args)
+  ;;(message "yes")
+  (funcall _original/consult-ag--builder  args))
+
+(cl-letf* (
+            ((symbol-function 'consult-ag--builder) #'my/consult-ag--builder))
+  (consult-ag))
+
+(consult-ag--builder "")
+
+(popup-page-next 'popup)
+(ac-show-menu)
+(print ac-menu)
+
+(vertico-next-group)
+(vertico)
+(vertico-posframe-get-size (current-buffer))
+(message "%s" (vertico-posframe-get-size vertico-posframe--buffer))
+
+(scroll-down-command)
+(consult-n)
+
+
 ```
 
+
+```elisp
+
+(consult-line-multi t "hello")
+
+```
+
+```html
+<!DOCTYPE html>
+<!-- SlickGridを使ってcsvを表示する。getパラメータでcsvファイル名を指定する -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CSV Viewer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slickgrid/2.3.6/slick.grid.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slickgrid/2.3.6/slick-default-theme.css">
+  <style>
+    .slick-cell {
+      padding: 0px;
+      margin: 0px;
+    }
+  </style>
+  <script>
+    function loadCSV() {
+      var url = new URL(window.location.href);
+      var csv = url.searchParams.get("csv");
+      if (!csv) {
+        alert("csv parameter is required.");
+        return;
+      }
+      var grid;
+      var columns = [];
+      var data = [];
+      var options = {
+        enableCellNavigation: true,
+        enableColumnReorder: false
+      };
+      var req = new XMLHttpRequest();
+      req.open("GET", csv);
+      req.onload = function() {
+        var lines = req.responseText.split("\n");
+        columns = lines[0].split(",");
+        for (var i = 1; i < lines.length; i++) {
+          var values = lines[i].split(",");
+          var row = {};
+          for (var j = 0; j < columns.length; j++) {
+            row[columns[j]] = values[j];
+          }
+          data.push(row);
+        }
+        grid = new Slick.Grid("#myGrid", data, columns, options);
+      };
+      req.send();
+    }
+    function init() {
+      loadCSV();
+    }
+
+    window.onload = init;     
+</script>
+</head>
+<body>
+  <div id="myGrid" style="width:100%;height:500px;"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/slickgrid/2.3.6/slick.core.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/slickgrid/2.3.6/slick.grid.js"></script>
+</body>
+</html>
+```
