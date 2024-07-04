@@ -731,8 +731,8 @@
   ;; (setq dabbrev-check-all-buffers nil)
   ;;
   ;; デフォルトを選択なしにする
-  ;;(setq corfu-preselect 'prompt)
-  (setq corfu-preselect 'valid)
+  (setq corfu-preselect 'prompt)
+  ;;(setq corfu-preselect 'valid)
   
   (global-corfu-mode +1)
   (leaf cape :ensure t)
@@ -1262,7 +1262,7 @@ ssh localhost ~/bin/npm $@
     ;;(advice-remove 'counsel-yank-pop  #'my/disable-ivy-prescient-for-counsel-yank-pop)
     )
 
-  ;; 絞り込みの動作が手になじまない
+  ;; ;; 絞り込みの動作が手になじまない
   ;; (leaf corfu-prescient
   ;;   :ensure t
   ;;   :after corfu
