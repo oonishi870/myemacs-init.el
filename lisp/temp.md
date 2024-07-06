@@ -26,17 +26,24 @@ done
 a & b \\
 c & d 
 \end{pmatrix} 
-
+(yas-minor-mode 1)
 \begin{pmatrix}
 x \\
 y  
 \end{pmatrix} 
 =
+(require 'yasnippet)
+
 \begin{pmatrix}
 k \\
 t  
 \end{pmatrix}  
 
+
+\begin{pmatrix}
+a & b \\
+c & d 
+\end{pmatrix}
 
 \int_{}^{} x \mathrm{d}x
 
@@ -2061,12 +2068,25 @@ comp-ctxt
 (defun setup-cape-dict (dict-file)
   "Set up cape-dict with the specified DICT-FILE."
   (setq-local cape-dict-file dict-file)
-  (setq-local completion-at-point-functions
-              (list #'cape-dict)))
+  ;; (setq-local completion-at-point-functions
+  ;;   (list #'cape-dict))
+  (add-hook 'completion-at-point-functions #'cape-dict)
+  )
 
-(defun my-text-mode-setup ()
+(defun my/tex-mode-setup ()
   "Set up cape-dict for text-mode."
   (setup-cape-dict "/path/to/text-mode-dictionary.txt"))
+
+(remove-hook 'text-mode-hook nil)
+(remove-hook 'tex-mode-hook nil)
+
+(make-local-variable 'tex-mode-hook)
+(add-hook 'plain-tex-mode-hook
+  (lambda (&rest _)
+    (print "yes")
+    (make-local-variable 'completion-at-point-functions)
+    (setup-cape-dict
+      (locate-user-emacs-file "files/dictionary-tex.txt"))))
 
 (defun my-prog-mode-setup ()
   "Set up cape-dict for prog-mode."
@@ -2107,7 +2127,8 @@ comp-ctxt
               (lambda ()
                 (setq-local corfu-auto-delay 0
                             corfu-auto-prefix 1
-                            compleion-styles '(orderless-fast basic))))))
+                  compleion-styles '(orderless-fast basic))))))
+
 
 
 ;; Abbrev mode を有効にする
@@ -2177,6 +2198,8 @@ __
 
 ```
 
+
+
 ```html
 <!DOCTYPE html>
 <!-- SlickGridを使ってcsvを表示する。getパラメータでcsvファイル名を指定する -->
@@ -2238,3 +2261,90 @@ __
 </body>
 </html>
 ```
+
+
+```elisp
+(straight-use-package '(fussy :type git :host github :repo "jojojames/fussy"))
+;; (straight-use-package '(flx-rs :repo "jcs-elpa/flx-rs" :fetcher github :files (:defaults "bin")))
+(straight-use-package '(fzf-native :repo "dangduc/fzf-native" :host github :files (:defaults "bin")))
+;; (straight-use-package '(fuz-bin :repo "jcs-elpa/fuz-bin" :fetcher github :files (:defaults "bin")))
+;; (straight-use-package 'liquidmetal)
+;; (straight-use-package '(sublime-fuzzy :repo "jcs-elpa/sublime-fuzzy" :fetcher github :files (:defaults "bin")))
+;; (straight-use-package 'hotfuzz)
+;; (straight-use-package 'orderless)
+
+(require 'fussy)
+
+(setq completion-styles '(fussy)
+      completion-category-defaults nil
+      compleiton-category-overrides nil
+      ;;fussy-score-fn #'flx-score
+      ;; fussy-score-fn 'flx-rs-score
+      ;;fussy-score-fn 'fussy-fzf-native-score
+      ;; fussy-score-fn 'fussy-fuz-bin-score
+      ;; fussy-score-fn 'fussy-liquidmetal-score
+      ;; fussy-score-fn 'fussy-sublime-fuzzy-score
+      ;; fussy-score-fn 'fussy-hotfuzz-score
+      ;; fussy-filter-fn 'fussy-filter-flex
+      ;;fussy-filter-fn 'fussy-filter-default
+      ;; fussy-filter-fn 'fussy-filter-orderless-flex
+      ;;fussy-filter-fn 'fussy-filter-orderless
+      ;;fussy-filter-fn 'fussy-filter-flex
+      )
+
+(leaf fussy
+  :el-get (
+    jojojames/fussy
+    :type github
+    :pkgname "jojojames/fussy"
+    ;;:branch "main"
+            )
+  :ensure t
+  (setq completion-styles '(fussy)
+      completion-category-defaults nil
+      compleiton-category-overrides nil)
+  )
+
+(print completion-styles)
+(add-hook 'vertico-mode-hook
+  (lambda (&rest _)
+        ;;(message "yessssssssss" )
+        (setq-local completion-styles '(basic partial-completion emacs22))
+    ))
+
+(remove-hook 'vertico-posframe-mode-hook nil)
+(remove-hook 'vertico-mode-hook nil)
+(setq completion-styles '(basic partial-completion emacs22))
+
+(setq completion-styles '(basic partial-completion emacs22))
+
+(vertico--filter-completions
+
+```
+
+
+```tex
+
+
+(add-hook 'tex-mode-hook
+  (lambda ()
+    ;; (modify-syntax-entry ?\( "w")
+    ;; (modify-syntax-entry ?\) "w")
+    (modify-syntax-entry ?\\ "w")
+    ))
+    
+(add-hook 'tex-mode-hook (lambda () (modify-syntax-entry ?\) "w")))
+(add-hook 'tex-mode-hook (lambda () (modify-syntax-entry ?\\ "w")))
+(let()
+  (modify-syntax-entry ?\( "w")
+  (modify-syntax-entry ?\) "w")
+  )
+testtesttest
+left
+ensure    
+(print major-mode)
+(setq major-mode nil)
+
+```
+
+

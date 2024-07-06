@@ -1,0 +1,5 @@
+\left( \right)
+\displaystyle \frac{}{}
+\displaystyle \sum_{}^{}
+\displaystyle \int
+\mathrm{d}
