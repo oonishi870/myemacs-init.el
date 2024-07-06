@@ -441,7 +441,7 @@
         (if (file-directory-p (helm-get-selection))
           (helm-exit-and-execute-action
             (lambda (x) (dired x)))
-          ;;(helm-execute-persistent-action)     
+          ;;(helm-execute-persistent-action)
           (helm-exit-and-execute-action
             (lambda (x) (find-file x)))
           )))
@@ -1558,7 +1558,9 @@ ssh localhost ~/bin/npm $@
   ;; advice関数
   (defun my/advice-smart-consult(f &rest args)
     ;; C-gでキャンセルの場合も解除
-    (let ((result))
+    (let (
+           (result)
+           )
       (unwind-protect
         (progn
           ;; minibuffer-contents-no-propertiesにアドバイスを追加し実行後解除する
@@ -1576,10 +1578,36 @@ ssh localhost ~/bin/npm $@
   (advice-add 'consult-line     :around  #'my/advice-smart-consult)
   (advice-add 'consult-buffer   :around  #'my/advice-smart-consult)
   (advice-add 'consult-yank-pop :around  #'my/advice-smart-consult)
-  
+      
   ;; (advice-remove 'consult-line       #'my/advice-smart-consult)
   ;; (advice-remove 'consult-buffer     #'my/advice-smart-consult)
   ;; (advice-remove 'consult-yank-pop   #'my/advice-smart-consult)
   )
 
+
+;; ;; 前方一致。無難で早くて安定してる気がする
+;; (leaf orderless
+;;   :ensure t
+;;   :config
+;;   (setq completion-styles '(orderless basic)
+;;         completion-category-defaults nil
+;;         completion-category-overrides nil)
+;;   )
+
+;; 任意の部分一致
+(leaf fussy
+  :el-get (
+    jojojames/fussy
+    :type github
+    :pkgname "jojojames/fussy"
+    ;;:branch "main"
+            )
+  :ensure t
+  :config
+  
+  (add-hook 'corfu-mode-hook
+    (lambda (&rest _)
+      (setq-local completion-styles '(fussy))
+    ))
+  )
   
