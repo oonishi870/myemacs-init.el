@@ -428,6 +428,7 @@
   (setq helm-split-window-inside-p t)
   (setq helm-split-width-threshold 1024)
 
+  (require 'helm-files)
   ;; helm-find-filesのキーバインド
   (bind-keys :map helm-find-files-map
     ("<tab>" . helm-ff-RET)
@@ -435,10 +436,15 @@
       (lambda (&optional args)
         (interactive)
         ;; ディレクトリならdired。ファイルなら開く
+        (message (helm-get-selection))
+        (message "%s" (file-directory-p (helm-get-selection)))
         (if (file-directory-p (helm-get-selection))
           (helm-exit-and-execute-action
             (lambda (x) (dired x)))
-          (helm-execute-persistent-action))))
+          ;;(helm-execute-persistent-action)     
+          (helm-exit-and-execute-action
+            (lambda (x) (find-file x)))
+          )))
     )
 
 )
@@ -681,7 +687,8 @@
       ( "C-k C-k C-@" . describe-key)
       ( "C-k C-@" . my/repeat-last-evaluated-sexp)
       ;;( "C-k C-h" . counsel-ag)
-      ( "C-k C-h" . consult-ag)
+    ;;( "C-k C-h" . consult-ag)
+      ( "C-k C-h" . consult-ripgrep)
       ( "<zenkaku-hankaku>" . toggle-input-method)
       ;;( "C-k C-h" . consult-ag)
 ;;      ( "C-k C-<left>" . split-window-left)
@@ -968,12 +975,12 @@
   ;; (set-fontset-font t 'japanese-jisx0208 "RiiTegakiN-R")
   ;; (set-frame-font "azuki_font 11")
   ;; (setq face-font-rescale-alist '())
-  (set-frame-font "NotoMono 9")
-  (set-frame-font "DejaVu Sans Mono 9")
+  (set-frame-font "NotoMono 10")
+  (set-frame-font "DejaVu Sans Mono 10")
   (setq face-font-rescale-alist '(
            (".*Zen Kurenaido.**" . 1.2) ;; Zenkurenaido
            (".*APJapanesefont.*" . 1.2) ;; あんずもじ
-           (".*azuki.*" . 1.2)          ;; あずきフォント
+           (".*azuki.*" . 1.3)          ;; あずきフォント
            (".*Klee.*" . 1.2)          ;; Klee One
            (".*MogihaPenFont.*" . 1.2)          ;;mogiha
            (".*RiiTegakiN.*" . 1.2)          ;;りい手書き
@@ -1407,7 +1414,7 @@ ssh localhost ~/bin/npm $@
 (leaf my/markdown-preview
   :init
   (leaf web-server
-    :ensure 1)
+    :ensure t)
   :require web-server
   ;;:ensure t
   :config
@@ -1473,7 +1480,7 @@ ssh localhost ~/bin/npm $@
           ))))
               9001))
   ;;(ws-stop svr)
-
+  
 
   (require 'xwidget)
   (defun my/markdown-live-preview-refresh(&rest _args)
