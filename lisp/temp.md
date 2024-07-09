@@ -2436,7 +2436,61 @@ ensure
     (interactive)
     (my/buffer-switch-mode-hook-init)
     (my/buffer-switch-next))
-  
 
 
 ```
+
+```elisp
+;; leafでjump-treeをgithubからインストール
+(leaf jump-tree
+  :el-get (jump-tree
+            :type github
+            :pkgname "oonishi870/jump-tree"
+            :branch "devel/cl-remove-if"
+            )
+  :config
+  (global-jump-tree-mode 1)
+  ;;(global-jump-tree-mode -1)
+  )
+
+
+(defun my/ad--polymode-jump-tree2 (f &rest args)
+  ;;(print "yes")
+  ;;(print args)
+  (with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
+    (apply f args)
+  )
+)
+
+(advice-add    'jump-tree-pos-list-pre-command  :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-jump-prev             :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-jump-next             :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-pos-list-push :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-pos-list-pre-command :around #'my/ad--polymode-jump-tree2)
+
+(advice-remove 'jump-tree-jump-prev #'my/ad--polymode-jump-tree2)
+(advice-remove 'jump-tree-jump-next #'my/ad--polymode-jump-tree2)
+(advice-remove 'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree2)
+(advice-remove 'jump-tree-pos-list-post-command  #'my/ad--polymode-jump-tree2)
+
+(advice-remove 'jump-tree-pos-list-push #'my/ad--polymode-jump-tree2)
+
+(advice-remove 'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree2)
+
+(advice-add    'jump-tree-pos-list-push :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree)
+(advice-remove 'jump-tree-pos-list-post-command #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-jump-prev             :around #'my/ad--polymode-jump-tree)
+(advice-add    'jump-tree-jump-next             :around #'my/ad--polymode-jump-tree)
+
+(print jump-tree-pos-list)
+(setq jump-tree-pos-list ())
+```
+
+(print jump-tree-pos-list)
+(setq jump-tree-pos-list ())
+
+
