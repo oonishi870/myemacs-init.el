@@ -2437,6 +2437,52 @@ ensure
     (my/buffer-switch-mode-hook-init)
     (my/buffer-switch-next))
   
-
-
 ```
+
+```elisp
+
+(leaf jump-tree
+    :el-get (
+    yangwen0228/jump-tree.git
+    :type github               
+    :pkgname "yangwen0228/jump-tree"
+    ;;:branch "main"
+              )
+  :ensure t
+
+  )
+(global-jump-tree-mode 1)
+
+
+
+(defun my/consult-ripgrep-insert-file-content ()
+  "Use consult-ripgrep to select a file and insert its content into the current buffer."
+  (interactive)
+  (cl-letf ((consult--lookup-member
+              (lambda (&rest args)
+                (interactive)
+               ;;(apply #'message (car args)) ;; これでデバッグ出力
+               ;;(apply #'consult--lookup-member args)
+               ;;(car args)
+               ;;(message "%s" args)
+               ;;(car args)
+               ;;(print args)
+               (setq xxx (get-text-property 0 'consult--prefix-group args))
+               ;;(print "---")
+               )))
+    (let ((result (consult-ripgrep "/home/oonishi/" nil)))
+      (print "yes")
+      (print  result)
+      (print "yes"))))
+      
+      (when result
+        (let ((file  result))
+          (when (file-exists-p file)
+            (insert-file-contents file)))))))
+
+(my/consult-ripgrep-insert-file-content)
+(print xxx)
+(get-text-property 0 'test (propertize "yes" 'test 900))
+```
+
+
