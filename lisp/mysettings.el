@@ -792,7 +792,7 @@
   ;;   (setq lsp-completion-provider :none))
   (setq corfu-auto-prefix 1)
   ;;(setq corfu-auto t) 
-  (setq cape-dabbrev-min-length 2)
+  (setq cape-dabbrev-min-length 1)
   (setq corfu-auto-delay 0.0)
   ;;(company-dabbrev-ignore-buffers '((get-buffer "*scratch*")))
 

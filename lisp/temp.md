@@ -2458,10 +2458,15 @@ ensure
   ;;(print "yes")
   ;;(print args)
   (with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
+    (print jump-tree-pos-list)
+    (print (current-buffer))
+    (print (eq (current-buffer) prev))
+    (setq prev (current-buffer))
     (apply f args)
   )
-)
-
+  )
+(setq prev (current-buffer))
+(eq (current-buffer) prev)
 (advice-add    'jump-tree-pos-list-pre-command  :around #'my/ad--polymode-jump-tree2)
 (advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
 (advice-add    'jump-tree-jump-prev             :around #'my/ad--polymode-jump-tree2)
@@ -2469,7 +2474,9 @@ ensure
 (advice-add    'jump-tree-pos-list-push :around #'my/ad--polymode-jump-tree2)
 (advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
 (advice-add    'jump-tree-pos-list-pre-command :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-pos-list-make-position :around #'my/ad--polymode-jump-tree2)
 
+(advice-remove 'jump-tree-pos-list-make-position #'my/ad--polymode-jump-tree2)
 (advice-remove 'jump-tree-jump-prev #'my/ad--polymode-jump-tree2)
 (advice-remove 'jump-tree-jump-next #'my/ad--polymode-jump-tree2)
 (advice-remove 'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree2)
@@ -2488,9 +2495,19 @@ ensure
 
 (print jump-tree-pos-list)
 (setq jump-tree-pos-list ())
+(polymode-with-current-base-buffer 'current-buffer)
+(polymode-with-current-base-buffer (polymode-with-current-base-buffer 'current-buffer))
+(buffer-file-name (polymode-with-current-base-buffer 'current-buffer))
+(print jump-tree-pos-list-position)
+
+(jump-tree-buffer-prev)
+(jump-tree-node-previous)
+
 ```
 
 (print jump-tree-pos-list)
 (setq jump-tree-pos-list ())
+(print jump-tree-pos-list-position)
 
-
+(print currentl)
+(buffer-file-name (polymode-with-current-base-buffer 'current-buffer))
