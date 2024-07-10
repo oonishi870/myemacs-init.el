@@ -1596,7 +1596,6 @@ Return the list of results."
 #!/bin/bash
 
 
-
 x = xxx + bnhdbb(test)*aaaa, cccc
 
 (print (syntax-table))
@@ -2457,14 +2456,64 @@ ensure
 (defun my/ad--polymode-jump-tree2 (f &rest args)
   ;;(print "yes")
   ;;(print args)
-  (with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
-    (print jump-tree-pos-list)
-    (print (current-buffer))
-    (print (eq (current-buffer) prev))
-    (setq prev (current-buffer))
-    (apply f args)
+  ;;(setq p (point))
+    (remove-hook 'pre-command-hook  'jump-tree-pos-list-pre-command)
+    (remove-hook 'post-command-hook 'jump-tree-pos-list-post-command)
+  (unwind-protect 
+    (with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
+      ;;(global-jump-tree-mode 1)
+      ;;(goto-char p)
+        ;; (add-hook 'pre-command-hook  'jump-tree-pos-list-pre-command)
+        ;; (add-hook 'post-command-hook 'jump-tree-pos-list-post-command)
+      ;; (print jump-tree-pos-list)
+      ;; (print (current-buffer))
+      ;; (print (eq (current-buffer) prev))
+      ;; (setq prev (current-buffer))
+      (apply f args)
+      )
+      (progn
+        (add-hook 'pre-command-hook  'jump-tree-pos-list-pre-command)
+        (add-hook 'post-command-hook 'jump-tree-pos-list-post-command))
+  ))
+
+;; current-bufferでpolymodeのbase-bufferを返すadvice
+(defun my/ad--polymode-current-buffer(f &rest _)
+  (let (result p)
+    (setq p (point))
+    (setq result (polymode-with-current-base-buffer f))
+    (goto-char p)
+    result
+  ))
+
+(with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
+  (point))
+;; jump-treeの関数でcurrent-bufferをpolymodeのbase-bufferに変更するadvice
+(defun my/ad--polymode-jump-tree(f &rest args)
+  ;;(advice-add 'current-buffer :around #'my/ad--polymode-current-buffer)
+  (advice-add 'point-marker :around #'my/ad--polymode-current-buffer)
+  ;; エラー時でもadviceを解除する
+  (let (result)
+    (unwind-protect
+      (setq result (apply f args))
+      ;;(advice-remove 'current-buffer #'my/ad--polymode-current-buffer))
+      (advice-remove 'point-marker #'my/ad--polymode-current-buffer))
+    result)
   )
-  )
+
+(advice-add    'jump-tree-jump-prev              :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-jump-next              :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-pos-list-pre-command :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-visualize :around #'my/ad--polymode-jump-tree2)
+(advice-add    'jump-tree-pos-list-make-position :around #'my/ad--polymode-jump-tree)
+
+(advice-remove    'jump-tree-jump-prev  #'my/ad--polymode-jump-tree2)
+(advice-remove    'jump-tree-jump-next  #'my/ad--polymode-jump-tree2)
+(advice-remove    'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree2)
+(advice-remove    'jump-tree-pos-list-post-command  #'my/ad--polymode-jump-tree2)
+(advice-remove    'jump-tree-pos-list-make-position  #'my/ad--polymode-jump-tree)
+
+
 (setq prev (current-buffer))
 (eq (current-buffer) prev)
 (advice-add    'jump-tree-pos-list-pre-command  :around #'my/ad--polymode-jump-tree2)
@@ -2503,11 +2552,26 @@ ensure
 (jump-tree-buffer-prev)
 (jump-tree-node-previous)
 
+(with-eval-after-load 'markdown-mode
+  (custom-set-variables
+   '(markdown-command '("pandoc" "--from=markdown" "--to=html5"))
+   '(markdown-fontify-code-blocks-natively t)
+   '(markdown-header-scaling t)
+   '(markdown-indent-on-enter 'indent-and-new-item))
+  (define-key markdown-mode-map (kbd "<S-tab>") #'markdown-shifttab))
+
+(progn
+  (print "hello world" #'external-debugging-output)
+  nil
+  )
+
 ```
 
 (print jump-tree-pos-list)
 (setq jump-tree-pos-list ())
 (print jump-tree-pos-list-position)
-
+(setq prev (current-buffer))
 (print currentl)
 (buffer-file-name (polymode-with-current-base-buffer 'current-buffer))
+(markdown-mode -1)
+(print jump-tree-pos-tree)(setq jump-tree-pos-tree nil)
