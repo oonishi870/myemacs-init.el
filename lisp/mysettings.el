@@ -600,6 +600,51 @@
 
   )
 
+(leaf jump-tree
+  :el-get (jump-tree
+            :type github
+            :pkgname "oonishi870/jump-tree"
+            :branch "devel/cl-remove-if"
+            )
+  :config
+  ;; (defun org--get-buffer-window(buffer &rest _)
+  ;;   (print "2452" #'external-debugging-output)
+  ;;   (print _ #'external-debugging-output)
+  ;;   nil
+  ;;   )
+
+  (setq org--get-buffer-window (symbol-function 'get-buffer-window))
+  (defun my/get-buffer-window(buffer &rest _)
+    (let (buffers base)
+      (setq base (with-current-buffer buffer
+                   (polymode-with-current-base-buffer  'current-buffer)))
+      (setq buffers
+        (cl-remove-if-not
+          (lambda (arg)
+            (eq base
+              (with-current-buffer arg
+                (polymode-with-current-base-buffer  'current-buffer))))
+          (buffer-list)))
+      (-any (lambda (buf) (funcall org--get-buffer-window buf)) buffers)
+      ))
+  (defun my/ad--polymode-jump-tree (f &rest args)
+    (unwind-protect
+      (with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
+        (cl-letf* (
+                    ((symbol-function 'get-buffer-window) #'my/get-buffer-window))
+        (apply f args)
+        ))
+      ))
+  
+  (advice-add    'jump-tree-visualize              :around #'my/ad--polymode-jump-tree)
+  (advice-add    'jump-tree-jump-prev              :around #'my/ad--polymode-jump-tree)
+  (advice-add    'jump-tree-jump-next              :around #'my/ad--polymode-jump-tree)
+  (advice-add    'jump-tree-pos-list-post-command  :around #'my/ad--polymode-jump-tree)
+  (advice-add    'jump-tree-pos-list-pre-command   :around #'my/ad--polymode-jump-tree)
+  (global-jump-tree-mode 1)
+  ;;(global-jump-tree-mode -1)
+  )
+
 (leaf overriding-minor-mode
   :config
   (let ()
@@ -647,6 +692,8 @@
       ( "C-<iso-lefttab>" . my/switch-to-next-buffer-in-window)
       ( "C-h" . er/expand-region)
       ( "C-S-d" . er/contract-region)
+      ( "C-p" . jump-tree-jump-prev)
+      ( "C-n" . jump-tree-jump-prev)
       ( "C-k" . nil)
       ;; ( "C-k C-n" . helm-mini)
       ;; ( "C-k C-n" . counsel-switch-buffer)
@@ -1356,10 +1403,6 @@ ssh localhost ~/bin/npm $@
   ;;   )
   )
 
-(leaf jump-back
-  :config
-  (load "jump-back.el")
-  )
 
 
 (leaf dimmer
@@ -1619,7 +1662,7 @@ ssh localhost ~/bin/npm $@
 ;;         completion-category-overrides nil)
 ;;   )
 
-;; 任意の部分一致
+;; ;; 任意の部分一致
 (leaf fussy
   :el-get (
     jojojames/fussy
@@ -1633,6 +1676,7 @@ ssh localhost ~/bin/npm $@
   (add-hook 'corfu-mode-hook
     (lambda (&rest _)
       (setq-local completion-styles '(fussy))
+      ;;(setq-local completion-styles '(orderless))
     ))
   )
   
