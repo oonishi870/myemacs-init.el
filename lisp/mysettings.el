@@ -165,6 +165,28 @@
   		(select-window nextwin)
   	  ))
     )
+  (defun my/copy-buffer-path ()
+    (interactive)
+    (kill-new (buffer-file-name))
+    (minibuffer-message (buffer-file-name))
+  )
+  (provide 'my/copy-buffer-path)
+  
+  (defun basename (path)
+    (let
+      ((rstring (string-reverse path)))
+    (string-reverse (substring-no-properties rstring 0 (string-search "/" rstring)))
+    )
+  )
+  
+  
+  (defun my/copy-buffer-basename ()
+    (interactive)
+    (kill-new (basename (buffer-file-name)))
+    (minibuffer-message (basename (buffer-file-name)))
+  )
+  (provide 'my/copy-buffer-basename)
+  
   (defun kill-ring-save-keep-selection (&optional args)
     (interactive "P")
     "Keep selection after copying."
@@ -691,6 +713,8 @@
       ( "C-8" . (lambda (&optional _)(interactive)(search-backward-regexp "(\\|\\[\\|{")))
       ( "C-9" . (lambda (&optional _)(interactive)(search-forward-regexp ")\\|\\]\\|}")))
       ( "<zenkaku-hankaku>" . toggle-input-method)
+      ( "C-k C-p" . my/copy-buffer-path)
+      ( "C-k C-k C-p" . my/copy-buffer-basename)
       ;;( "C-k C-h" . consult-ag)
 ;;      ( "C-k C-<left>" . split-window-left)
       ;; ( "C-k C-<right>" . split-window-right)
