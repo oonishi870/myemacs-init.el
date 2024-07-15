@@ -2453,22 +2453,28 @@ ensure
 image:
 alpinelinux/ansible
 
+```hosts
+54.238.118.19  webservers
+```
+
 ```config
 [webservers]
-(ホスト名 or IPアドレス)
+54.238.118.19
 
 [webservers:vars]
-ansible_port=(sshのポート番号、デフォルト22)
-ansible_user=(ssh接続先のユーザー名)
-ansible_ssh_pass=(パスワード)
-ansible_ssh_private_key_file=(秘密鍵のパス (~/.ssh/id_rsa など))
+ansible_port=22
+ansible_user=ubuntu
+#ansible_ssh_pass=(パスワード)
+ansible_ssh_private_key_file=/ssh/ubuntu-test2.pem
 ```
 
 ```bash
 #!/bin/bash
 cd $(mktemp -d)
-~/bin/mdcoderun --show --index [::index+1::] [::mdpath::] > ansible.yml
-docker run --rm --name testtest         \
+~/bin/mdcoderun --show --index [::index-2::] [::mdpath::] > hosts
+~/bin/mdcoderun --show --index [::index-1::] [::mdpath::] > ubuntu.net
+~/bin/mdcoderun --show --index [::index+1::] [::mdpath::] > ubuntu.yml
+docker run --rm --name ansible          \
        -v /home:/home                   \
        -v /tmp:/tmp/host                \
        -e HOME=$HOME                    \
@@ -2481,29 +2487,41 @@ docker run --rm --name testtest         \
        -v /etc/passwd:/etc/passwd:ro    \
        -v /etc/group:/etc/group:ro      \
        -v /etc/shadow:/etc/shadow:ro    \
+       -v ./hosts:/etc/hosts \
+       -v ~/Downloads/ubuntu-test2.pem:/ssh/ubuntu-test2.pem \
        -v $(pwd):$(pwd)                 \
        -w $(pwd)                        \
        --network=host                   \
        --user $(id -u):$(id -g)         \
-       ansible-playbook -i vyos.example.net, -u ansible -k -e ansible_network_os=vyos first_playbook.yml
+       local/ansible ansible-playbook -i ubuntu.net ubuntu.yml
+       
+       #alpinelinux/ansible ansible-playbook -i ubuntu.net ubuntu.yml
+       #local/ansible ansible-playbook --version
 
 ```
 
 ```yml
-
-- name: Install basic list of packages
-  apt:
-    name: "{{ packages }}"
-    state: present
-    update_cache: yes
-  vars:
-    packages:
-      - apt-transport-https
-      - ca-certificates
-      - curl
-      - gnupg-agent
-      - software-properties-common
-  become: yes
+---
+- hosts: webservers
+  user: root
+  tasks:
+  - name: Add docker GPG key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+    become: yes
+  # - name: Install basic list of packages
+  #   apt:
+  #     name: "{{ packages }}"
+  #     state: present
+  #     update_cache: yes
+  #   vars:
+  #     packages:
+  #       - apt-transport-https
+  #       - ca-certificates
+  #       - curl
+  #       - gnupg-agent
+  #       - software-properties-common
+  #   become: yes
 ```
 
 ```yml
@@ -2566,5 +2584,22 @@ docker run --rm --name testtest         \
 
 ```
 
+```Dockerfile
+FROM alpinelinux/ansible
+RUN apk update  \
+    && apk upgrade 
+RUN apk add py-pip
+RUN pip install six
+
+```
+
+```bash
+#!/bin/bash
+cd $(mktemp -d)
+~/bin/mdcoderun --show --index [::index-1::] [::mdpath::] > Dockerfile
+
+docker build -t local/ansible . 
+
+```
 
 # end
