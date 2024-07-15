@@ -2439,260 +2439,132 @@ ensure
 
 ```
 
+# ansibleでdockerをセットアップ
+
 ```elisp
-;; leafでjump-treeをgithubからインストール
-(leaf noflet
+(leaf yaml-mode
   :ensure t
   :config
-  (require 'noflet)
-  )
-(leaf jump-tree
-  :el-get (jump-tree
-            :type github
-            :pkgname "oonishi870/jump-tree"
-            :branch "devel/cl-remove-if"
-            )
-  :config
-  ;; (defun org--get-buffer-window(buffer &rest _)
-  ;;   (print "2452" #'external-debugging-output)
-  ;;   (print _ #'external-debugging-output)
-  ;;   nil
-  ;;   )
-
-  (setq org--get-buffer-window (symbol-function 'get-buffer-window))
-  (defun my/get-buffer-window(buffer &rest _)
-    (let (buffers base)
-      (print "2453" #'external-debugging-output)
-      (setq base (with-current-buffer buffer
-                   (polymode-with-current-base-buffer  'current-buffer)))
-      (print "2456" #'external-debugging-output)
-      (setq buffers
-        (cl-remove-if-not
-          (lambda (arg)
-            (eq base
-              (with-current-buffer arg
-                (polymode-with-current-base-buffer  'current-buffer))))
-          (buffer-list)))
-      (print "2463-" #'external-debugging-output)
-      (funcall org--get-buffer-window (current-buffer))
-      (print "2464" #'external-debugging-output)
-      (-any (lambda (buf) (funcall org--get-buffer-window buf)) buffers)
-      ;;(-any (lambda (buf) (funcall this-fn buf)) buffers)
-      ))
-  (defun my/ad--polymode-jump-tree (f &rest args)
-    (unwind-protect
-      ;;(print "2467" #'external-debugging-output)
-      (with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
-        ;;(noflet (
-        (cl-letf* (
-                    ;;((symbol-function 'org--get-buffer-window)  #'get-buffer-window)
-                    ;;( org--get-buffer-window  (symbol-function 'get-buffer-window))
-                    ;;('org--get-buffer-window  (symbol-function 'get-buffer-window))
-                    ((symbol-function 'get-buffer-window) #'my/get-buffer-window)
-                  ;;(lambda (buffer) (my/get-buffer-window buffer)))
-                  ;;(get-buffer-window  #'my/get-buffer-window)
-                                 )
-                       (print "2475" #'external-debugging-output)
-        (apply f args)
-        ))
-      ))
-  
-  (advice-add    'jump-tree-visualize              :around #'my/ad--polymode-jump-tree)
-  (advice-add    'jump-tree-jump-prev              :around #'my/ad--polymode-jump-tree)
-  (advice-add    'jump-tree-jump-next              :around #'my/ad--polymode-jump-tree)
-  (advice-add    'jump-tree-pos-list-post-command  :around #'my/ad--polymode-jump-tree)
-  (advice-add    'jump-tree-pos-list-pre-command   :around #'my/ad--polymode-jump-tree)
-  (global-jump-tree-mode 1)
-  ;;(global-jump-tree-mode -1)
+  (require 'yaml-mode)
   )
 
-
-
-(defun my/ad--polymode-jump-tree2 (f &rest args)
-  (let ((p (point)))
-    (print "temp.md:2480" #'external-debugging-output)
-    (unwind-protect 
-      (with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
-
-      (unless (= p (point))
-        (remove-hook 'pre-command-hook  'jump-tree-pos-list-pre-command)
-        (remove-hook 'post-command-hook 'jump-tree-pos-list-post-command)
-        (goto-char p)
-        (add-hook 'pre-command-hook  'jump-tree-pos-list-pre-command)
-        (add-hook 'post-command-hook 'jump-tree-pos-list-post-command)
-        )
-        ;;(global-jump-tree-mode 1)
-      ;;(goto-char p)
-        ;; (add-hook 'pre-command-hook  'jump-tree-pos-list-pre-command)
-        ;; (add-hook 'post-command-hook 'jump-tree-pos-list-post-command)
-      ;; (print jump-tree-pos-list)
-      ;; (print (current-buffer))
-      ;; (print (eq (current-buffer) prev))
-      ;; (setq prev (current-buffer))
-      (apply f args)
-      )
-      ;; (progn
-      ;;   (add-hook 'pre-command-hook  'jump-tree-pos-list-pre-command)
-      ;;   (add-hook 'post-command-hook 'jump-tree-pos-list-post-command))
-    )))
-
-
-(defun my/ad--polymode-jump-tree3 (f &rest args)
-  
-  (when (eq (current-buffer) (polymode-with-current-base-buffer 'current-buffer))
-    (with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
-      (apply f args)
-      )
-  ))
-
-;; current-bufferでpolymodeのbase-bufferを返すadvice
-(defun my/ad--polymode-current-buffer(f &rest _)
-  (let (result p)
-    (setq p (point))
-    (setq result (polymode-with-current-base-buffer f))
-    (goto-char p)
-    result
-  ))
-
-(with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
-  (point))
-;; jump-treeの関数でcurrent-bufferをpolymodeのbase-bufferに変更するadvice
-(defun my/ad--polymode-jump-tree(f &rest args)
-  ;;(advice-add 'current-buffer :around #'my/ad--polymode-current-buffer)
-  (advice-add 'point-marker :around #'my/ad--polymode-current-buffer)
-  ;; エラー時でもadviceを解除する
-  (let (result)
-    (unwind-protect
-      (setq result (apply f args))
-      ;;(advice-remove 'current-buffer #'my/ad--polymode-current-buffer))
-      (advice-remove 'point-marker #'my/ad--polymode-current-buffer))
-    result)
-  )
-(advice-add    'jump-tree-visualize              :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-jump-prev              :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-jump-next              :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command  :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-pre-command   :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree3)
-(advice-add    'jump-tree-visualize :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-make-position :around #'my/ad--polymode-jump-tree)
-
-(advice-remove    'jump-tree-jump-prev  #'my/ad--polymode-jump-tree2)
-(advice-remove    'jump-tree-jump-next  #'my/ad--polymode-jump-tree2)
-(advice-remove    'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree2)
-(advice-remove    'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree3)
-(advice-remove    'jump-tree-pos-list-post-command  #'my/ad--polymode-jump-tree2)
-(advice-remove    'jump-tree-pos-list-post-command  #'my/ad--polymode-jump-tree3)
-(advice-remove    'jump-tree-pos-list-make-position  #'my/ad--polymode-jump-tree)
-
-
-(setq prev (current-buffer))
-(eq (current-buffer) prev)
-(advice-add    'jump-tree-pos-list-pre-command  :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-jump-prev             :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-jump-next             :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-push :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-pre-command :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-make-position :around #'my/ad--polymode-jump-tree2)
-
-(advice-remove 'jump-tree-pos-list-make-position #'my/ad--polymode-jump-tree2)
-(advice-remove 'jump-tree-jump-prev #'my/ad--polymode-jump-tree2)
-(advice-remove 'jump-tree-jump-next #'my/ad--polymode-jump-tree2)
-(advice-remove 'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree2)
-(advice-remove 'jump-tree-pos-list-post-command  #'my/ad--polymode-jump-tree2)
-
-(advice-remove 'jump-tree-pos-list-push #'my/ad--polymode-jump-tree2)
-
-(advice-remove 'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree2)
-
-(advice-add    'jump-tree-pos-list-push :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree)
-(advice-remove 'jump-tree-pos-list-post-command #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-jump-prev             :around #'my/ad--polymode-jump-tree)
-(advice-add    'jump-tree-jump-next             :around #'my/ad--polymode-jump-tree)
-
-(print jump-tree-pos-list)
-(setq jump-tree-pos-list ())
-(polymode-with-current-base-buffer 'current-buffer)
-(polymode-with-current-base-buffer (polymode-with-current-base-buffer 'current-buffer))
-(buffer-file-name (polymode-with-current-base-buffer 'current-buffer))
-(print jump-tree-pos-list-position)
-@@@@@
-(jump-tree-buffer-prev)
-(jump-tree-node-previous)
-
-(with-eval-after-load 'markdown-mode
-  (custom-set-variables
-   '(markdown-command '("pandoc" "--from=markdown" "--to=html5"))
-   '(markdown-fontify-code-blocks-natively t)
-   '(markdown-header-scaling t)
-   '(markdown-indent-on-enter 'indent-and-new-item))
-  (define-key markdown-mode-map (kbd "<S-tab>") #'markdown-shifttab))
-
-(progn
-  (print "hello world" #'external-debugging-output)
-  nil
-  )
-
-(setq m (polymode-with-current-base-buffer 'point-marker))
-
-(setq x
-(with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
-  (cl-remove-if-not
-    (lambda (arg) (eq (current-buffer)
-                    (with-current-buffer arg
-                      (polymode-with-current-base-buffer  'current-buffer)))) (buffer-list)))
-)
-(cl-first (-any (lambda (buf) (get-buffer-window buf))
-            x
-            ))
-(defun my/get-buffer-window(buffer)
-  (let (buffers base)
-    (setq base (with-current-buffehr buffer
-                 (polymode-with-current-base-buffer  'current-buffer)))
-    (setq buffers (cl-remove-if-not
-                    (lambda (arg) (eq base
-                                    (with-current-buffehr arg
-                                      (polymode-with-current-base-buffer  'current-buffer)))) (buffer-list)))
-    (-any (lambda (buf) (get-buffer-window buf))buffers)
-    ))
-
-(defun test()
-  (print "hello"))
-
-(defun print2(v)
-  (message "msg")
-  (org-print (format "yes %s" v)))
-
-(cl-letf* (
-           ( org-print (symbol-function 'print))
-            ;;((symbol-function 'print) (lambda (s)(org-print (format "yes %s" s))))
-            ((symbol-function 'print) #'print2)
-            )
-  (message "msg1")
-  (test)
-  )
 ```
 
-(print jump-tree-pos-list)
-(setq jump-tree-pos-list ())
-(print jump-tree-pos-list-position)
-(setq prev (current-buffer))
-(print currentl)
-(buffer-file-name (polymode-with-current-base-buffer 'current-buffer))
-(markdown-mode -1)
-(print jump-tree-pos-tree)(setq jump-tree-pos-tree nil)
+image:
+alpinelinux/ansible
 
-(global-jump-tree-mode -1)
-(global-jump-tree-mode  1)
-(print "===================================" #'external-debugging-output)
-(print jump-tree-pos-list)
-(mark)
+```config
+[webservers]
+(ホスト名 or IPアドレス)
 
-(mark m)
-(goto-char m)
+[webservers:vars]
+ansible_port=(sshのポート番号、デフォルト22)
+ansible_user=(ssh接続先のユーザー名)
+ansible_ssh_pass=(パスワード)
+ansible_ssh_private_key_file=(秘密鍵のパス (~/.ssh/id_rsa など))
+```
 
-(polymode-inhibit-in-indirect-buffers 'current-buffer)
+```bash
+#!/bin/bash
+cd $(mktemp -d)
+~/bin/mdcoderun --show --index [::index+1::] [::mdpath::] > ansible.yml
+docker run --rm --name testtest         \
+       -v /home:/home                   \
+       -v /tmp:/tmp/host                \
+       -e HOME=$HOME                    \
+       -e DISPLAY=$DISPLAY              \
+       -e GTK_IM_MODULE=$GTK_IM_MODULE  \
+       -e QT_IM_MODULE=$QT_IM_MODULE    \
+       -e LANG=C.UTF-8                  \
+       -e LANGUAGE=en_US:               \
+       -e XMODIFIERS=$XMODIFIERS        \
+       -v /etc/passwd:/etc/passwd:ro    \
+       -v /etc/group:/etc/group:ro      \
+       -v /etc/shadow:/etc/shadow:ro    \
+       -v $(pwd):$(pwd)                 \
+       -w $(pwd)                        \
+       --network=host                   \
+       --user $(id -u):$(id -g)         \
+       ansible-playbook -i vyos.example.net, -u ansible -k -e ansible_network_os=vyos first_playbook.yml
+
+```
+
+```yml
+
+- name: Install basic list of packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+  become: yes
+```
+
+```yml
+
+- name: Add docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+  become: yes
+
+- name: Install basic list of packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+  become: yes
+
+- name: Add apt repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+  become: yes
+
+- name: Install Docker packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+  become: yes
+
+- name: Add user to docker group
+  user:
+    name: "{{ ansible_env.USER }}"
+    groups: docker
+    append: yes
+  become: yes
+
+- name: Ensure docker service is enabled
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Install docker-compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+    dest: /usr/local/bin/docker-compose
+    mode: +x
+  become: yes
+
+```
+
+
+# end
