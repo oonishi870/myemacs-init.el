@@ -2439,140 +2439,167 @@ ensure
 
 ```
 
+# ansibleでdockerをセットアップ
+
 ```elisp
-;; leafでjump-treeをgithubからインストール
-(leaf jump-tree
-  :el-get (jump-tree
-            :type github
-            :pkgname "oonishi870/jump-tree"
-            :branch "devel/cl-remove-if"
-            )
+(leaf yaml-mode
+  :ensure t
   :config
-  (global-jump-tree-mode 1)
-  ;;(global-jump-tree-mode -1)
-  )
-
-
-(defun my/ad--polymode-jump-tree2 (f &rest args)
-  ;;(print "yes")
-  ;;(print args)
-  ;;(setq p (point))
-    (remove-hook 'pre-command-hook  'jump-tree-pos-list-pre-command)
-    (remove-hook 'post-command-hook 'jump-tree-pos-list-post-command)
-  (unwind-protect 
-    (with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
-      ;;(global-jump-tree-mode 1)
-      ;;(goto-char p)
-        ;; (add-hook 'pre-command-hook  'jump-tree-pos-list-pre-command)
-        ;; (add-hook 'post-command-hook 'jump-tree-pos-list-post-command)
-      ;; (print jump-tree-pos-list)
-      ;; (print (current-buffer))
-      ;; (print (eq (current-buffer) prev))
-      ;; (setq prev (current-buffer))
-      (apply f args)
-      )
-      (progn
-        (add-hook 'pre-command-hook  'jump-tree-pos-list-pre-command)
-        (add-hook 'post-command-hook 'jump-tree-pos-list-post-command))
-  ))
-
-;; current-bufferでpolymodeのbase-bufferを返すadvice
-(defun my/ad--polymode-current-buffer(f &rest _)
-  (let (result p)
-    (setq p (point))
-    (setq result (polymode-with-current-base-buffer f))
-    (goto-char p)
-    result
-  ))
-
-(with-current-buffer (polymode-with-current-base-buffer 'current-buffer)
-  (point))
-;; jump-treeの関数でcurrent-bufferをpolymodeのbase-bufferに変更するadvice
-(defun my/ad--polymode-jump-tree(f &rest args)
-  ;;(advice-add 'current-buffer :around #'my/ad--polymode-current-buffer)
-  (advice-add 'point-marker :around #'my/ad--polymode-current-buffer)
-  ;; エラー時でもadviceを解除する
-  (let (result)
-    (unwind-protect
-      (setq result (apply f args))
-      ;;(advice-remove 'current-buffer #'my/ad--polymode-current-buffer))
-      (advice-remove 'point-marker #'my/ad--polymode-current-buffer))
-    result)
-  )
-======= end
-
-(advice-add    'jump-tree-jump-prev              :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-jump-next              :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-pre-command :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-visualize :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-make-position :around #'my/ad--polymode-jump-tree)
-
-(advice-remove    'jump-tree-jump-prev  #'my/ad--polymode-jump-tree2)
-(advice-remove    'jump-tree-jump-next  #'my/ad--polymode-jump-tree2)
-(advice-remove    'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree2)
-(advice-remove    'jump-tree-pos-list-post-command  #'my/ad--polymode-jump-tree2)
-(advice-remove    'jump-tree-pos-list-make-position  #'my/ad--polymode-jump-tree)
-
-
-(setq prev (current-buffer))
-(eq (current-buffer) prev)
-(advice-add    'jump-tree-pos-list-pre-command  :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-jump-prev             :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-jump-next             :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-push :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-pre-command :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-make-position :around #'my/ad--polymode-jump-tree2)
-
-(advice-remove 'jump-tree-pos-list-make-position #'my/ad--polymode-jump-tree2)
-(advice-remove 'jump-tree-jump-prev #'my/ad--polymode-jump-tree2)
-(advice-remove 'jump-tree-jump-next #'my/ad--polymode-jump-tree2)
-(advice-remove 'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree2)
-(advice-remove 'jump-tree-pos-list-post-command  #'my/ad--polymode-jump-tree2)
-
-(advice-remove 'jump-tree-pos-list-push #'my/ad--polymode-jump-tree2)
-
-(advice-remove 'jump-tree-pos-list-pre-command  #'my/ad--polymode-jump-tree2)
-
-(advice-add    'jump-tree-pos-list-push :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-pos-list-post-command :around #'my/ad--polymode-jump-tree)
-(advice-remove 'jump-tree-pos-list-post-command #'my/ad--polymode-jump-tree2)
-(advice-add    'jump-tree-jump-prev             :around #'my/ad--polymode-jump-tree)
-(advice-add    'jump-tree-jump-next             :around #'my/ad--polymode-jump-tree)
-
-(print jump-tree-pos-list)
-(setq jump-tree-pos-list ())
-(polymode-with-current-base-buffer 'current-buffer)
-(polymode-with-current-base-buffer (polymode-with-current-base-buffer 'current-buffer))
-(buffer-file-name (polymode-with-current-base-buffer 'current-buffer))
-(print jump-tree-pos-list-position)
-
-(jump-tree-buffer-prev)
-(jump-tree-node-previous)
-
-(with-eval-after-load 'markdown-mode
-  (custom-set-variables
-   '(markdown-command '("pandoc" "--from=markdown" "--to=html5"))
-   '(markdown-fontify-code-blocks-natively t)
-   '(markdown-header-scaling t)
-   '(markdown-indent-on-enter 'indent-and-new-item))
-  (define-key markdown-mode-map (kbd "<S-tab>") #'markdown-shifttab))
-
-(progn
-  (print "hello world" #'external-debugging-output)
-  nil
+  (require 'yaml-mode)
   )
 
 ```
 
-(print jump-tree-pos-list)
-(setq jump-tree-pos-list ())
-(print jump-tree-pos-list-position)
-(setq prev (current-buffer))
-(print currentl)
-(buffer-file-name (polymode-with-current-base-buffer 'current-buffer))
-(markdown-mode -1)
-(print jump-tree-pos-tree)(setq jump-tree-pos-tree nil)
+image:
+alpinelinux/ansible
+
+```hosts
+54.238.118.19  webservers
+```
+
+```config
+[webservers]
+54.238.118.19
+
+[webservers:vars]
+ansible_port=22
+ansible_user=ubuntu
+#ansible_ssh_pass=(パスワード)
+ansible_ssh_private_key_file=/ssh/ubuntu-test2.pem
+```
+
+```bash
+#!/bin/bash
+cd $(mktemp -d)
+~/bin/mdcoderun --show --index [::index-2::] [::mdpath::] > hosts
+~/bin/mdcoderun --show --index [::index-1::] [::mdpath::] > ubuntu.net
+~/bin/mdcoderun --show --index [::index+1::] [::mdpath::] > ubuntu.yml
+docker run --rm --name ansible          \
+       -v /home:/home                   \
+       -v /tmp:/tmp/host                \
+       -e HOME=$HOME                    \
+       -e DISPLAY=$DISPLAY              \
+       -e GTK_IM_MODULE=$GTK_IM_MODULE  \
+       -e QT_IM_MODULE=$QT_IM_MODULE    \
+       -e LANG=C.UTF-8                  \
+       -e LANGUAGE=en_US:               \
+       -e XMODIFIERS=$XMODIFIERS        \
+       -v /etc/passwd:/etc/passwd:ro    \
+       -v /etc/group:/etc/group:ro      \
+       -v /etc/shadow:/etc/shadow:ro    \
+       -v ./hosts:/etc/hosts \
+       -v ~/Downloads/ubuntu-test2.pem:/ssh/ubuntu-test2.pem \
+       -v $(pwd):$(pwd)                 \
+       -w $(pwd)                        \
+       --network=host                   \
+       --user $(id -u):$(id -g)         \
+       local/ansible ansible-playbook -i ubuntu.net ubuntu.yml
+       
+       #alpinelinux/ansible ansible-playbook -i ubuntu.net ubuntu.yml
+       #local/ansible ansible-playbook --version
+
+```
+
+```yml
+---
+- hosts: webservers
+  user: root
+  tasks:
+  - name: Add docker GPG key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+    become: yes
+  # - name: Install basic list of packages
+  #   apt:
+  #     name: "{{ packages }}"
+  #     state: present
+  #     update_cache: yes
+  #   vars:
+  #     packages:
+  #       - apt-transport-https
+  #       - ca-certificates
+  #       - curl
+  #       - gnupg-agent
+  #       - software-properties-common
+  #   become: yes
+```
+
+```yml
+
+- name: Add docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+  become: yes
+
+- name: Install basic list of packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+  become: yes
+
+- name: Add apt repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+  become: yes
+
+- name: Install Docker packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+  become: yes
+
+- name: Add user to docker group
+  user:
+    name: "{{ ansible_env.USER }}"
+    groups: docker
+    append: yes
+  become: yes
+
+- name: Ensure docker service is enabled
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Install docker-compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+    dest: /usr/local/bin/docker-compose
+    mode: +x
+  become: yes
+
+```
+
+```Dockerfile
+FROM alpinelinux/ansible
+RUN apk update  \
+    && apk upgrade 
+RUN apk add py-pip
+RUN pip install six
+
+```
+
+```bash
+#!/bin/bash
+cd $(mktemp -d)
+~/bin/mdcoderun --show --index [::index-1::] [::mdpath::] > Dockerfile
+
+docker build -t local/ansible . 
+
+```
+
+# end
