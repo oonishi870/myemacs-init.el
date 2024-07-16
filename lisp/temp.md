@@ -2454,12 +2454,12 @@ ensure
 
 
 ```hosts
-54.178.82.116  webservers
+54.199.96.1  webservers
 ```
 
 ```config
 [webservers]
-54.178.82.116
+54.199.96.1
 
 [webservers:vars]
 ansible_port=22
@@ -2475,6 +2475,7 @@ cd $(mktemp -d)
 ~/bin/mdcoderun --show --index [::index-2::] [::mdpath::] > hosts
 ~/bin/mdcoderun --show --index [::index-1::] [::mdpath::] > ubuntu.net
 ~/bin/mdcoderun --show --index [::index+1::] [::mdpath::] > ubuntu.yml
+~/bin/mdcoderun --show --index [::index+2::] [::mdpath::] > Dockerfile
 docker run --rm --name ansible          \
        -v /home:/home                   \
        -v /tmp:/tmp/host                \
@@ -2489,12 +2490,103 @@ docker run --rm --name ansible          \
        -v /etc/group:/etc/group:ro      \
        -v /etc/shadow:/etc/shadow:ro    \
        -v ./hosts:/etc/hosts            \
-       -v ~/ubuntu-test3.pem:/ssh/ubuntu-test2.pem \
+       -v ~/Downloads/ubuntu-test2.pem:/ssh/ubuntu-test2.pem \
        -v $(pwd):$(pwd)                 \
        -w $(pwd)                        \
        --network=host                   \
        --user $(id -u):$(id -g)         \
        local/ansible ansible-playbook -i ubuntu.net ubuntu.yml
+       
+#       -v ~/ubuntu-test3.pem:/ssh/ubuntu-test2.pem \
+
+```
+
+```yml
+---
+- name: Install Docker on Ubuntu
+  hosts: all
+  become: yes
+  tasks:
+    - name: Add docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+      become: yes
+    
+    - name: Install basic list of packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg-agent
+          - software-properties-common
+      become: yes
+    
+    - name: Add apt repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+      become: yes
+    
+    - name: Install Docker packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+      become: yes
+    
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+      become: yes
+    
+    - name: Ensure docker service is enabled
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      become: yes
+    
+    - name: Install docker-compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}"
+        dest: /usr/local/bin/docker-compose
+        mode: +x
+      become: yes
+
+    - name: Create a directory for Dockerfile
+      file:
+        path: /opt/docker_build
+        state: directory
+
+    - name: Upload Dockerfile
+      copy:
+        src: ./Dockerfile
+        dest: /opt/docker_build/Dockerfile
+
+    - name: Build Docker image
+      command: docker build -t my_docker_image /opt/docker_build
+
+    - name: Remove Dockerfile from remote host
+      file:
+        path: /opt/docker_build/Dockerfile
+        state: absent
+```
+
+```Dockerfile
+# Dockerfile example
+FROM ubuntu:20.04
+RUN apt-get update && apt-get install -y nginx
+CMD ["nginx", "-g", "daemon off;"]
 
 ```
 
