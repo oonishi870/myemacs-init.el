@@ -1680,3 +1680,8 @@ ssh localhost ~/bin/npm $@
     ))
   )
   
+(leaf yaml-mode
+  :ensure t
+  :config
+  (require 'yaml-mode)
+  )
