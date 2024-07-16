@@ -2439,7 +2439,6 @@ ensure
 
 ```
 
-# ansibleでdockerをセットアップ
 
 ```elisp
 (leaf yaml-mode
@@ -2450,22 +2449,24 @@ ensure
 
 ```
 
-image:
-alpinelinux/ansible
+# ansibleでdockerをセットアップ
+
+
 
 ```hosts
-54.238.118.19  webservers
+54.178.82.116  webservers
 ```
 
 ```config
 [webservers]
-54.238.118.19
+54.178.82.116
 
 [webservers:vars]
 ansible_port=22
 ansible_user=ubuntu
 #ansible_ssh_pass=(パスワード)
 ansible_ssh_private_key_file=/ssh/ubuntu-test2.pem
+
 ```
 
 ```bash
@@ -2487,109 +2488,36 @@ docker run --rm --name ansible          \
        -v /etc/passwd:/etc/passwd:ro    \
        -v /etc/group:/etc/group:ro      \
        -v /etc/shadow:/etc/shadow:ro    \
-       -v ./hosts:/etc/hosts \
-       -v ~/Downloads/ubuntu-test2.pem:/ssh/ubuntu-test2.pem \
+       -v ./hosts:/etc/hosts            \
+       -v ~/ubuntu-test3.pem:/ssh/ubuntu-test2.pem \
        -v $(pwd):$(pwd)                 \
        -w $(pwd)                        \
        --network=host                   \
        --user $(id -u):$(id -g)         \
        local/ansible ansible-playbook -i ubuntu.net ubuntu.yml
-       
-       #alpinelinux/ansible ansible-playbook -i ubuntu.net ubuntu.yml
-       #local/ansible ansible-playbook --version
 
 ```
 
 ```yml
 ---
-- hosts: webservers
-  user: root
+- name: Install curl on Ubuntu
+  hosts: all
+  become: yes
   tasks:
-  - name: Add docker GPG key
-    apt_key:
-      url: https://download.docker.com/linux/ubuntu/gpg
-    become: yes
-  # - name: Install basic list of packages
-  #   apt:
-  #     name: "{{ packages }}"
-  #     state: present
-  #     update_cache: yes
-  #   vars:
-  #     packages:
-  #       - apt-transport-https
-  #       - ca-certificates
-  #       - curl
-  #       - gnupg-agent
-  #       - software-properties-common
-  #   become: yes
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install curl
+      apt:
+        name: curl
+        state: present
 ```
 
-```yml
-
-- name: Add docker GPG key
-  apt_key:
-    url: https://download.docker.com/linux/ubuntu/gpg
-  become: yes
-
-- name: Install basic list of packages
-  apt:
-    name: "{{ packages }}"
-    state: present
-    update_cache: yes
-  vars:
-    packages:
-      - apt-transport-https
-      - ca-certificates
-      - curl
-      - gnupg-agent
-      - software-properties-common
-  become: yes
-
-- name: Add apt repository
-  apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-  become: yes
-
-- name: Install Docker packages
-  apt:
-    name: "{{ packages }}"
-    state: present
-  vars:
-    packages:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-  become: yes
-
-- name: Add user to docker group
-  user:
-    name: "{{ ansible_env.USER }}"
-    groups: docker
-    append: yes
-  become: yes
-
-- name: Ensure docker service is enabled
-  systemd:
-    name: docker
-    state: started
-    enabled: yes
-  become: yes
-
-- name: Install docker-compose
-  get_url:
-    url: "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
-    dest: /usr/local/bin/docker-compose
-    mode: +x
-  become: yes
-
-```
 
 ```Dockerfile
-FROM alpinelinux/ansible
-RUN apk update  \
-    && apk upgrade 
-RUN apk add py-pip
-RUN pip install six
+FROM python:3.10
+RUN pip install ansible
 
 ```
 
