@@ -243,6 +243,14 @@
                              tab-mark))
 
     (global-whitespace-mode 0))
+
+  ;; 2024/07/23 単語区切り。やっぱりpythonでは_は区切りにしないほうがいい。置換のときとか。
+  (modify-syntax-entry ?_ "w" python-mode-syntax-table)
+  ;;(modify-syntax-entry ?_ "w" shell-mode-syntax-table);
+  ;;(modify-syntax-entry ?_ "w" sh-mode-syntax-table)
+  ;;(modify-syntax-entry ?_ "w" markdown-mode-syntax-table)
+  (modify-syntax-entry ?_ "w" c-mode-syntax-table)
+  (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
 )
 
 (leaf expand-region
