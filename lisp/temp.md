@@ -2,6 +2,7 @@
 
 (buffer-name)
 test
+
 ```bash
 #!/bin/bash
 
@@ -15,6 +16,7 @@ for i in $(seq 10);
 do
     echo $i
 done
+
 ```
 
 ```math
@@ -22,11 +24,14 @@ done
 ```
 
 ```math
+
 \begin{pmatrix}
 a & b \\
 c & d 
-\end{pmatrix} 
+\end{pmatrix}
+
 (yas-minor-mode 1)
+
 \begin{pmatrix}
 x \\
 y  
@@ -2454,18 +2459,18 @@ ensure
 
 
 ```hosts
-54.199.96.1  webservers
+43.206.95.230  webservers
 ```
 
 ```config
 [webservers]
-54.199.96.1
+43.206.95.230
 
 [webservers:vars]
 ansible_port=22
 ansible_user=ubuntu
 #ansible_ssh_pass=(パスワード)
-ansible_ssh_private_key_file=/ssh/ubuntu-test2.pem
+#ansible_ssh_private_key_file=/ssh/ubuntu-test2.pem
 
 ```
 
@@ -2476,9 +2481,12 @@ cd $(mktemp -d)
 ~/bin/mdcoderun --show --index [::index-1::] [::mdpath::] > ubuntu.net
 ~/bin/mdcoderun --show --index [::index+1::] [::mdpath::] > ubuntu.yml
 ~/bin/mdcoderun --show --index [::index+2::] [::mdpath::] > Dockerfile
-docker run --rm --name ansible          \
+# docker build -t local/ansible .
+# exit 
+docker run -it --rm --name ansible      \
        -v /home:/home                   \
        -v /tmp:/tmp/host                \
+       -v /mnt:/mnt                     \
        -e HOME=$HOME                    \
        -e DISPLAY=$DISPLAY              \
        -e GTK_IM_MODULE=$GTK_IM_MODULE  \
@@ -2490,15 +2498,19 @@ docker run --rm --name ansible          \
        -v /etc/group:/etc/group:ro      \
        -v /etc/shadow:/etc/shadow:ro    \
        -v ./hosts:/etc/hosts            \
-       -v ~/Downloads/ubuntu-test2.pem:/ssh/ubuntu-test2.pem \
        -v $(pwd):$(pwd)                 \
        -w $(pwd)                        \
        --network=host                   \
        --user $(id -u):$(id -g)         \
-       local/ansible ansible-playbook -i ubuntu.net ubuntu.yml
+       local/ansible bash
+       #local/ansible ansible-playbook -i ubuntu.net ubuntu.yml
        
+#       -v ~/Downloads/ubuntu-test2.pem:/ssh/ubuntu-test2.pem \
 #       -v ~/ubuntu-test3.pem:/ssh/ubuntu-test2.pem \
-
+# ls /mnt/c/Users/oonishi/Downloads/ubuntu-g4-3.pem
+# ssh-agent bash
+# cat /mnt/c/Users/oonishi/Downloads/ubuntu-g4-3.pem|ssh-add -
+# ssh -l ubuntu 43.206.95.230
 ```
 
 ```yml
@@ -2580,7 +2592,46 @@ docker run --rm --name ansible          \
       file:
         path: /opt/docker_build/Dockerfile
         state: absent
+    - name: Add Docker’s official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker APT repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+        update_cache: yes
+
+    - name: Install Docker CE
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Add the nvidia-docker repository
+      shell: |
+        distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+        curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+        curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+    - name: Install NVIDIA Docker toolkit
+      apt:
+        name: nvidia-docker
+        state: present
+        update_cache: yes
+
+    - name: Restart Docker
+      service:
+        name: docker
+        state: restarted
 ```
+
+```Dockerfile
+FROM python:3.10
+RUN pip install ansible
+
+```
+
 
 ```Dockerfile
 # Dockerfile example
@@ -2607,11 +2658,6 @@ CMD ["nginx", "-g", "daemon off;"]
 ```
 
 
-```Dockerfile
-FROM python:3.10
-RUN pip install ansible
-
-```
 
 ```bash
 #!/bin/bash
@@ -2622,4 +2668,192 @@ docker build -t local/ansible .
 
 ```
 
+https://docs.conda.io/en/latest/miniconda.html
+https://developer.nvidia.com/cuda-downloads?target_os=Windows
+
+sudo apt install ubuntu-drivers-common
+ubuntu-drivers devices
+sudo apt install nvidia-headless-535-server
+
+/home/ubuntu/anaconda3/bin/conda env create -f lip_env.yml
+
 # end
+
+
+
+```python
+    accesskey = 's5djzIafhco8TFGnFi2yrFrn9'
+    access_secret = 's00GxWoVdU8NF2w7dK75nTy5Qh0Glq1tu0kBgVI8'
+    date: str = str(int(datetime.utcnow().replace(tzinfo=timezone.utc).timestamp()))
+    data: str = json.dumps({
+        'coefont': '2b174967-1a8a-42e4-b1ae-5f6548cfa05d', # 声の種類
+        'text': script
+    })
+    signature = hmac.new(bytes(access_secret, 'utf-8'), (date+data).encode('utf-8'), hashlib.sha256).hexdigest()
+    response = requests.post('https://api.coefont.cloud/v2/text2speech', data=data, headers={
+        'Content-Type': 'application/json',
+        'Authorization': accesskey,
+        'X-Coefont-Date': date,
+        'X-Coefont-Content': signature
+    })
+```
+
+curl -X POST https://api.coefont.cloud/v2/text2speech \
+    -H "Content-Type: application/json" \
+    -H "Authorization: s5djzIafhco8TFGnFi2yrFrn9" \
+    -H "X-Coefont-Date: GENERATED_DATE" \
+    -H "X-Coefont-Content: GENERATED_SIGNATURE" \
+    -d '{"coefont": "2b174967-1a8a-42e4-b1ae-5f6548cfa05d", "text": "SCRIPT"}'
+
+
+
+
+```bash
+
+cd $(mktemp -d -p /tmp/host)
+docker run -it --rm --name anaconda3    \
+       -v /home:/home                   \
+       -v /mnt:/mnt                     \
+       -v /tmp:/tmp/host                \
+       -e HOME=$HOME                    \
+       -e LANG=C.UTF-8                  \
+       -e LANGUAGE=en_US:               \
+       -v /etc/passwd:/etc/passwd:ro    \
+       -v /etc/group:/etc/group:ro      \
+       -v /etc/shadow:/etc/shadow:ro    \
+       --network=host                   \
+       --user $(id -u):$(id -g)         \
+       -w $(pwd) \
+       continuumio/anaconda3 bash 
+
+```
+
+
+```Dockerfile
+FROM python:3.10
+RUN pip install mediapipe opencv-python
+RUN apt update -y
+RUN apt install -y libgl-dev
+RUN pip install streamlit
+RUN pip install av
+RUN pip install streamlit-webrtc
+```
+
+
+```bash
+#!/bin/bash
+cd $(mktemp -d)
+~/bin/mdcoderun --show --index [::index-1::] [::mdpath::] > Dockerfile
+
+docker build -t loycal/mediapipe . 
+
+```
+
+```bash
+#!/bin/bash
+cd $(mktemp -d)
+~/bin/mdcoderun --show --index [::index-2::] [::mdpath::] > Dockerfile
+
+ssh-agent bash <<EOF
+cat /mnt/c/Users/oonishi/Downloads/ubuntu-g4-3.pem|ssh-add -
+scp -r $(pwd) ubuntu@43.206.95.230:$(pwd)
+ssh -l ubuntu 43.206.95.230 cd $(pwd) \&\& docker build -t local/mediapipe . 
+#ssh -l ubuntu 43.206.95.230:$(pwd) docker build -t local/mediapipe . 
+EOF
+
+#docker build -t loycal/mediapipe . 
+
+```
+
+```bash
+#!/bin/bash
+cd $(mktemp -d)
+~/bin/mdcoderun --show --index [::index+1::] [::mdpath::] > test.sh
+cp ~/note.d/test0724_2.py ./
+
+ssh-agent bash <<EOF
+cat /mnt/c/Users/oonishi/Downloads/ubuntu-g4-3.pem|ssh-add -
+scp -r $(pwd) ubuntu@43.206.95.230:$(pwd)
+ssh -l ubuntu 43.206.95.230 cd $(pwd) \&\& bash test.sh
+#ssh -l ubuntu 43.206.95.230:$(pwd) docker build -t loycal/mediapipe . 
+EOF
+
+#docker build -t loycal/mediapipe . 
+
+```
+
+```bash
+#!/bin/bash
+ln -s /tmp /tmp/host 
+#cd $(mktemp -d -p /tmp/host)
+#docker run -it --rm --name mediapipe    \
+
+docker run -i --rm --name mediapipe    \
+       -v /home:/home                   \
+       -v /mnt:/mnt                     \
+       -v $(pwd):$(pwd)                \
+       -e HOME=$HOME                    \
+       -e LANG=C.UTF-8                  \
+       -e LANGUAGE=en_US:               \
+       -v /etc/passwd:/etc/passwd:ro    \
+       -v /etc/group:/etc/group:ro      \
+       -v /etc/shadow:/etc/shadow:ro    \
+       --network=host                   \
+       --user $(id -u):$(id -g)         \
+       -w $(pwd)                        \
+       --gpus all \
+       local/mediapipe  streamlit run test0724_2.py
+
+#       local/mediapipe  streamlit run ~/note.d/test0724_2.py 
+#       -v /tmp:/tmp/host                \
+    
+```
+
+
+
+```bash
+#!/bin/bash
+cd $(mktemp -d)
+
+ssh-agent bash <<EOF
+cat /mnt/c/Users/oonishi/Downloads/ubuntu-g4-3.pem|ssh-add -
+ssh -N -L 8501:localhost:8501  -l ubuntu 43.206.95.230
+EOF
+
+#docker build -t loycal/mediapipe . 
+
+```
+
+sudo apt install ubuntu-drivers-common
+
+ubuntu-drivers devices
+
+sudo add-apt-repository ppa:graphics-drivers/ppa
+sudo apt update
+sudo apt install nvidia-driver-535
+
+
+
+
+
+$ wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-keyring_1.1-1_all.deb
+
+$ sudo dpkg -i cuda-keyring_1.1-1_all.deb
+
+$ sudo tee /etc/apt/sources.list.d/jammy.list << EOF
+deb http://archive.ubuntu.com/ubuntu/ jammy universe
+EOF
+
+$ sudo tee /etc/apt/preferences.d/pin-jammy <<EOF
+Package: *
+Pin: release n=jammy
+Pin-Priority: -10
+
+Package: libtinfo5
+Pin: release n=jammy
+Pin-Priority: 990
+EOF
+
+$ sudo apt-get update
+
+$ sudo apt-get -y install cuda-toolkit
